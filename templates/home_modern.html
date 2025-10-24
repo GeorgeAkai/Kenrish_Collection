@@ -1,0 +1,643 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Kenrish Collection - Premium Beauty & Style in Nakuru{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Emergency visibility fix */
+    .animate-on-scroll { opacity: 1 !important; transform: none !important; }
+    .hero-section * { opacity: 1 !important; }
+    .container * { opacity: 1 !important; }
+</style>
+<style>
+    /* Force text visibility */
+    * { color: inherit !important; }
+    body, .container, .row, .col-lg-6 { color: #363636 !important; }
+    h1, h2, h3, h4, h5, h6 { color: #0b3e64 !important; }
+    .hero-title { color: #0b3e64 !important; }
+    .hero-subtitle { color: #363636 !important; }
+    p, .lead, .text-muted { color: #363636 !important; }
+    .btn { color: #f2f0e9 !important; }
+    .navbar-brand, .nav-link { color: #363636 !important; }
+</style>
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, var(--light-background) 0%, var(--background) 100%);
+        position: relative;
+        overflow: hidden;
+        padding: 5rem 0;
+    }
+    
+    .hero-title {
+        font-family: var(--heading-font-family);
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 700;
+        color: var(--heading-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+        color: var(--text-color);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .text-gradient {
+        background: linear-gradient(135deg, var(--heading-color), var(--text-color-light));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    /* Make all hero buttons look the same */
+    .hero-section .btn {
+        background-color: var(--button-background);
+        border-color: var(--button-background);
+        color: white !important;
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        border-radius: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .hero-section .btn:hover {
+        background-color: var(--text-color-light);
+        border-color: var(--text-color-light);
+        color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(11, 62, 100, 0.3);
+    }
+    
+    .service-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid var(--border-color);
+        background: var(--background);
+    }
+    
+    .service-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(11, 62, 100, 0.15);
+    }
+    
+    .stats-counter {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--heading-color);
+    }
+    
+    .testimonial-card {
+        background: var(--background);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 1rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: 1px solid var(--border-color);
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .product-card {
+        background: var(--background);
+        border: 1px solid var(--border-color);
+        border-radius: 0;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .product-image {
+        position: relative;
+        overflow: hidden;
+        height: 250px;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-image img {
+        transform: scale(1.05);
+    }
+
+    /* Make overlay less obstructive */
+    .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(11, 62, 100, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+
+    .product-info {
+        padding: 1.5rem;
+    }
+
+    .product-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--heading-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .product-price {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--link-color);
+    }
+
+    /* Make stars goldenrod */
+    .rating-stars .star {
+        color: goldenrod !important;
+        margin-right: 2px;
+    }
+
+    .rating-stars .star.empty {
+        color: var(--border-color);
+    }
+
+    /* Make wishlist icon more visible */
+    .add-to-wishlist {
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 2px solid var(--link-color);
+        color: var(--link-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .add-to-wishlist:hover {
+        background-color: var(--link-color);
+        color: white;
+    }
+
+    .search-container {
+        max-width: 600px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3rem;
+        border: 2px solid var(--border-color);
+        border-radius: 0;
+        font-size: 1rem;
+        background: var(--background);
+        color: var(--text-color);
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--link-color);
+        box-shadow: 0 0 0 3px rgba(11, 62, 100, 0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-color-light);
+        font-size: 1.2rem;
+    }
+
+    .carousel-modern {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .carousel-modern .carousel-item img {
+        height: 400px;
+        object-fit: cover;
+    }
+
+    .carousel-caption {
+        background: rgba(255, 255, 255, 0.9); color: #0b3e64;
+        border-radius: 10px;
+        padding: 1rem;
+        bottom: 2rem;
+        left: 2rem;
+        right: 2rem;
+    }
+
+    .min-vh-75 {
+        min-height: 75vh;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center position-relative">
+    <div class="container position-relative">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-6 text-lg-start">
+                <img src="{% static 'kenrish.png' %}" alt="Kenrish Collection" class="img-fluid mb-4" style="max-width: 150px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                
+                <h1 class="hero-title mb-4">
+                    Discover Your 
+                    <span class="text-gradient">Bliss in Beauty</span>
+                </h1>
+                
+                <p class="hero-subtitle mb-4">
+                    Premium barbershop, hairdressing, and beauty services in Nakuru City. 
+                    Shop our curated collection for your best self-care experience.
+                </p>
+                
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-lg-start justify-content-center">
+                    <a href="{% url 'handbags' %}" class="btn">
+                        <i class="bi bi-bag"></i>
+                        Shop Handbags
+                    </a>
+                    <a href="{% url 'services' %}" class="btn">
+                        <i class="bi bi-scissors"></i>
+                        Our Services
+                    </a>
+                    <a href="{% url 'gallery' %}" class="btn">
+                        <i class="bi bi-images"></i>
+                        View Gallery
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    {% if products %}
+                    <div id="heroCarousel" class="carousel slide carousel-modern" data-bs-ride="carousel" data-bs-interval="4000">
+                        <div class="carousel-inner">
+                            {% for product in products|slice:":9" %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <img src="{{ product.image.url }}" class="d-block w-100" alt="{{ product.name }}" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
+                                <div class="carousel-caption">
+                                    <h5 class="fw-bold">{{ product.name }}</h5>
+                                    <p>{{ product.description|truncatewords:8 }}</p>
+                                    <a href="{% url 'product-detail' product.id %}" class="btn btn-sm btn-light">View Product</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5" style="background-color: var(--light-background);">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stats-counter" data-count="7">7</div>
+                <p class="text-muted">Years of Excellence</p>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stats-counter" data-count="1000">1000+</div>
+                <p class="text-muted">Happy Clients</p>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stats-counter" data-count="{{ products.count }}">{{ products.count }}</div>
+                <p class="text-muted">Quality Products</p>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stats-counter" data-count="15">15+</div>
+                <p class="text-muted">Professional Services</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="search-container">
+            <div class="position-relative">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search for beauty products, services, or handbags...">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-gradient mb-3">Featured Products</h2>
+            <p class="lead text-muted">Discover our most popular beauty and cosmetic products</p>
+        </div>
+        
+        <div class="product-grid" id="productGrid">
+            {% for product in products %}
+            <div class="product-card" data-product-id="{{ product.id }}">
+                <div class="product-image">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy" class="img-fluid">
+                    <div class="product-overlay">
+                        <a href="{% url 'product-detail' product.id %}" class="btn btn-primary">
+                            <i class="bi bi-eye"></i>
+                            View Details
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="product-info">
+                    <h5 class="product-title">{{ product.name }}</h5>
+                    <p class="text-muted mb-3">{{ product.description|truncatewords:10 }}</p>
+                    
+                    <div class="rating-stars mb-3">
+                        {% with avg=product.average_rating %}
+                        {% if avg > 0 %}
+                            {% for i in "12345" %}
+                                {% if avg >= forloop.counter %}
+                                    <i class="bi bi-star-fill star"></i>
+                                {% elif avg >= forloop.counter0|add:"0.5" and avg < forloop.counter %}
+                                    <i class="bi bi-star-half star"></i>
+                                {% else %}
+                                    <i class="bi bi-star star empty"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="rating-value">({{ avg|floatformat:1 }})</span>
+                        {% else %}
+                            <span class="text-muted">No ratings yet</span>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="product-price">Ksh {{ product.price }}</div>
+                        {% if request.user.is_authenticated %}
+                        <button class="add-to-wishlist" data-product-id="{{ product.id }}">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                        {% else %}
+                        <a href="{% url "login" %}" class="btn btn-outline-primary btn-sm">Login to Buy</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    No products available at the moment. Please check back later!
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'handbags' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-arrow-right"></i>
+                View All Products
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Services Preview -->
+<section class="py-5" style="background-color: var(--light-background);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-gradient mb-3">Our Services</h2>
+            <p class="lead text-muted">Professional beauty services tailored for you</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="service-card card h-100 text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-scissors display-4" style="color: var(--link-color);"></i>
+                    </div>
+                    <h5 class="card-title">Hairdressing</h5>
+                    <p class="text-muted">Professional hair cutting, styling, and treatments for all hair types.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="service-card card h-100 text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-palette display-4" style="color: var(--link-color);"></i>
+                    </div>
+                    <h5 class="card-title">Nail Care</h5>
+                    <p class="text-muted">Manicure, pedicure, and nail art services for beautiful, healthy nails.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="service-card card h-100 text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-person-check display-4" style="color: var(--link-color);"></i>
+                    </div>
+                    <h5 class="card-title">Beauty Consultation</h5>
+                    <p class="text-muted">Personalized beauty advice and product recommendations from our experts.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'services' %}" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-arrow-right"></i>
+                View All Services
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-gradient mb-3">What Our Clients Say</h2>
+            <p class="lead text-muted">Real experiences from our valued customers</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="rating-stars mb-3">
+                        <i class="bi bi-star-fill star"></i>
+                        <i class="bi bi-star-fill star"></i>
+                        <i class="bi bi-star-fill star"></i>
+                        <i class="bi bi-star-fill star"></i>
+                        <i class="bi bi-star-fill star"></i>
+                    </div>
+                    <p class="mb-3">"Excellent service and quality products. The staff is professional and friendly. Highly recommended!"</p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; background-color: var(--link-color);">
+                            <i class="bi bi-person text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Sarah M.</h6>
+                            <small class="text-muted">Regular Client</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="rating-stars mb-3">
+                        <i class="bi bi-star-fill star"></i>
+                        <i class="bi bi-star-fill star"></i>
+                        <i class="bi bi-star-fill star"></i>
+                        <i class="bi bi-star-fill star"></i>
+                        <i class="bi bi-star-fill star"></i>
+                    </div>
+                    <p class="mb-3">"Amazing hairdressing services! They really understand what looks good and the products are top quality."</p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; background-color: var(--link-color);">
+                            <i class="bi bi-person text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Grace K.</h6>
+                            <small class="text-muted">Loyal Customer</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="rating-stars mb-3">
+                        <i class="bi bi-star-fill star"></i>
+                        <i class="bi bi-star-fill star"></i>
+                        <i class="bi bi-star-fill star"></i>
+                        <i class="bi bi-star-fill star"></i>
+                        <i class="bi bi-star-fill star"></i>
+                    </div>
+                    <p class="mb-3">"Best beauty salon in Nakuru! Clean environment, skilled professionals, and great customer service."</p>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; background-color: var(--link-color);">
+                            <i class="bi bi-person text-white"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Mary W.</h6>
+                            <small class="text-muted">Happy Client</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5" style="background-color: var(--heading-color); color: white !important;">
+    <div class="container text-center">
+        <h2 class="display-6 fw-bold mb-3" style="color: white !important;">Ready to Transform Your Look?</h2>
+        <p class="lead mb-4">Book an appointment today and experience the Kenrish Collection difference</p>
+        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+            <a href="tel:0708440390" class="btn btn-lg" style="background-color: white !important; color: var(--heading-color);">
+                <i class="bi bi-telephone"></i>
+                Call Now: 0708440390
+            </a>
+            <a href="{% url 'about' %}" class="btn btn-outline-light btn-lg">
+                <i class="bi bi-info-circle"></i>
+                Learn More
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Search functionality
+function initSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const productCards = document.querySelectorAll('.product-card');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            productCards.forEach(card => {
+                const productName = card.querySelector('.product-title').textContent.toLowerCase();
+                const productDesc = card.querySelector('.text-muted').textContent.toLowerCase();
+                
+                if (productName.includes(searchTerm) || productDesc.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    }
+}
+
+// Wishlist functionality
+function initWishlist() {
+    const wishlistButtons = document.querySelectorAll('.add-to-wishlist');
+    
+    wishlistButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            
+            fetch("/wishlist/add/" + productId + "/", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.innerHTML = '<i class="bi bi-heart-fill"></i>';
+                    this.style.backgroundColor = 'var(--link-color)';
+                    this.style.color = 'white';
+                }
+            });
+        });
+    });
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initSearch();
+    initWishlist();
+});
+</script>
+{% endblock %}

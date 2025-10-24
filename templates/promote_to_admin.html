@@ -1,0 +1,220 @@
+{% extends "base_modern.html" %}
+{% block title %}Manage Admins{% endblock %}
+
+{% block content %}
+<div class="admins-wrap">
+  <div class="container">
+    <div class="admin-head">
+      <div>
+        <h2 class="page-title">Manage Admins</h2>
+        <p class="page-subtitle">Promote trusted users and keep your site secure.</p>
+      </div>
+      <span class="admin-cap badge">
+        <strong>{{ admins.count }}</strong>/3
+      </span>
+    </div>
+
+    <div class="security-note">
+      <div class="note-icon">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <div class="note-text">
+        <strong>Security Notice:</strong> Only add users you fully trust as admins. Admins have access to sensitive site
+        management features and can make critical changes.
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Current Admins -->
+      <section class="card panel">
+        <div class="panel-head">
+          <h3 class="panel-title">Current Admins</h3>
+          <span class="muted">({{ admins.count }} of 3)</span>
+        </div>
+
+        {% if admins %}
+        <ul class="admin-list">
+          {% for admin in admins %}
+          <li class="admin-item">
+            <div class="admin-meta">
+              <div class="avatar">{{ admin.username|first|upper }}</div>
+              <div>
+                <div class="admin-name">{{ admin.username }}</div>
+                <div class="admin-email text-muted">{{ admin.email }}</div>
+              </div>
+            </div>
+
+            {% if request.user.is_superuser or admin.userprofile.added_by == request.user %}
+              {% if admin != request.user %}
+              <form method="post" action="{% url 'remove-admin' admin.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-pill">Remove</button>
+              </form>
+              {% else %}
+              <span class="badge you-badge">You</span>
+              {% endif %}
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="empty">
+          <p class="mb-0">No admins yet. Promote a trusted user on the right to get started.</p>
+        </div>
+        {% endif %}
+      </section>
+
+      <!-- Promote User -->
+      <section class="card panel">
+        <div class="panel-head">
+          <h3 class="panel-title">Promote a User</h3>
+          <span class="muted">Grant admin access</span>
+        </div>
+
+        <form method="post" class="promote-form">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="user_id" class="form-label">Select User to Promote</label>
+            <select name="user_id" id="user_id" class="form-control input-pill" required>
+              {% for user in users %}
+                <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary btn-wide btn-pill" {% if admins.count >= 3 %}disabled{% endif %}>
+              Promote to Admin
+            </button>
+            {% if admins.count >= 3 %}
+            <div class="helper text-muted small mt-2">Admin limit reached (3). Remove an admin to add another.</div>
+            {% endif %}
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Shell & page header */
+  .admins-wrap { padding: 3rem 0; background: var(--kenrish-bg); }
+  .admin-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .page-title {
+    color: var(--kenrish-turquoise);
+    font-weight: 800; letter-spacing: .2px; margin: 0 0 .25rem 0;
+  }
+  .page-subtitle { color: var(--text-secondary); margin: 0; }
+
+  .admin-cap.badge {
+    background: var(--kenrish-card); color: var(--kenrish-turquoise-dark);
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 999px; padding: .5rem .875rem; font-weight: 700;
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+  }
+
+  /* Notice */
+  .security-note {
+    display: flex; gap: .75rem; align-items: flex-start;
+    background: #fff8e1; color: var(--kenrish-gold);
+    border: 1.5px solid var(--kenrish-gold);
+    border-radius: 16px; padding: 1rem 1.1rem; margin-bottom: 1.5rem;
+  }
+  .note-icon { line-height: 1.2; font-size: 1.15rem; }
+  .note-text { font-weight: 600; }
+
+  /* Grid layout */
+  .grid { display: grid; gap: 1.25rem; }
+  @media (min-width: 992px) {
+    .grid { grid-template-columns: 6fr 5fr; }
+  }
+
+  /* Card / panel */
+  .card.panel {
+    background: var(--kenrish-card);
+    border-radius: 20px; border: none;
+    box-shadow: 0 12px 30px rgba(0,0,0,.08);
+    padding: 1.25rem;
+  }
+  @media (min-width: 768px) { .card.panel { padding: 1.75rem; } }
+  .panel-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; }
+  .panel-title { color: var(--kenrish-turquoise-dark); font-weight: 800; margin: 0; }
+  .muted { color: var(--text-secondary); }
+
+  /* Admin list */
+  .admin-list { list-style: none; padding: 0; margin: 0; }
+  .admin-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: .875rem 0; border-bottom: 1px dashed rgba(0,0,0,.08);
+  }
+  .admin-item:last-child { border-bottom: none; }
+  .admin-meta { display: flex; align-items: center; gap: .875rem; }
+  .avatar {
+    width: 42px; height: 42px; border-radius: 999px;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg, rgba(0,0,0,.04), rgba(0,0,0,.07));
+    color: var(--kenrish-turquoise-dark); font-weight: 800;
+  }
+  .admin-name { color: var(--kenrish-turquoise-dark); font-weight: 700; }
+  .admin-email { font-size: .95rem; }
+
+  .you-badge {
+    background: rgba(0,0,0,.05);
+    color: var(--text-secondary);
+    border-radius: 999px; padding: .35rem .6rem; font-weight: 700; font-size: .85rem;
+  }
+
+  /* Form */
+  .promote-form .form-group { margin-bottom: 1rem; }
+  .form-label { color: var(--kenrish-turquoise-dark); font-weight: 700; margin-bottom: .4rem; display: block; }
+
+  .form-control,
+  select,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    border-radius: 12px !important;
+    padding: .75rem .9rem !important;
+    border: 1px solid rgba(0,0,0,.1) !important;
+    background: var(--input-bg, #fff);
+    color: var(--text-primary, #222);
+    transition: box-shadow .2s ease, border-color .2s ease;
+  }
+  .form-control:focus,
+  select:focus,
+  input:focus {
+    outline: none; border-color: rgba(0,0,0,.2) !important;
+    box-shadow: 0 0 0 4px rgba(0,0,0,.06);
+  }
+
+  /* Buttons */
+  .btn { font-weight: 700; letter-spacing: .2px; }
+  .btn-pill { border-radius: 999px; }
+  .btn-wide { width: 100%; }
+  .btn-primary { border-radius: 12px; padding: .8rem 1rem; }
+  .btn-outline-danger {
+    border-radius: 999px; padding: .45rem .9rem;
+    border-width: 1.5px;
+  }
+
+  .actions { margin-top: .5rem; }
+
+  /* Empty state */
+  .empty {
+    padding: 1rem; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(0,0,0,.025), rgba(0,0,0,.05));
+    color: var(--text-secondary);
+  }
+
+  /* Spacing for small screens */
+  @media (max-width: 575.98px) {
+    .admins-wrap { padding: 2rem 0; }
+    .page-title { font-size: 1.35rem; }
+  }
+</style>
+{% endblock %}
+

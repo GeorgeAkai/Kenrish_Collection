@@ -1,0 +1,99 @@
+{% extends "base_modern.html" %}
+{% block title %}{{ action }} Gallery Image{% endblock %}
+{% block content %}
+<div class="container py-5" style="background: var(--kenrish-bg); border-radius: 1.5rem;">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow rounded-4 p-4" style="background: var(--kenrish-card);">
+                <h2 class="mb-4 fw-bold text-center" style="color: var(--kenrish-turquoise);">
+                    <i class="bi bi-images"></i> {{ action }} Gallery Image
+                </h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_service" class="form-label fw-semibold" style="color: var(--kenrish-turquoise-dark);">Service</label>
+                        {{ form.service }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_image" class="form-label fw-semibold" style="color: var(--kenrish-turquoise-dark);">Image</label>
+                        {{ form.image }}
+                        {% if form.image.value %}
+                            <img src="{{ form.image.value.url }}" alt="Current Image" class="img-fluid rounded mt-2" style="max-height:120px;">
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label fw-semibold" style="color: var(--kenrish-turquoise-dark);">Description</label>
+                        {{ form.description }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_file" class="form-label fw-semibold" style="color: var(--kenrish-turquoise-dark);">File</label>
+                        <input type="file" name="file" accept="image/*,video/*" class="form-control">
+                    </div>
+                    <div class="d-flex justify-content-center gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary rounded-pill fw-bold shadow-sm px-4" style="background: linear-gradient(90deg, var(--kenrish-turquoise), var(--kenrish-gold)); border: none;">
+                            <i class="bi bi-check-circle"></i> {{ action }}
+                        </button>
+                        <a href="{% url 'gallery' %}" class="btn btn-outline-secondary rounded-pill px-4" style="color: var(--kenrish-turquoise-dark); border-color: var(--kenrish-turquoise-dark);">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    :root {
+        --kenrish-gold: #ffb347;
+        --kenrish-turquoise: #1abc9c;
+        --kenrish-turquoise-dark: #009688;
+        --kenrish-bg: #fff;
+        --kenrish-card: #f8fcfc;
+    }
+    body {
+        background: var(--kenrish-bg) !important;
+        color: var(--kenrish-turquoise-dark);
+    }
+    .container.py-5 {
+        background: var(--kenrish-bg);
+        border-radius: 1.5rem;
+    }
+    .card {
+        border: none;
+        background: var(--kenrish-card) !important;
+        box-shadow: 0 4px 24px rgba(26, 188, 156, 0.07);
+    }
+    .form-label {
+        font-size: 1.08rem;
+        color: var(--kenrish-turquoise-dark) !important;
+    }
+    .form-control, select, textarea {
+        border-radius: 2rem;
+        border: 1.5px solid #ffd6b0;
+        background: #fff8f3;
+        font-size: 1.08rem;
+        color: var(--kenrish-turquoise-dark);
+    }
+    .form-control:focus, select:focus, textarea:focus {
+        border-color: var(--kenrish-turquoise);
+        box-shadow: 0 0 0 0.15rem #1abc9c33;
+        color: var(--kenrish-turquoise-dark);
+    }
+    .btn:focus {
+        box-shadow: 0 0 0 0.2rem #ffd6b088;
+    }
+    .btn-primary {
+        background: linear-gradient(90deg, var(--kenrish-turquoise), var(--kenrish-gold)) !important;
+        border: none;
+        color: #fff !important;
+    }
+    .btn-outline-secondary {
+        border-color: var(--kenrish-turquoise-dark) !important;
+        color: var(--kenrish-turquoise-dark) !important;
+    }
+    .btn-outline-secondary:hover {
+        background: var(--kenrish-turquoise-dark) !important;
+        color: #fff !important;
+        border-color: var(--kenrish-turquoise-dark) !important;
+    }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}

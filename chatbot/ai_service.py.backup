@@ -1,0 +1,264 @@
+import json
+import os
+import requests
+from django.conf import settings
+
+class KenrishAIService:
+    def __init__(self):
+        self.api_key = "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"
+        self.api_url = "https://openrouter.ai/api/v1/chat/completions"
+        self.model = "microsoft/wizardlm-2-8x22b"
+        self.knowledge_base = self.load_knowledge_base()
+        
+    def load_knowledge_base(self):
+        """Load the crawled website data"""
+        try:
+            kb_path = os.path.join('chatbot', 'data', 'knowledge_base.json')
+            if os.path.exists(kb_path):
+                with open(kb_path, 'r') as f:
+                    return json.load(f)
+        except Exception as e:
+            print(f"Error loading knowledge base: {e}")
+        return {}
+    
+    def get_fallback_response(self, user_question):
+        """Generate fallback response based on keywords and knowledge base"""
+        question_lower = user_question.lower()
+        
+        # Product-related questions
+        if any(word in question_lower for word in ['product', 'beauty', 'cosmetic', 'skin', 'hair']):
+            products = self.knowledge_base.get('products', [])
+            if products:
+                response = "🌟 Here are some of our popular beauty products:\n\n"
+                for i, product in enumerate(products[:5]):
+                    response += f"• **{product['name']}** - {product['description'][:100]}... (${product['price']})\n"
+                response += f"\nWe have {len(products)} products in total! Visit our store in Nakuru City to see our full collection."
+                return response
+        
+        # Handbag-related questions
+        if any(word in question_lower for word in ['handbag', 'bag', 'purse', 'accessory']):
+            handbags = self.knowledge_base.get('handbags', [])
+            if handbags:
+                response = "👜 Check out our stylish handbag collection:\n\n"
+                for handbag in handbags[:5]:
+                    response += f"• **{handbag['name']}** - {handbag['description'][:100]}... (${handbag['price']})\n"
+                response += f"\nWe have {len(handbags)} handbags available! Perfect for any occasion."
+                return response
+        
+        # Service-related questions
+        if any(word in question_lower for word in ['service', 'hair', 'beauty', 'salon', 'barber']):
+            services = self.knowledge_base.get('services', [])
+            if services:
+                response = "✨ Our professional beauty services include:\n\n"
+                for service in services:
+                    response += f"• **{service['name']}** - {service['description'][:150]}...\n"
+                response += "\n📍 Visit us in Nakuru City for professional beauty treatments!"
+                return response
+        
+        # Location/contact questions
+        if any(word in question_lower for word in ['location', 'where', 'address', 'contact', 'phone']):
+            return """📍 **Kenrish Collection Location & Contact:**
+
+🏢 **Address:** Nakuru City, Kenya
+📞 **Phone:** 0708440390
+🕒 **Hours:** Contact us to book your appointment
+
+We're conveniently located in Nakuru City, offering premium beauty services and products. Call us to schedule your visit!"""
+        
+        # Price-related questions
+        if any(word in question_lower for word in ['price', 'cost', 'how much', 'expensive']):
+            return """💰 **Our Pricing:**
+
+Our products and services are competitively priced to offer great value:
+
+🛍️ **Products:** Range from affordable daily essentials to premium beauty items
+👜 **Handbags:** Stylish options for every budget
+💄 **Services:** Professional beauty treatments at fair prices
+
+📞 Call us at 0708440390 for specific pricing or visit our store in Nakuru City!"""
+        
+        # Offers/promotions
+        if any(word in question_lower for word in ['offer', 'deal', 'promotion', 'discount', 'special']):
+            offers = self.knowledge_base.get('offers', [])
+            if offers:
+                response = "🎉 **Current Offers:**\n\n"
+                for offer in offers:
+                    response += f"• **{offer['title']}** - {offer['description']}\n"
+                return response
+            else:
+                return "🎉 We regularly have special offers and promotions! Contact us at 0708440390 or visit our store in Nakuru City to learn about current deals."
+        
+        # General business info
+        return """👋 **Welcome to Kenrish Collection!**
+
+We're your premier beauty destination in Nakuru City, offering:
+
+✨ **Professional Services:**
+• Barbershop services
+• Hairdressing & styling
+• Beauty treatments
+• Nail services
+
+🛍️ **Quality Products:**
+• Beauty & cosmetic products
+• Hair care essentials
+• Stylish handbags & accessories
+
+📍 **Visit Us:** Nakuru City, Kenya
+📞 **Contact:** 0708440390
+
+How can I help you today? Ask me about our products, services, or anything else!"""
+    
+    def create_context_prompt(self, user_question):
+        """Create a context-aware prompt with business data"""
+        context = f"""You are a helpful AI assistant for Kenrish Collection, a premium beauty and lifestyle business in Nakuru City, Kenya.
+
+BUSINESS INFORMATION:
+- Name: Kenrish Collection
+- Location: Nakuru City, Kenya
+- Services: Professional barbershop, hairdressing, beauty treatments, nail services, interior design consultation
+- Products: Beauty products, hair care, handbags, cosmetics, personal care items
+
+AVAILABLE PRODUCTS ({len(self.knowledge_base.get('products', []))}):\n"""
+        
+        # Add products info
+        for product in self.knowledge_base.get('products', [])[:10]:  # Limit to avoid token overflow
+            context += f"- {product['name']}: {product['description']} (Price: {product['price']})\n"
+        
+        context += f"\nAVAILABLE HANDBAGS ({len(self.knowledge_base.get('handbags', []))}):\n"
+        
+        # Add handbags info
+        for handbag in self.knowledge_base.get('handbags', [])[:10]:
+            context += f"- {handbag['name']}: {handbag['description']} (Price: {handbag['price']})\n"
+        
+        context += f"\nSERVICES OFFERED ({len(self.knowledge_base.get('services', []))}):\n"
+        
+        # Add services info
+        for service in self.knowledge_base.get('services', []):
+            context += f"- {service['name']}: {service['description']}\n"
+        
+        if self.knowledge_base.get('offers'):
+            context += f"\nCURRENT OFFERS ({len(self.knowledge_base.get('offers', []))}):\n"
+            for offer in self.knowledge_base.get('offers', []):
+                context += f"- {offer['title']}: {offer['description']}\n"
+        
+        context += f"""
+INSTRUCTIONS:
+- Answer questions about Kenrish Collection's products, services, prices, and business
+- Be friendly, professional, and helpful
+- If asked about specific products or services, provide detailed information from the data above
+- For pricing inquiries, provide the exact prices listed
+- If you don't have specific information, suggest contacting the business directly
+- Keep responses concise but informative
+- Always maintain a warm, welcoming tone that reflects the premium nature of the business
+
+User Question: {user_question}
+
+Please provide a helpful response based on the Kenrish Collection information above:"""
+        
+        return context
+    
+    def get_response(self, user_message, conversation_history=None):
+        """Get AI response from Deep Hermes API with fallback"""
+        try:
+            # Create context-aware prompt
+            system_prompt = self.create_context_prompt(user_message)
+            
+            messages = [
+                {"role": "system", "content": system_prompt}
+            ]
+            
+            # Add conversation history if provided
+            if conversation_history:
+                messages.extend(conversation_history[-6:])  # Keep last 6 messages for context
+            
+            messages.append({"role": "user", "content": user_message})
+            
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "model": self.model,
+                "messages": messages,
+                "max_tokens": 500,
+                "temperature": 0.7,
+                "stream": False
+            }
+            
+            response = requests.post(self.api_url, headers=headers, json=payload, timeout=30)
+            
+            # If API call fails, use fallback
+            if response.status_code != 200:
+                print(f"API Error {response.status_code}: Using fallback response")
+                return self.get_fallback_response(user_message)
+            
+            result = response.json()
+            return result['choices'][0]['message']['content']
+            
+        except Exception as e:
+            print(f"AI Service Error: {e}")
+            return self.get_fallback_response(user_message)
+    
+    def get_streaming_response(self, user_message, conversation_history=None):
+        """Get streaming AI response with fallback"""
+        try:
+            system_prompt = self.create_context_prompt(user_message)
+            
+            messages = [
+                {"role": "system", "content": system_prompt}
+            ]
+            
+            if conversation_history:
+                messages.extend(conversation_history[-6:])
+            
+            messages.append({"role": "user", "content": user_message})
+            
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "model": self.model,
+                "messages": messages,
+                "max_tokens": 500,
+                "temperature": 0.7,
+                "stream": True
+            }
+            
+            response = requests.post(self.api_url, headers=headers, json=payload, stream=True, timeout=30)
+            
+            # If API call fails, use fallback
+            if response.status_code != 200:
+                print(f"API Error {response.status_code}: Using fallback response")
+                fallback_response = self.get_fallback_response(user_message)
+                # Simulate streaming for fallback
+                for char in fallback_response:
+                    yield char
+                return
+            
+            for line in response.iter_lines():
+                if line:
+                    line = line.decode('utf-8')
+                    if line.startswith('data: '):
+                        data = line[6:]
+                        if data.strip() == '[DONE]':
+                            break
+                        try:
+                            json_data = json.loads(data)
+                            if 'choices' in json_data and json_data['choices']:
+                                delta = json_data['choices'][0].get('delta', {})
+                                if 'content' in delta:
+                                    yield delta['content']
+                        except json.JSONDecodeError:
+                            continue
+                            
+        except Exception as e:
+            print(f"Streaming Error: {e}")
+            # Use fallback response
+            fallback_response = self.get_fallback_response(user_message)
+            # Simulate streaming for fallback
+            for char in fallback_response:
+                yield char

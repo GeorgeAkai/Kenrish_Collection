@@ -1,0 +1,117 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Cash Flow - Kenrish Collection{% endblock %}
+
+{% block content %}
+<section class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3" style="font-family: 'Playfair Display', serif;">
+            <i class="bi bi-cash-stack me-3"></i>Cash Flow
+        </h1>
+        <p class="lead mb-4">
+            Track your revenue and expenses
+        </p>
+        <a href="{% url 'inventory-dashboard' %}" class="btn btn-outline-light">
+            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <!-- Summary Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-3 col-md-6">
+                <div class="glass-card p-4 text-center h-100">
+                    <div class="mb-3">
+                        <i class="bi bi-arrow-up-circle display-4 text-success"></i>
+                    </div>
+                    <h3 class="text-success mb-2">Ksh {{ total_revenue|floatformat:0 }}</h3>
+                    <p class="text-muted mb-0">Total Revenue</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="glass-card p-4 text-center h-100">
+                    <div class="mb-3">
+                        <i class="bi bi-arrow-down-circle display-4 text-danger"></i>
+                    </div>
+                    <h3 class="text-danger mb-2">Ksh {{ total_expenses|floatformat:0 }}</h3>
+                    <p class="text-muted mb-0">Total Expenses</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="glass-card p-4 text-center h-100">
+                    <div class="mb-3">
+                        <i class="bi bi-graph-up display-4 {% if net_profit >= 0 %}text-success{% else %}text-danger{% endif %}"></i>
+                    </div>
+                    <h3 class="{% if net_profit >= 0 %}text-success{% else %}text-danger{% endif %} mb-2">Ksh {{ net_profit|floatformat:0 }}</h3>
+                    <p class="text-muted mb-0">Net Profit</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="glass-card p-4 text-center h-100">
+                    <div class="mb-3">
+                        <i class="bi bi-percent display-4 text-gradient"></i>
+                    </div>
+                    <h3 class="text-gradient mb-2">
+                        {% if total_revenue > 0 %}
+                            {% widthratio net_profit total_revenue 100 %}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </h3>
+                    <p class="text-muted mb-0">Profit Margin</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cash Flow Table -->
+        <div class="glass-card p-4">
+            <h3 class="fw-bold mb-4">Recent Transactions</h3>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for flow in cash_flows %}
+                        <tr>
+                            <td>{{ flow.created_at|date:"M d, H:i" }}</td>
+                            <td>
+                                {% if flow.transaction_type == 'REVENUE' %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-arrow-up me-1"></i>Revenue
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-arrow-down me-1"></i>Expense
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ flow.description }}</td>
+                            <td class="fw-bold {% if flow.transaction_type == 'REVENUE' %}text-success{% else %}text-danger{% endif %}">
+                                {% if flow.transaction_type == 'REVENUE' %}+{% else %}-{% endif %}Ksh {{ flow.amount|floatformat:0 }}
+                            </td>
+                            <td>{{ flow.created_by.username }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No transactions yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

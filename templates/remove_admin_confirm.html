@@ -1,0 +1,16 @@
+{% extends "base_modern.html" %}
+{% block title %}Remove Admin{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow rounded-4 p-4 text-center" style="background: var(--kenrish-card); max-width: 400px; margin:auto;">
+        <h2 class="mb-3 text-danger"><i class="bi bi-person-dash"></i> Remove Admin</h2>
+        <p>Are you sure you want to remove <strong>{{ admin_user.username }}</strong> as admin?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger rounded-pill px-4">Remove</button>
+            <a href="{% url 'promote-to-admin' %}" class="btn btn-outline-secondary rounded-pill px-4 ms-2"
+               style="color: var(--kenrish-turquoise-dark); border-color: var(--kenrish-turquoise-dark);">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

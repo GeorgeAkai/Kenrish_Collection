@@ -1,0 +1,334 @@
+{% extends "base_modern.html" %}
+{% block title %}User Login Counts{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0" style="color: var(--kenrish-turquoise); letter-spacing: 1px;">
+            <i class="bi bi-person-lines-fill me-2"></i>User Login Counts
+        </h2>
+        <a href="{% url 'home' %}" class="btn btn-outline-primary rounded-pill shadow-sm">
+            <i class="bi bi-house"></i> Home
+        </a>
+    </div>
+    <div class="table-responsive rounded-4 shadow-sm" style="background: var(--kenrish-card);">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="text-center" style="color: var(--kenrish-gold); background: #222 !important; letter-spacing: 0.5px;">Username</th>
+                    <th style="color: var(--kenrish-gold); background: #222 !important; letter-spacing: 0.5px;">Email</th>
+                    <th class="text-center" style="color: var(--kenrish-gold); background: #222 !important; letter-spacing: 0.5px;">Login Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr style="background: #fff8f3; cursor: pointer;"
+                    onclick="window.location='{% url 'admin_user_wishlist' user.id %}'">
+                    <td class="text-center fw-semibold" style="font-size: 1.1rem; color: var(--kenrish-turquoise-dark);" data-label="Username">
+                        <i class="bi bi-person-circle me-1" style="color: var(--kenrish-turquoise);"></i>
+                        {{ user.username }}
+                    </td>
+                    <td style="font-size: 1.05rem;" data-label="Email">
+                        <i class="bi bi-envelope me-1" style="color: var(--kenrish-gold);"></i>
+                        {{ user.email }}
+                    </td>
+                    <td class="text-center fw-bold" style="color: var(--kenrish-gold); font-size: 1.15rem;" data-label="Login Count">
+                        <span class="badge rounded-pill" style="background: linear-gradient(90deg, var(--kenrish-turquoise), var(--kenrish-gold)); color: #fff; font-size: 1rem;">
+                            <i class="bi bi-person-check me-1"></i> {{ user.userprofile.login_count }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center text-danger fw-bold">No users found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<button id="darkModeToggle" class="btn btn-outline-secondary rounded-pill ms-2" style="position:fixed;bottom:24px;right:24px;z-index:9999;">
+    <i class="bi bi-moon"></i>
+</button>
+<style>
+    :root {
+        --kenrish-gold: #ffb347;
+        --kenrish-turquoise: #1abc9c;
+        --kenrish-turquoise-dark: #009688;
+        --kenrish-bg: #fff;
+        --kenrish-card: #f8fcfc;
+    }
+
+    body {
+        background: #fff7f0 !important;
+    }
+
+    .container.py-4 {
+        background: var(--kenrish-bg);
+        border-radius: 1.5rem;
+        box-shadow: 0 2px 16px #ffb34711;
+    }
+
+    .table-responsive {
+        border-radius: 24px;
+        overflow: hidden;
+        background: var(--kenrish-card);
+    }
+
+    .table thead th {
+        border-top: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        background: #fff3e6 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody tr {
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .table tbody tr:hover {
+        box-shadow: 0 4px 24px rgba(209, 122, 75, 0.10);
+        transform: scale(1.01);
+        background: #ffe5d0 !important;
+    }
+
+    .btn-outline-primary {
+        border-radius: 20px;
+        border-color: var(--kenrish-turquoise);
+        color: var(--kenrish-turquoise);
+        font-weight: 600;
+        background: #fff;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--kenrish-turquoise);
+        color: #fff;
+    }
+
+    .badge {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px #1abc9c22;
+    }
+
+    /* --- Responsive Table for Mobile --- */
+    @media (max-width: 767.98px) {
+        .container.py-4 {
+            border-radius: 0.7rem;
+            padding: 0.7rem 0.2rem !important;
+        }
+        .table-responsive {
+            border-radius: 12px;
+            padding: 0;
+        }
+        table.table {
+            display: block;
+            width: 100%;
+        }
+        thead {
+            display: none;
+        }
+        tbody, tr, td {
+            display: block;
+            width: 100%;
+        }
+        tr {
+            margin-bottom: 1.2rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px #ffb34722;
+            background: #fff8f3 !important;
+        }
+        td {
+            padding: 0.7rem 1rem;
+            text-align: left !important;
+            font-size: 1.05rem;
+            border: none;
+            position: relative;
+        }
+        td:before {
+            content: attr(data-label);
+            display: block;
+            font-weight: 600;
+            color: var(--kenrish-gold);
+            margin-bottom: 0.2rem;
+            font-size: 0.98rem;
+            letter-spacing: 0.5px;
+        }
+        .table tbody tr:hover {
+            box-shadow: 0 4px 24px rgba(209, 122, 75, 0.10);
+            background: #ffe5d0 !important;
+            transform: none;
+        }
+        .badge {
+            font-size: 1.05rem;
+            padding: 0.6em 1.1em;
+        }
+    }
+
+    /* Enhance dark mode for a sleek, shiny, visually appealing look */
+    body.dark-mode {
+        --kenrish-bg: #011127c0;
+        --kenrish-card: rgba(2, 56, 89, 0.88);
+        --kenrish-turquoise: #06e3c9;
+        --kenrish-turquoise-dark: #54acbf;
+        --kenrish-gold: #f5ae21;
+        --kenrish-text: #fff;
+        --kenrish-accent: #26658c;
+        background:
+            linear-gradient(120deg, #134462 0%, #011c40 100%) fixed;
+        color: var(--kenrish-text) !important;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    body.dark-mode::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+            linear-gradient(120deg, rgba(167,235,242,0.05) 0%, rgba(2,56,89,0.10) 100%);
+        z-index: 0;
+        mix-blend-mode: lighten;
+        opacity: 0.7;
+    }
+
+    body.dark-mode .kenrish-hero,
+    body.dark-mode .kenrish-product-card,
+    body.dark-mode .kenrish-about-feature,
+    body.dark-mode .kenrish-about-info,
+    body.dark-mode .card {
+        background: linear-gradient(135deg, rgba(2,56,89,0.92) 60%, rgba(1,28,64,0.96) 100%) !important;
+        color: var(--kenrish-text) !important;
+        box-shadow: 0 8px 40px 0 #011c40cc, 0 1.5px 0.5px #a7ebf244;
+        border: 1px solid #26658c;
+        backdrop-filter: blur(18px) saturate(1.3);
+        position: relative;
+        z-index: 1;
+    }
+
+    body.dark-mode .kenrish-hero {
+        background: linear-gradient(120deg, #023859 0%, #011c40 100%) !important;
+        box-shadow: 0 8px 40px #54acbf33, 0 1.5px 0.5px #a7ebf244;
+    }
+
+    body.dark-mode .form-control,
+    body.dark-mode input,
+    body.dark-mode textarea {
+        background: rgba(2,56,89,0.85) !important;
+        color: #fff !important;
+        border-color: #54acbf !important;
+        box-shadow: 0 2px 8px #a7ebf244;
+        backdrop-filter: blur(8px) saturate(1.2);
+    }
+
+    body.dark-mode .kenrish-btn-outline {
+        background: #011c40 !important;
+        color: #a7ebf2 !important;
+        border: 2px solid #a7ebf2;
+        box-shadow: 0 2px 8px #a7ebf244;
+    }
+
+    body.dark-mode .kenrish-btn-primary,
+    body.dark-mode .kenrish-btn-warning {
+        background: linear-gradient(90deg, #a7ebf2, #54acbf 90%);
+        color: #023859 !important;
+        border: none;
+        box-shadow: 0 2px 16px #a7ebf244, 0 1.5px 0.5px #54acbf33;
+        filter: brightness(1.08) saturate(1.2);
+        text-shadow: 0 2px 8px #011c40cc;
+    }
+
+    body.dark-mode .kenrish-btn-primary:hover,
+    body.dark-mode .kenrish-btn-warning:hover,
+    body.dark-mode .kenrish-btn-outline:hover {
+        filter: brightness(1.18) saturate(1.4);
+        box-shadow: 0 4px 24px #a7ebf255, 0 2px 8px #54acbf44;
+        color: #fff !important;
+    }
+
+    body.dark-mode .kenrish-section-title,
+    body.dark-mode h1, 
+    body.dark-mode h2, 
+    body.dark-mode .section-title {
+        color: var(--kenrish-gold) !important;
+        text-shadow: 0 2px 8px #011c40cc;
+    }
+
+    body.dark-mode .kenrish-product-price,
+    body.dark-mode .text-gold {
+        color: #ffd580 !important;
+        text-shadow: 0 1px 4px #023859;
+    }
+
+    body.dark-mode .rating-stars .bi-star-fill,
+    body.dark-mode .rating-stars .bi-star-half {
+        color: #ffd580 !important;
+        filter: drop-shadow(0 0 6px #ffd58099);
+    }
+    body.dark-mode .rating-stars .bi-star {
+        color: #54acbf !important;
+    }
+
+    body.dark-mode .kenrish-animate {
+        filter: drop-shadow(0 0 24px #a7ebf299);
+    }
+
+    body.dark-mode .search-animated .bi-search {
+        color: #a7ebf2 !important;
+        filter: drop-shadow(0 2px 8px #a7ebf244);
+    }
+
+    body.dark-mode .carousel-caption {
+        background: linear-gradient(90deg, #023859cc 60%, #011c40cc 100%);
+        border-radius: 1rem;
+        padding: 1.2rem 1.5rem;
+        box-shadow: 0 2px 12px #a7ebf244;
+    }
+
+    body.dark-mode .carousel-control-prev-icon,
+    body.dark-mode .carousel-control-next-icon {
+        background-color: #023859;
+        border: 2px solid #a7ebf2;
+        filter: drop-shadow(0 2px 8px #a7ebf244);
+    }
+
+    body.dark-mode .btn-outline-secondary {
+        background: #011c40 !important;
+        color: #a7ebf2 !important;
+        border-color: #a7ebf2 !important;
+    }
+
+    body.dark-mode .btn-outline-secondary:hover {
+        background: #a7ebf2 !important;
+        color: #023859 !important;
+        border-color: #a7ebf2 !important;
+        box-shadow: 0 2px 12px #a7ebf255;
+    }
+
+    body.dark-mode #kenrish-loader {
+        background: rgba(1,28,64,0.97) !important;
+    }
+
+    body.dark-mode .spinner-border.text-warning {
+        border-color: #ffd580 #ffd580 #ffd580 #023859 !important;
+    }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggle = document.getElementById('darkModeToggle');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const saved = localStorage.getItem('kenrish-dark-mode');
+    if (saved === 'on' || (!saved && prefersDark)) {
+        document.body.classList.add('dark-mode');
+    }
+    toggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('kenrish-dark-mode', document.body.classList.contains('dark-mode') ? 'on' : 'off');
+    });
+});
+</script>
+{% endblock %}

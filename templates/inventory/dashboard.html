@@ -1,0 +1,180 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Inventory Dashboard - Kenrish Collection{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: var(--background);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    
+    .stats-card.primary {
+        border-left: 5px solid #0b3e64;
+    }
+    
+    .stats-card.success {
+        border-left: 5px solid #28a745;
+    }
+    
+    .stats-card.warning {
+        border-left: 5px solid #ffc107;
+    }
+    
+    .stats-card.danger {
+        border-left: 5px solid #dc3545;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--heading-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        color: var(--text-color);
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+    
+    .stats-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--link-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-5" style="background-color: var(--light-background);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold mb-3">
+                <i class="bi bi-boxes me-3"></i>Inventory Dashboard
+            </h1>
+            <p class="lead mb-4">
+                Manage your inventory, track sales, and monitor stock levels
+            </p>
+            <div class="d-flex flex-wrap gap-3 justify-content-center">
+                <a href="{% url 'add-stock' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Add Stock
+                </a>
+                <a href="{% url 'record-sale' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-cart-plus me-2"></i>Record Sale
+                </a>
+                <a href="{% url 'inventory-list' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-list me-2"></i>View All Items
+                </a>
+                <a href="{% url 'cash-flow' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-cash-stack me-2"></i>Cash Flow
+                </a>
+                <a href="{% url 'clear-sales-data' %}" class="btn btn-outline-danger">
+                    <i class="bi bi-trash me-2"></i>Clear Data
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Analytics Cards -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4 mb-5">
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card primary">
+                    <i class="bi bi-box stats-icon"></i>
+                    <div class="stats-number">{{ total_products }}</div>
+                    <p class="stats-label">Total Items</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card success">
+                    <i class="bi bi-graph-up stats-icon" style="color: #28a745;"></i>
+                    <div class="stats-number">{{ month_sales.count|default:0 }}</div>
+                    <p class="stats-label">Total Sales</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card warning">
+                    <i class="bi bi-currency-dollar stats-icon" style="color: #ffc107;"></i>
+                    <div class="stats-number">{{ month_sales.total|default:0|floatformat:0 }}</div>
+                    <p class="stats-label">Total Revenue (KSh)</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card danger">
+                    <i class="bi bi-exclamation-triangle stats-icon" style="color: #dc3545;"></i>
+                    <div class="stats-number">{{ low_stock_count }}</div>
+                    <p class="stats-label">Low Stock Items</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Product Sales -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Product Sales</h5>
+                        {% if recent_sales %}
+                        <a href="{% url 'sales-history' %}" class="btn btn-outline-primary btn-sm">View All</a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        {% if recent_sales %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sale in recent_sales %}
+                                    <tr>
+                                        <td>{{ sale.product.name }}</td>
+                                        <td>{{ sale.quantity }}</td>
+                                        <td>KSh {{ sale.unit_price }}</td>
+                                        <td>KSh {{ sale.total_amount }}</td>
+                                        <td>{{ sale.created_at|date:"M d, Y" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-cart-x display-4 text-muted mb-3"></i>
+                            <h5 class="text-muted">No sales recorded yet</h5>
+                            <p class="text-muted">Start by recording your first sale!</p>
+                            <a href="{% url 'record-sale' %}" class="btn btn-primary">
+                                <i class="bi bi-cart-plus me-2"></i>Record Sale
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

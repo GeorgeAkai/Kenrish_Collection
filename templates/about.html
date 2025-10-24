@@ -1,0 +1,325 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}About Us - Kenrish Collection{% endblock %}
+
+{% block extra_css %}
+<style>
+    .colorful-card {
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .colorful-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+    
+    .card-header-turquoise {
+        background: linear-gradient(135deg, #40E0D0, #48D1CC);
+        color: white;
+        font-weight: 600;
+        padding: 1.5rem;
+        border: none;
+    }
+    
+    .card-story {
+        background: linear-gradient(135deg, #E8F5E8, #F0FFF0);
+        border-left: 5px solid #28a745;
+    }
+    
+    .card-mission {
+        background: linear-gradient(135deg, #E3F2FD, #F0F8FF);
+        border-left: 5px solid #2196F3;
+    }
+    
+    .card-values {
+        background: linear-gradient(135deg, #FFF3E0, #FFFAF0);
+        border-left: 5px solid #FF9800;
+    }
+    
+    .card-team {
+        background: linear-gradient(135deg, #F3E5F5, #FAF0FA);
+        border-left: 5px solid #9C27B0;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #40E0D0, #48D1CC);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 8px 25px rgba(64, 224, 208, 0.3);
+    }
+    
+    .stats-number {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+    
+    .icon-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2rem;
+        color: white;
+    }
+    
+    .icon-success { background: linear-gradient(135deg, #28a745, #20c997); }
+    .icon-info { background: linear-gradient(135deg, #2196F3, #03A9F4); }
+    .icon-warning { background: linear-gradient(135deg, #FF9800, #FFC107); }
+    .icon-purple { background: linear-gradient(135deg, #9C27B0, #E91E63); }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-5" style="background: linear-gradient(135deg, var(--light-background), var(--background));">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold mb-3">About Kenrish Collection</h1>
+            <p class="lead">Your trusted beauty partner in Nakuru City for over 7 years</p>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4 mb-5">
+            <div class="col-md-3 col-6">
+                <div class="stats-card">
+                    <div class="stats-number">7+</div>
+                    <p class="mb-0">Years of Excellence</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stats-card">
+                    <div class="stats-number">1000+</div>
+                    <p class="mb-0">Happy Clients</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stats-card">
+                    <div class="stats-number">15+</div>
+                    <p class="mb-0">Services</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stats-card">
+                    <div class="stats-number">100%</div>
+                    <p class="mb-0">Satisfaction</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Content -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Our Story -->
+            <div class="col-lg-6">
+                <div class="colorful-card card-story h-100">
+                    <div class="card-header-turquoise">
+                        <div class="icon-circle icon-success">
+                            <i class="bi bi-book"></i>
+                        </div>
+                        <h3 class="text-center mb-0">Our Story</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="mb-3">
+                            Founded in 2017, Kenrish Collection has been at the forefront of beauty and style in Nakuru City. 
+                            What started as a small beauty salon has grown into a comprehensive beauty destination.
+                        </p>
+                        <p class="mb-3">
+                            Our passion for beauty and commitment to excellence has made us the go-to choice for clients 
+                            seeking professional services and quality products.
+                        </p>
+                        <p class="mb-0">
+                            Located in the heart of Shabab, we continue to serve our community with dedication, 
+                            bringing out the best in every client.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Our Mission -->
+            <div class="col-lg-6">
+                <div class="colorful-card card-mission h-100">
+                    <div class="card-header-turquoise">
+                        <div class="icon-circle icon-info">
+                            <i class="bi bi-target"></i>
+                        </div>
+                        <h3 class="text-center mb-0">Our Mission</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="mb-3">
+                            To provide exceptional beauty services and premium products that enhance natural beauty 
+                            and boost confidence in every client who walks through our doors.
+                        </p>
+                        <p class="mb-3">
+                            We believe that beauty is not just about appearance, but about feeling confident, 
+                            comfortable, and authentic in your own skin.
+                        </p>
+                        <p class="mb-0">
+                            Our mission is to create a welcoming space where everyone can discover their unique 
+                            beauty and express their personal style.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Our Values -->
+            <div class="col-lg-6">
+                <div class="colorful-card card-values h-100">
+                    <div class="card-header-turquoise">
+                        <div class="icon-circle icon-warning">
+                            <i class="bi bi-heart"></i>
+                        </div>
+                        <h3 class="text-center mb-0">Our Values</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <ul class="list-unstyled">
+                            <li class="mb-3">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                <strong>Quality:</strong> We use only premium products and maintain the highest standards
+                            </li>
+                            <li class="mb-3">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                <strong>Professionalism:</strong> Our skilled team delivers expert services with care
+                            </li>
+                            <li class="mb-3">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                <strong>Innovation:</strong> We stay current with the latest beauty trends and techniques
+                            </li>
+                            <li class="mb-0">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                <strong>Customer Focus:</strong> Your satisfaction and comfort are our top priorities
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Our Team -->
+            <div class="col-lg-6">
+                <div class="colorful-card card-team h-100">
+                    <div class="card-header-turquoise">
+                        <div class="icon-circle icon-purple">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h3 class="text-center mb-0">Our Team</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="mb-3">
+                            Our experienced team of beauty professionals brings years of expertise and passion 
+                            to every service we provide.
+                        </p>
+                        <p class="mb-3">
+                            From skilled hairdressers to beauty consultants, each team member is dedicated to 
+                            helping you look and feel your absolute best.
+                        </p>
+                        <p class="mb-0">
+                            We continuously invest in training and development to ensure we deliver the latest 
+                            techniques and trends in beauty and style.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Preview -->
+<section class="py-5" style="background-color: var(--light-background);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3" style="color: var(--heading-color);">What We Offer</h2>
+            <p class="lead" style="color: var(--text-color);">Comprehensive beauty services under one roof</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="colorful-card card-story text-center p-4 h-100">
+                    <div class="icon-circle icon-success">
+                        <i class="bi bi-scissors"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Professional Hairdressing</h5>
+                    <p class="mb-0">Expert hair cutting, styling, coloring, and treatments for all hair types and textures.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="colorful-card card-mission text-center p-4 h-100">
+                    <div class="icon-circle icon-info">
+                        <i class="bi bi-palette"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Nail Care & Art</h5>
+                    <p class="mb-0">Professional manicure, pedicure, and creative nail art services for beautiful hands and feet.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="colorful-card card-values text-center p-4 h-100">
+                    <div class="icon-circle icon-warning">
+                        <i class="bi bi-person-check"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Beauty Consultation</h5>
+                    <p class="mb-0">Personalized beauty advice and product recommendations from our expert consultants.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'services' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-arrow-right me-2"></i>
+                View All Services
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="colorful-card card-team text-center p-5">
+                    <div class="card-header-turquoise mb-4">
+                        <div class="icon-circle icon-purple">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                        <h3 class="mb-0">Visit Us Today</h3>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <i class="bi bi-geo-alt display-6 text-primary mb-3"></i>
+                            <h5>Location</h5>
+                            <p class="mb-0">Shabab, Nakuru City</p>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="bi bi-telephone display-6 text-success mb-3"></i>
+                            <h5>Call Us</h5>
+                            <p class="mb-0">0708440390</p>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="bi bi-envelope display-6 text-info mb-3"></i>
+                            <h5>Email</h5>
+                            <p class="mb-0">info@kenrishcollection.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

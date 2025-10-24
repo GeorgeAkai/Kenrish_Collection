@@ -1,0 +1,114 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Record Sale - Kenrish Collection{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="glass-card p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="text-gradient" style="font-family: 'Playfair Display', serif;">
+                            <i class="bi bi-cart-plus me-2"></i>Record Sale
+                        </h2>
+                        <p class="text-muted">Record a customer purchase and update inventory</p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Item Type</label>
+                                <select name="item_type" class="form-select" required onchange="updateItemOptions()">
+                                    <option value="">Select Type</option>
+                                    <option value="product">Product</option>
+                                    <option value="handbag">Handbag</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Item</label>
+                                <select name="item_id" id="itemSelect" class="form-select" required>
+                                    <option value="">Select Item</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Quantity</label>
+                                <input type="number" name="quantity" class="form-control" min="1" required>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Unit Price (Ksh)</label>
+                                <input type="number" name="unit_price" class="form-control" step="0.01" min="0" required>
+                            </div>
+                            
+                            <!-- <div class="col-md-6">
+                                <label class="form-label fw-semibold">Customer Name</label>
+                                <input type="text" name="customer_name" class="form-control" placeholder="Optional">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Customer Phone</label>
+                                <input type="tel" name="customer_phone" class="form-control" placeholder="Optional">
+			    </div>-->
+                            
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-success btn-lg me-3">
+                                    <i class="bi bi-cart-plus me-2"></i>Record Sale
+                                </button>
+                                <a href="{% url 'inventory-dashboard' %}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function updateItemOptions() {
+    const itemType = document.querySelector('select[name="item_type"]').value;
+    const itemSelect = document.getElementById('itemSelect');
+    
+    // Clear existing options
+    itemSelect.innerHTML = '<option value="">Select Item</option>';
+    
+    let items = [];
+    if (itemType === 'product') {
+        items = [
+            {% for product in products %}
+            {id: {{ product.id }}, name: "{{ product.name|escapejs }}", stock: {{ product.stock_quantity|default:0 }}, price: {{ product.price }}},
+            {% endfor %}
+        ];
+    } else if (itemType === 'handbag') {
+        items = [
+            {% for handbag in handbags %}
+            {id: {{ handbag.id }}, name: "{{ handbag.name|escapejs }}", stock: {{ handbag.stock_quantity|default:0 }}, price: {{ handbag.price }}},
+            {% endfor %}
+        ];
+    }
+    
+    items.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id;
+        option.setAttribute('data-price', item.price);
+        option.textContent = `${item.name} (Stock: ${item.stock})`;
+        itemSelect.appendChild(option);
+    });
+}
+
+// Auto-fill price when item is selected
+document.getElementById('itemSelect').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const price = selectedOption.getAttribute('data-price');
+    if (price) {
+        document.querySelector('input[name="unit_price"]').value = price;
+    }
+});
+</script>
+{% endblock %}

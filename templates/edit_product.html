@@ -1,0 +1,130 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Edit Product{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow rounded-4 p-4 border-0" style="background: var(--kenrish-card);">
+                <h2 class="text-center mb-4 fw-bold" style="color: var(--kenrish-turquoise); letter-spacing: 1px;">
+                    <i class="bi bi-pencil-square"></i> Edit Product
+                </h2>
+                <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        {% for field in form.visible_fields %}
+                        <div class="col-12">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold" style="color: var(--kenrish-turquoise-dark);">
+                                {{ field.label }}{% if field.field.required %} <span style="color:var(--kenrish-gold);">*</span>{% endif %}
+                            </label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text text-muted" style="font-size: 0.95em;">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="d-flex justify-content-between gap-2 flex-wrap mt-4">
+                        <button type="submit" class="btn btn-primary px-4 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
+                        <a href="{% url 'admin-product' %}" class="btn btn-outline-secondary px-4 rounded-pill shadow-sm">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    :root {
+        --kenrish-gold: #ffb347;
+        --kenrish-turquoise: #1abc9c;
+        --kenrish-turquoise-dark: #009688;
+        --kenrish-bg: #fff;
+        --kenrish-card: #f8fcfc;
+    }
+    body {
+        background: linear-gradient(135deg, #fff7f0 0%, #ffe5d0 100%);
+    }
+    .card {
+        border: none;
+        background: var(--kenrish-card) !important;
+        box-shadow: 0 8px 32px rgba(209, 122, 75, 0.13);
+        border-radius: 2rem !important;
+    }
+    .btn-primary {
+        background: linear-gradient(90deg, var(--kenrish-turquoise), var(--kenrish-gold));
+        border: none;
+        border-radius: 20px;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: 1px;
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover, .btn-primary:focus {
+        background: linear-gradient(90deg, #009688 60%, #ffd6b0 100%);
+        color: #fff;
+        box-shadow: 0 2px 12px rgba(209, 122, 75, 0.15);
+    }
+    .btn-outline-secondary {
+        border-radius: 20px;
+        border-color: var(--kenrish-turquoise);
+        color: var(--kenrish-turquoise);
+        font-weight: 600;
+        background: #fff;
+        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+    .btn-outline-secondary:hover, .btn-outline-secondary:focus {
+        background: var(--kenrish-turquoise);
+        color: #fff;
+        box-shadow: 0 2px 12px rgba(209, 122, 75, 0.10);
+    }
+    label {
+        color: var(--kenrish-turquoise-dark);
+        font-weight: 500;
+        margin-bottom: 0.3rem;
+    }
+    .form-control, select, textarea {
+        border-radius: 2rem !important;
+        border: 1.5px solid #ffd6b0 !important;
+        background: #fff8f3 !important;
+        font-size: 1.08rem !important;
+        box-shadow: none !important;
+        padding-left: 1.2rem !important;
+        padding-right: 1.2rem !important;
+        min-height: 2.7rem;
+    }
+    .form-control:focus, select:focus, textarea:focus {
+        border-color: var(--kenrish-turquoise) !important;
+        box-shadow: 0 0 0 0.15rem #1abc9c33 !important;
+        background: #fff !important;
+    }
+    input[type="file"].form-control {
+        padding: 0.5rem 1.2rem !important;
+        background: #fff8f3 !important;
+        border-radius: 2rem !important;
+    }
+    .form-text {
+        color: var(--kenrish-turquoise-dark) !important;
+    }
+    @media (max-width: 767.98px) {
+        .card {
+            padding: 1.2rem !important;
+            border-radius: 1.2rem !important;
+        }
+        h2 {
+            font-size: 1.3rem !important;
+        }
+        .btn, .form-control {
+            font-size: 1rem !important;
+        }
+    }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}

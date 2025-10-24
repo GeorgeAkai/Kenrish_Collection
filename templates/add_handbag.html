@@ -1,0 +1,95 @@
+{% extends "base_modern.html" %}
+{% block title %}Add Handbag{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-5 p-4" style="background: linear-gradient(135deg, #f8fcfc 80%, #eaf4fb 100%);">
+                <div class="text-center mb-4">
+                    <span class="d-inline-block bg-white shadow rounded-circle p-3 mb-2">
+                        <i class="bi bi-bag-plus" style="font-size: 2.5rem; color: #009688;"></i>
+                    </span>
+                    <h2 class="fw-bold mb-1" style="color: #009688; letter-spacing: 1px;">Add a New Handbag</h2>
+                    <div class="mx-auto" style="width: 60px; border-bottom: 3px solid #d17a4b; margin-bottom: 1rem;"></div>
+                </div>
+                <form method="post" enctype="multipart/form-data" autocomplete="off">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label fw-semibold" style="color: #d17a4b;">
+                            {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
+                        </label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary w-100 fw-bold rounded-pill py-2 shadow-sm" style="font-size: 1.1rem;">
+                        <i class="bi bi-save"></i> Save Handbag
+                    </button>
+                    <a href="{% url 'handbags' %}" class="btn btn-outline-secondary w-100 fw-bold rounded-pill py-2 mt-2 shadow-sm" style="font-size: 1.1rem;">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    body {
+        background: linear-gradient(135deg, #f8fcfc 60%, #eaf4fb 100%) !important;
+    }
+    .card {
+        border-radius: 2rem !important;
+        background: #f8fcfc !important;
+        box-shadow: 0 8px 32px 0 rgba(53, 122, 184, 0.10), 0 1.5px 8px 0 #d17a4b22;
+    }
+    .form-label {
+        color: #d17a4b;
+        font-size: 1.08rem;
+    }
+    .form-control, .form-select {
+        border-radius: 14px;
+        border: 1.5px solid #e0e0e0;
+        font-size: 1.08rem;
+        background: #fff;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        min-height: 48px;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #009688;
+        box-shadow: 0 0 0 2px #b2dfdb33;
+    }
+    .btn-primary {
+        background: #009688;
+        border: none;
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover {
+        background: #00796b;
+        box-shadow: 0 2px 8px #00968833;
+    }
+    .btn-outline-secondary {
+        border-radius: 20px;
+        transition: background 0.2s, color 0.2s;
+    }
+    .btn-outline-secondary:hover {
+        background: #eaf4fb;
+        color: #009688;
+    }
+    .fw-bold {
+        font-weight: 700 !important;
+    }
+    .fw-semibold {
+        font-weight: 600 !important;
+    }
+    .form-text, .text-danger {
+        font-size: 0.97rem;
+    }
+</style>
+{% endblock %}

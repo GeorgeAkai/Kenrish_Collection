@@ -1,0 +1,54 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Terms of Service - Kenrish Collection{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="glass-card p-5">
+            <h1 class="text-gradient mb-4" style="font-family: 'Playfair Display', serif;">Terms of Service</h1>
+            <p class="text-muted mb-4">Last updated: {{ "now"|date:"F d, Y" }}</p>
+            
+            <h3 class="mb-3">Acceptance of Terms</h3>
+            <p class="mb-4">By accessing and using Kenrish Collection services, you accept and agree to be bound by the terms and provision of this agreement.</p>
+            
+            <h3 class="mb-3">Services</h3>
+            <p class="mb-4">Kenrish Collection provides beauty services including hairdressing, nail care, and beauty consultation, as well as beauty products and handbags.</p>
+            
+            <h3 class="mb-3">User Accounts</h3>
+            <ul class="mb-4">
+                <li>You are responsible for maintaining the confidentiality of your account</li>
+                <li>You agree to provide accurate and complete information</li>
+                <li>You are responsible for all activities under your account</li>
+            </ul>
+            
+            <h3 class="mb-3">Appointments and Services</h3>
+            <ul class="mb-4">
+                <li>Appointments must be scheduled in advance</li>
+                <li>Cancellations should be made at least 24 hours in advance</li>
+                <li>We reserve the right to refuse service</li>
+            </ul>
+            
+            <h3 class="mb-3">Payment Terms</h3>
+            <p class="mb-4">Payment is due at the time of service. We accept cash and mobile money payments.</p>
+            
+            <h3 class="mb-3">Limitation of Liability</h3>
+            <p class="mb-4">Kenrish Collection shall not be liable for any indirect, incidental, special, or consequential damages.</p>
+            
+            <h3 class="mb-3">Contact Information</h3>
+            <p class="mb-4">For questions about these Terms of Service, contact us at:</p>
+            <ul class="mb-4">
+                <li>Phone: <a href="tel:0708440390">0708440390</a></li>
+                <li>Location: Shabab, Nakuru City</li>
+            </ul>
+            
+            <div class="text-center mt-5">
+                <a href="{% url 'home' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

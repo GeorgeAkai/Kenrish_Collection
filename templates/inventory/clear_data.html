@@ -1,0 +1,48 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Clear Sales Data - Kenrish Collection{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="glass-card p-5 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-exclamation-triangle display-1 text-warning"></i>
+                    </div>
+                    
+                    <h2 class="text-gradient mb-4" style="font-family: 'Playfair Display', serif;">
+                        Clear All Sales Data
+                    </h2>
+                    
+                    <div class="alert alert-warning mb-4">
+                        <strong>Warning!</strong> This action will permanently delete:
+                        <ul class="mt-3 mb-0 text-start">
+                            <li>All sales records</li>
+                            <li>All inventory transactions</li>
+                            <li>All cash flow data</li>
+                            <li>Reset all stock quantities to 0</li>
+                        </ul>
+                    </div>
+                    
+                    <p class="text-muted mb-4">
+                        This action cannot be undone. Are you sure you want to proceed?
+                    </p>
+                    
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-lg me-3" onclick="return confirm('Are you absolutely sure? This will delete ALL sales data!')">
+                            <i class="bi bi-trash me-2"></i>Yes, Clear All Data
+                        </button>
+                    </form>
+                    
+                    <a href="{% url 'inventory-dashboard' %}" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-left me-2"></i>Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

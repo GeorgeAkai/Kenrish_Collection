@@ -1,0 +1,535 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Gallery - Kenrish Collection{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3" style="font-family: 'Playfair Display', serif;">
+            Our Work Gallery
+        </h1>
+        <p class="lead mb-4">
+            Showcasing our beautiful transformations and satisfied clients
+        </p>
+        {% if request.user.is_staff %}
+        <a href="{% url 'add-gallery-image' %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle me-2"></i>
+            Add New Image
+        </a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Filter Section -->
+<section class="py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="glass-card p-3">
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <button class="btn btn btn-outline-primary btn-sm filter-btn active" data-filter="all">
+                            All Work
+                        </button>
+                        {% for service_code, service_name in services %}
+                        <button class="btn btn btn-outline-primary btn-sm filter-btn" data-filter="{{ service_code }}">
+                            {{ service_name }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Gallery Grid -->
+<section class="py-5">
+    <div class="container">
+        {% for section in gallery_sections %}
+        {% if section.images %}
+        <div class="mb-5">
+            <h3 class="text-center mb-4 text-gradient" style="font-family: 'Playfair Display', serif;">
+                {{ section.service_label }}
+            </h3>
+            <div class="row g-4">
+                {% for image in section.images %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="glass-card overflow-hidden h-100">
+                        <div class="position-relative">
+                            {% if image.is_image %}
+                                <img src="{{ image.file.url }}" alt="{{ image.description }}" 
+                                     class="img-fluid w-100" style="height: 300px; object-fit: cover;">
+                            {% elif image.is_video %}
+                                <video controls class="w-100" style="height: 300px; object-fit: cover;">
+                                    <source src="{{ image.file.url }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            {% endif %}
+                            
+                            <!-- Like Button -->
+                            {% if user.is_authenticated %}
+                            <button class="btn btn-sm position-absolute top-0 end-0 m-2 like-btn" 
+                                    data-image-id="{{ image.id }}"
+                                    style="background: rgba(255,255,255,0.9); border: none;">
+                                <i class="bi bi-heart" data-liked="false"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="p-3">
+                            <p class="mb-2">{{ image.description }}</p>
+                            <small class="text-muted">
+                                <i class="bi bi-heart me-1"></i>
+                                <span class="like-count">{{ image.like_count }}</span> likes
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        
+        <!-- Fallback static images if no database images -->
+        {% if not gallery_sections %}
+        <div class="row g-4" id="galleryGrid">
+            {% for image in images %}
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="{{ image.service }}">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        {% if image.is_image %}
+                            <img src="{{ image.file.url }}" alt="{{ image.description }}" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('{{ image.file.url }}', '{{ image.description }}', 'image')">
+                        {% elif image.is_video %}
+                            <video class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('{{ image.file.url }}', '{{ image.description }}', 'video')" muted>
+                                <source src="{{ image.file.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <i class="bi bi-play-circle-fill fs-1 text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></i>
+                            </div>
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center h-100 bg-light">
+                                <i class="bi bi-file-earmark fs-1 text-muted"></i>
+                            </div>
+                        {% endif %}
+                        
+                        {% if request.user.is_staff %}
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-gear"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'edit-gallery-image' image.id %}">
+                                        <i class="bi bi-pencil me-2"></i>Edit
+                                    </a></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'delete-gallery-image' image.id %}">
+                                        <i class="bi bi-trash me-2"></i>Delete
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">{{ image.get_service_display }}</h6>
+                        {% if image.description %}
+                        <p class="text-muted small mb-2">{{ image.description }}</p>
+                        {% endif %}
+                        <small class="text-muted">{{ image.uploaded_at|date:"M d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <!-- Show all gallery images when no database entries exist -->
+            {% load static %}
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="hairdressing">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <img src="/media/gallery/hair1.jpg" alt="Hairdressing Work" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/hair1.jpg', 'Professional Hairdressing', 'image')">
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Hairdressing</h6>
+                        <p class="text-muted small mb-2">Professional hair styling</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="hairdressing">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <img src="/media/gallery/hair2.jpg" alt="Hair Styling" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/hair2.jpg', 'Hair Styling', 'image')">
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Hairdressing</h6>
+                        <p class="text-muted small mb-2">Beautiful hair styling</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="hairdressing">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <img src="/media/gallery/hair3.jpg" alt="Hair Treatment" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/hair3.jpg', 'Hair Treatment', 'image')">
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Hairdressing</h6>
+                        <p class="text-muted small mb-2">Hair treatments</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="hairdressing">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <img src="/media/gallery/hair5.jpg" alt="Hair Care" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/hair5.jpg', 'Hair Care', 'image')">
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Hairdressing</h6>
+                        <p class="text-muted small mb-2">Hair care services</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="hairdressing">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <img src="/media/gallery/hair6.jpg" alt="Hair Design" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/hair6.jpg', 'Hair Design', 'image')">
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Hairdressing</h6>
+                        <p class="text-muted small mb-2">Creative hair designs</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="hairdressing">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <img src="/media/gallery/hair7.jpg" alt="Hair Styling" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/hair7.jpg', 'Hair Styling', 'image')">
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Hairdressing</h6>
+                        <p class="text-muted small mb-2">Professional styling</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="barber">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <img src="/media/gallery/cut1.jpg" alt="Barber Cut" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/cut1.jpg', 'Professional Barber Cut', 'image')">
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Barber</h6>
+                        <p class="text-muted small mb-2">Professional barber cuts</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="barber">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <img src="/media/gallery/cut2.jpg" alt="Hair Cut" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/cut2.jpg', 'Stylish Hair Cut', 'image')">
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Barber</h6>
+                        <p class="text-muted small mb-2">Stylish hair cuts</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="barber">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <img src="/media/gallery/cut3.jpg" alt="Modern Cut" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/cut3.jpg', 'Modern Hair Cut', 'image')">
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Barber</h6>
+                        <p class="text-muted small mb-2">Modern hair cuts</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="barber">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <img src="/media/gallery/cut4.jpg" alt="Classic Cut" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/cut4.jpg', 'Classic Hair Cut', 'image')">
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Barber</h6>
+                        <p class="text-muted small mb-2">Classic cuts</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="barber">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <img src="/media/gallery/cut5.jpg" alt="Trendy Cut" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/cut5.jpg', 'Trendy Hair Cut', 'image')">
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Barber</h6>
+                        <p class="text-muted small mb-2">Trendy styles</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="barber">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <img src="/media/gallery/cut6.jpg" alt="Premium Cut" class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/cut6.jpg', 'Premium Hair Cut', 'image')">
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Barber</h6>
+                        <p class="text-muted small mb-2">Premium cuts</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="nails">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <video class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/nails2.mp4', 'Nail Art', 'video')" muted>
+                            <source src="/media/gallery/nails2.mp4" type="video/mp4">
+                        </video>
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <i class="bi bi-play-circle-fill fs-1 text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></i>
+                        </div>
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Nails</h6>
+                        <p class="text-muted small mb-2">Professional nail art</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="nails">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <video class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/nails3.mp4', 'Nail Design', 'video')" muted>
+                            <source src="/media/gallery/nails3.mp4" type="video/mp4">
+                        </video>
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <i class="bi bi-play-circle-fill fs-1 text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></i>
+                        </div>
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Nails</h6>
+                        <p class="text-muted small mb-2">Creative nail designs</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="nails">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <video class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/nails4.mp4', 'Manicure', 'video')" muted>
+                            <source src="/media/gallery/nails4.mp4" type="video/mp4">
+                        </video>
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <i class="bi bi-play-circle-fill fs-1 text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></i>
+                        </div>
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Nails</h6>
+                        <p class="text-muted small mb-2">Professional manicure</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="nails">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <video class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/nails5.mp4', 'Nail Care', 'video')" muted>
+                            <source src="/media/gallery/nails5.mp4" type="video/mp4">
+                        </video>
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <i class="bi bi-play-circle-fill fs-1 text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></i>
+                        </div>
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Nails</h6>
+                        <p class="text-muted small mb-2">Nail care services</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="barber">
+                <div class="product-card">
+                    <div class="product-image position-relative" style="height: 250px; overflow: hidden;">
+                        <video class="img-fluid w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="openLightbox('/media/gallery/kinyozi.mp4', 'Barber Work', 'video')" muted>
+                            <source src="/media/gallery/kinyozi.mp4" type="video/mp4">
+                        </video>
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <i class="bi bi-play-circle-fill fs-1 text-white" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);"></i>
+                        </div>
+                    </div>
+                    <div class="product-info p-3">
+                        <h6 class="fw-bold mb-2">Barber</h6>
+                        <p class="text-muted small mb-2">Professional barber work</p>
+                        <small class="text-muted">Sample Work</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Lightbox Modal -->
+<div class="modal fade" id="lightboxModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <div id="lightboxContent"></div>
+                <div id="lightboxCaption" class="text-white mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.filter-btn.active {
+    background: linear-gradient(135deg, var(--primary-turquoise) 0%, var(--primary-gold) 100%);
+    color: white;
+    border-color: transparent;
+}
+
+.gallery-item {
+    transition: all 0.3s ease;
+}
+
+.gallery-item.hidden {
+    display: none;
+}
+
+#lightboxContent img,
+#lightboxContent video {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 15px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter functionality
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterBtns.forEach(b => b.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            
+            galleryItems.forEach(item => {
+                if (filter === 'all' || item.getAttribute('data-category') === filter) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        });
+    });
+});
+
+// Lightbox functionality
+function openLightbox(src, caption, type) {
+    const lightboxContent = document.getElementById('lightboxContent');
+    const lightboxCaption = document.getElementById('lightboxCaption');
+    
+    if (type === 'image') {
+        lightboxContent.innerHTML = `<img src="${src}" alt="${caption}" class="img-fluid">`;
+    } else if (type === 'video') {
+        lightboxContent.innerHTML = `
+            <video controls class="img-fluid" autoplay>
+                <source src="${src}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        `;
+    }
+    
+    lightboxCaption.textContent = caption;
+    
+    const modal = new bootstrap.Modal(document.getElementById('lightboxModal'));
+    modal.show();
+}
+
+// Like functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Load initial like status for all images
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        const imageId = btn.dataset.imageId;
+        fetch(`/toggle-gallery-like/${imageId}/`, {
+            method: 'GET',
+        })
+        .then(response => response.json())
+        .then(data => {
+            const heartIcon = btn.querySelector('i');
+            const likeCount = btn.closest('.glass-card').querySelector('.like-count');
+            if (data.liked) {
+                heartIcon.className = 'bi bi-heart-fill text-danger';
+            }
+            likeCount.textContent = data.like_count;
+        })
+        .catch(error => console.log('Loading like status...'));
+    });
+    
+    // Handle like button clicks
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const imageId = this.dataset.imageId;
+            const heartIcon = this.querySelector('i');
+            const likeCount = this.closest('.glass-card').querySelector('.like-count');
+            
+            fetch(`/toggle-gallery-like/${imageId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.liked) {
+                    heartIcon.className = 'bi bi-heart-fill text-danger';
+                } else {
+                    heartIcon.className = 'bi bi-heart';
+                }
+                likeCount.textContent = data.like_count;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
+{% endblock %}

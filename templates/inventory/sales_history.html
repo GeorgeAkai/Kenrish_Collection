@@ -1,0 +1,68 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Sales History - Kenrish Collection{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background-color: var(--light-background);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold mb-3">
+                <i class="bi bi-graph-up me-3"></i>Sales History
+            </h1>
+            <p class="lead mb-4">
+                Complete record of all sales transactions
+            </p>
+            <a href="{% url 'inventory-dashboard' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">All Sales Records</h5>
+            </div>
+            <div class="card-body">
+                {% if sales %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sale in sales %}
+                            <tr>
+                                <td>{{ sale.product.name }}</td>
+                                <td>{{ sale.quantity_sold }}</td>
+                                <td>KSh {{ sale.sale_price }}</td>
+                                <td>KSh {{ sale.total_amount }}</td>
+                                <td>{{ sale.sale_date|date:"M d, Y H:i" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-cart-x display-4 text-muted mb-3"></i>
+                    <h5 class="text-muted">No sales recorded yet</h5>
+                    <p class="text-muted">Start by recording your first sale!</p>
+                    <a href="{% url 'record-sale' %}" class="btn btn-primary">
+                        <i class="bi bi-cart-plus me-2"></i>Record Sale
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

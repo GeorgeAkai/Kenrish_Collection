@@ -1,0 +1,179 @@
+{% extends "base_modern.html" %}
+{% block title %}{{ wishlist_user.username }}'s Wishlist{% endblock %}
+{% block content %}
+<style>
+.admin-header {
+    background: linear-gradient(135deg, #20b2aa, #d4af37);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-radius: 20px;
+}
+
+.wishlist-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.wishlist-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+}
+
+.product-img {
+    height: 200px;
+    object-fit: cover;
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+}
+
+.product-img:hover {
+    transform: scale(1.05);
+}
+
+.section-title {
+    color: #20b2aa;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.back-btn {
+    background: linear-gradient(135deg, #20b2aa, #1a9b96);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.back-btn:hover {
+    background: linear-gradient(135deg, #1a9b96, #168a82);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(32, 178, 170, 0.3);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #64748b;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #e2e8f0;
+    margin-bottom: 1rem;
+}
+
+.price-tag {
+    background: linear-gradient(135deg, #d4af37, #b8941f);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    display: inline-block;
+}
+</style>
+
+<div class="container py-4">
+    <div class="admin-header text-center">
+        <h1 class="mb-2">👤 {{ wishlist_user.username }}'s Wishlist</h1>
+        <p class="mb-0 opacity-90">Admin view of user's saved items</p>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title">
+            <i class="bi bi-heart-fill"></i>
+            Wishlist Items
+        </h2>
+        <a href="{% url 'admin_user_logins' %}" class="back-btn">
+            <i class="bi bi-arrow-left"></i>
+            Back to Users
+        </a>
+    </div>
+
+    {% if wishlist_products %}
+    <div class="section-title">
+        <i class="bi bi-box-seam"></i>
+        Beauty Products ({{ wishlist_products|length }})
+    </div>
+    <div class="row g-4 mb-5">
+        {% for product in wishlist_products %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="wishlist-card h-100">
+                {% if product.id %}
+                    <a href="{% url 'product-detail' product.id %}" class="text-decoration-none">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-img w-100 p-3">
+                    </a>
+                {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-exclamation-triangle fs-1"></i>
+                        <p>Product unavailable</p>
+                    </div>
+                {% endif %}
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-2" style="color: #2d3748;">{{ product.name }}</h5>
+                    <p class="text-muted mb-3">{{ product.description|truncatewords:15 }}</p>
+                    <div class="price-tag">Ksh {{ product.price }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if wishlist_handbags %}
+    <div class="section-title">
+        <i class="bi bi-handbag"></i>
+        Handbags ({{ wishlist_handbags|length }})
+    </div>
+    <div class="row g-4 mb-5">
+        {% for handbag in wishlist_handbags %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="wishlist-card h-100">
+                {% if handbag.id %}
+                    <a href="{% url 'handbag-detail' handbag.id %}" class="text-decoration-none">
+                        <img src="{{ handbag.image.url }}" alt="{{ handbag.name }}" class="product-img w-100 p-3">
+                    </a>
+                {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-exclamation-triangle fs-1"></i>
+                        <p>Handbag unavailable</p>
+                    </div>
+                {% endif %}
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-2" style="color: #2d3748;">{{ handbag.name }}</h5>
+                    <p class="text-muted mb-3">{{ handbag.description|truncatewords:15 }}</p>
+                    <div class="price-tag">Ksh {{ handbag.price }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if not wishlist_products and not wishlist_handbags %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="bi bi-heart"></i>
+        </div>
+        <h3>No Items in Wishlist</h3>
+        <p>{{ wishlist_user.username }} hasn't added any items to their wishlist yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% include 'chatbot_widget.html' %}
+{% endblock %}

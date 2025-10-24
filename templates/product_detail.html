@@ -1,0 +1,221 @@
+{% extends "base_modern.html" %}
+
+{% block title %}{{ product.name }} - Kenrish Collection{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row g-5">
+            <!-- Product Image -->
+            <div class="col-lg-6">
+                <div class="glass-card p-4">
+                    <div class="product-image-large">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded" style="width: 100%; height: 400px; object-fit: cover;">
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center bg-light rounded" style="height: 400px;">
+                                <i class="bi bi-image display-1 text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product Details -->
+            <div class="col-lg-6">
+                <div class="glass-card p-4">
+                    <h1 class="text-gradient mb-3" style="font-family: 'Playfair Display', serif;">{{ product.name }}</h1>
+                    
+                    <div class="rating-stars mb-3">
+                        {% with avg=product.average_rating %}
+                        {% if avg > 0 %}
+                            {% for i in "12345" %}
+                                {% if avg >= forloop.counter %}
+                                    <i class="bi bi-star-fill" style="color: #ffd700; font-size: 1.2rem;"></i>
+                                {% elif avg >= forloop.counter0|add:"0.5" and avg < forloop.counter %}
+                                    <i class="bi bi-star-half" style="color: #ffd700; font-size: 1.2rem;"></i>
+                                {% else %}
+                                    <i class="bi bi-star" style="color: #e0e0e0; font-size: 1.2rem;"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ms-2 fs-5">({{ avg|floatformat:1 }} out of 5)</span>
+                        {% else %}
+                            <span class="text-muted">No ratings yet</span>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                    
+                    <div class="product-price mb-4" style="font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, var(--primary-turquoise) 0%, var(--primary-gold) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        Ksh {{ product.price }}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">Description</h5>
+                        <p class="text-muted">{{ product.description }}</p>
+                    </div>
+                    
+                    <div class="d-flex gap-3 mb-4">
+                        {% if request.user.is_authenticated %}
+                        <a href="{% url 'add-to-wishlist' product.id %}" class="btn btn-outline-primary">
+                            <i class="bi bi-heart me-2"></i>
+                            Add to Wishlist
+                        </a>
+                        {% endif %}
+                        
+                        <a href="tel:0708440390" class="btn btn-primary flex-grow-1">
+                            <i class="bi bi-telephone me-2"></i>
+                            Call to Order
+                        </a>
+                    </div>
+                    
+                    {% if request.user.is_staff %}
+                    <div class="border-top pt-3">
+                        <h6 class="fw-bold mb-2">Admin Actions</h6>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'edit-product' product.id %}" class="btn btn-outline-warning btn-sm">
+                                <i class="bi bi-pencil me-1"></i>Edit
+                            </a>
+                            <a href="{% url 'delete-product' product.id %}" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-trash me-1"></i>Delete
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ratings Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="glass-card p-4">
+                    <h3 class="text-gradient mb-4" style="font-family: 'Playfair Display', serif;">Customer Reviews</h3>
+                    
+                    {% if product.ratings.all %}
+                    <div class="row g-4">
+                        {% for rating in product.ratings.all %}
+                        <div class="col-md-6">
+                            <div class="border rounded p-3" style="background: rgba(255, 255, 255, 0.5);">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="rating-stars me-3">
+                                        {% for i in "12345" %}
+                                            {% if rating.value >= forloop.counter %}
+                                                <i class="bi bi-star-fill" style="color: #ffd700;"></i>
+                                            {% else %}
+                                                <i class="bi bi-star" style="color: #e0e0e0;"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <strong>{{ rating.user.username }}</strong>
+                                </div>
+                                <small class="text-muted">{{ rating.created_at|date:"M d, Y" }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-chat-quote display-4 text-muted mb-3"></i>
+                        <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if request.user.is_authenticated %}
+                    <div class="border-top pt-4 mt-4">
+                        <h5 class="fw-bold mb-3">Leave a Review</h5>
+                        <form method="post" action="{% url 'product-detail' product.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Rating</label>
+                                <div class="rating-input">
+                                    {% for i in "12345" %}
+                                    <input type="radio" name="value" value="{{ forloop.counter }}" id="star{{ forloop.counter }}" class="d-none" required>
+                                    <label for="star{{ forloop.counter }}" class="star-label" style="cursor: pointer; font-size: 1.5rem; color: #e0e0e0; margin-right: 5px;">
+                                        <i class="bi bi-star-fill"></i>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-star me-2"></i>
+                                Submit Review
+                            </button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="border-top pt-4 mt-4 text-center">
+                        <p class="text-muted">
+                            <a href="{% url 'login' %}" class="text-decoration-none" style="color: var(--primary-turquoise);">
+                                Login
+                            </a> to leave a review
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Back Button -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <a href="{% url 'admin-product' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Back to Products
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.rating-input .star-label:hover,
+.rating-input .star-label:hover ~ .star-label {
+    color: #ffd700 !important;
+}
+
+.rating-input input:checked ~ .star-label {
+    color: #ffd700 !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Interactive star rating
+    const starLabels = document.querySelectorAll('.star-label');
+    const ratingInputs = document.querySelectorAll('input[name="rating"]');
+    
+    starLabels.forEach((label, index) => {
+        label.addEventListener('click', function() {
+            // Reset all stars
+            starLabels.forEach(star => star.style.color = '#e0e0e0');
+            
+            // Fill stars up to clicked one
+            for (let i = 0; i <= index; i++) {
+                starLabels[i].style.color = '#ffd700';
+            }
+        });
+        
+        label.addEventListener('mouseover', function() {
+            // Highlight stars on hover
+            starLabels.forEach(star => star.style.color = '#e0e0e0');
+            for (let i = 0; i <= index; i++) {
+                starLabels[i].style.color = '#ffd700';
+            }
+        });
+    });
+    
+    // Reset on mouse leave
+    document.querySelector('.rating-input').addEventListener('mouseleave', function() {
+        const checkedInput = document.querySelector('input[name="rating"]:checked');
+        starLabels.forEach(star => star.style.color = '#e0e0e0');
+        
+        if (checkedInput) {
+            const checkedIndex = parseInt(checkedInput.value) - 1;
+            for (let i = 0; i <= checkedIndex; i++) {
+                starLabels[i].style.color = '#ffd700';
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

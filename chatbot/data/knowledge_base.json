@@ -1,0 +1,234 @@
+{
+  "products": [
+    {
+      "name": "Black Mask Skin Care",
+      "description": "Black mask dry skin remover is a peel-off facial treatment designed to unclog pores, remove dead skin cells, and absorb excess oil. It leaves the skin feeling smoother, clearer, and more refreshed after each use.",
+      "price": "200.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Cocoa Butter Cream",
+      "description": "Cocoa butter cream is a rich, moisturizing skincare product made from natural cocoa bean fat, known for its deep hydration and skin-soothing properties. It helps improve skin elasticity, reduce dryness, and leave the skin feeling soft and nourished.",
+      "price": "250.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Aloe Vera Lotion",
+      "description": "Aloe vera lotion is a soothing, hydrating moisturizer enriched with aloe extract to calm irritated or sun-exposed skin. It absorbs quickly, leaving the skin feeling cool, refreshed, and smooth.",
+      "price": "150.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Lip Balm",
+      "description": "Lip balm is a moisturizing treatment designed to soothe and protect dry, chapped lips. It forms a nourishing barrier to lock in hydration and keep lips soft and smooth.",
+      "price": "100.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Duo Mink Hair Eyebrows",
+      "description": "Duo Mink Hair Fake Eyebrows are realistic, reusable brow enhancements made from soft mink hair to mimic natural eyebrow texture. They offer a quick and easy way to achieve fuller, well-defined brows without permanent makeup.",
+      "price": "250.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Perfume Refill",
+      "description": "Perfume refills are eco-friendly, cost-effective alternatives that allow you to replenish your favorite fragrance without buying a new bottle. They help reduce waste while ensuring you always have your signature scent on hand.",
+      "price": "50.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Stickons",
+      "description": "Nail stickons are pre-designed adhesive nail coverings that offer a quick and easy way to achieve salon-style manicures at home. They come in various colors, patterns, and finishes, sticking directly to the nails without the need for polish or drying time.",
+      "price": "800.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Asante Soaps",
+      "description": "Asante Soaps are handcrafted, natural soaps made with nourishing ingredients like shea butter, essential oils, and herbal extracts. They gently cleanse the skin while promoting hydration, leaving it soft, refreshed, and delicately scented.",
+      "price": "350.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Brass Rings",
+      "description": "Brass rings are durable and stylish accessories made from a copper-zinc alloy, known for their warm golden hue and vintage appeal. They are often used in jewelry, crafts, or hardware, offering both aesthetic charm and long-lasting strength.",
+      "price": "500.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Laundry Basket",
+      "description": "Reed Laundry Basket is a stylish and functional storage solution made from natural reed materials, offering durability and a rustic charm. Ideal for organizing laundry, it combines breathable design with aesthetic appeal, perfect for home decor and practical use.",
+      "price": "3500.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Vaseline Body Oil",
+      "description": "Vaseline Body Oil is a lightweight, fast-absorbing moisturizer that deeply nourishes and hydrates the skin. Infused with healing ingredients like pure Vaseline jelly or cocoa butter, it leaves the skin soft, smooth, and glowing without a greasy feel.",
+      "price": "1200.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Body Mist",
+      "description": "Body mist is a light, refreshing fragrance spray designed for all-over body use, offering a subtle scent that lingers without being overpowering. It often contains moisturizing ingredients to hydrate the skin while providing a gentle burst of aroma.",
+      "price": "500.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Moroccan Oil",
+      "description": "Moroccan oil is a nutrient-rich hair treatment infused with argan oil, known for its ability to deeply hydrate, smooth, and add shine to all hair types. It helps reduce frizz, improve manageability, and protect against heat and environmental damage.",
+      "price": "600.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Luodais Professional Salon",
+      "description": "Luodais Professional Salon is a premium haircare brand known for salon-quality styling products and treatments. It offers solutions like hair serums, sprays, and oils designed to nourish, protect, and enhance hair's natural shine and manageability.",
+      "price": "600.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Dr Rashel Face Cream",
+      "description": "Dr Rashel Face Cream is a nourishing skincare product designed to hydrate, brighten, and even out the skin tone. Infused with natural ingredients like vitamins and plant extracts, it helps reduce signs of aging, fade dark spots, and improve overall skin texture for a radiant glow.",
+      "price": "500.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Skin Products",
+      "description": "We have affordable skin products like collagen and Mary Kay to replenish your natural skin beauty.",
+      "price": "200.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Hair Combs",
+      "description": "New combs designed to give your hair a beautiful look in no time",
+      "price": "100.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    },
+    {
+      "name": "Medicated Fade Cream with Sunscreen",
+      "description": "This fade creme is best for you to keep your skin even-toned for a smooth complexion.",
+      "price": "350.00",
+      "category": "Beauty Product",
+      "availability": "Available"
+    }
+  ],
+  "handbags": [
+    {
+      "name": "Red Handbag",
+      "description": "This handbag features a bold red design, making a striking statement with its vibrant color. Its sleek and durable construction ensures both style and practicality, perfect for adding a pop of elegance to any outfit.",
+      "price": "500.00",
+      "category": "Handbag",
+      "availability": "Available"
+    },
+    {
+      "name": "Leopard Spots & Leather",
+      "description": "This handbag exudes bold elegance with its premium leather construction and striking leopard print accents. Perfect for adding a touch of wild sophistication to any outfit, it combines durability with a stylish edge, making it a versatile statement piece for any occasion.",
+      "price": "500.00",
+      "category": "Handbag",
+      "availability": "Available"
+    },
+    {
+      "name": "Leather Handbag",
+      "description": "This handbag features a sleek, modern design with a classic black leather finish and subtle square patterns for a refined touch. Its structured shape and durable material make it a versatile accessory that effortlessly complements both casual and formal outfits.",
+      "price": "600.00",
+      "category": "Handbag",
+      "availability": "Available"
+    },
+    {
+      "name": "Brown leather and Cheetah Spots",
+      "description": "This handbag showcases a bold yet sophisticated design, featuring rich brown leather paired with striking cheetah spots. Its textured finish adds a dynamic touch, making it a versatile statement piece that blends elegance with a wild edge.",
+      "price": "500.00",
+      "category": "Handbag",
+      "availability": "Available"
+    },
+    {
+      "name": "Kiondo",
+      "description": "This kiondo bag features a beautiful blend of brown and tan tones, woven from durable sisal with a classic Kenyan design. Its structured shape and earthy colors make it a stylish and practical accessory for both casual and formal occasions.",
+      "price": "400.00",
+      "category": "Handbag",
+      "availability": "Available"
+    },
+    {
+      "name": "Brown and Grey Leather Handbag",
+      "description": "This handbag features a sophisticated blend of brown and grey leather, offering a timeless and versatile design. Its durable construction and neutral tones make it a stylish accessory for both casual and formal occasions.",
+      "price": "650.00",
+      "category": "Handbag",
+      "availability": "Available"
+    },
+    {
+      "name": "Grey Handbag",
+      "description": "This handbag features a sleek grey leather design, offering a modern and versatile look. Its durable construction and understated elegance make it a perfect accessory for both casual and formal occasions.",
+      "price": "600.00",
+      "category": "Handbag",
+      "availability": "Available"
+    }
+  ],
+  "services": [
+    {
+      "name": "Hairdressing",
+      "description": "We offer high-quality hairdressing services tailored to meet the needs of our valued clients.",
+      "category": "Beauty Service",
+      "location": "Nakuru City"
+    },
+    {
+      "name": "Hair Cuts",
+      "description": "We provide popular haircut services. Our barber is highly skilled with many years of experience.",
+      "category": "Beauty Service",
+      "location": "Nakuru City"
+    },
+    {
+      "name": "Stickons",
+      "description": "We provide nails services to give you the best nails available in our inventory.",
+      "category": "Beauty Service",
+      "location": "Nakuru City"
+    },
+    {
+      "name": "Quality Handbags",
+      "description": "We sell quality handbags also to add to our quality services. You will look like a superstar!",
+      "category": "Beauty Service",
+      "location": "Nakuru City"
+    }
+  ],
+  "offers": [],
+  "general_info": {
+    "business_name": "Kenrish Collection",
+    "location": "Nakuru City, Kenya",
+    "services_offered": [
+      "Barbershop services",
+      "Hairdressing",
+      "Beauty treatments",
+      "Nail services",
+      "Interior design consultation"
+    ],
+    "products_offered": [
+      "Beauty products",
+      "Hair care products",
+      "Handbags and accessories",
+      "Cosmetics",
+      "Personal care items"
+    ],
+    "business_description": "Kenrish Collection is a premium beauty and lifestyle destination in Nakuru City, offering professional barbershop, hairdressing, and beauty services alongside a curated collection of beauty products and stylish handbags.",
+    "contact_info": "Visit us in Nakuru City or browse our online collection",
+    "specialties": [
+      "Professional hair cutting and styling",
+      "Beauty treatments and consultations",
+      "Quality beauty products",
+      "Fashionable handbags and accessories"
+    ]
+  }
+}

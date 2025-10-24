@@ -1,0 +1,190 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Admin Product Management{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <h2 class="fw-bold mb-0" style="color: var(--heading-color); letter-spacing: 1px;">Manage Products</h2>
+        <a href="{% url 'add-product' %}" class="btn btn-primary shadow-sm rounded-pill px-4 py-2">
+            <i class="bi bi-plus-circle"></i> Add New Product
+        </a>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+        <a href="{% url 'home' %}" class="btn btn-outline-primary rounded-pill px-3">Go to Home Page</a>
+        <input type="text" id="searchInput" class="form-control flex-grow-1 rounded-pill" style="max-width: 300px;" placeholder="Search for a product...">
+    </div>
+    <div class="table-responsive rounded-4 shadow-sm kenrish-admin-table" style="background: var(--light-background);">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="text-center">Image</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                    <tr>
+                        <td class="text-center">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: contain; background: var(--light-background);">
+                        </td>
+                        <td class="fw-semibold" style="color: var(--heading-color);">{{ product.name }}</td>
+                        <td class="product-price fw-bold">Ksh {{ product.price }}</td>
+                        <td class="text-center">
+                            {% if request.user.is_authenticated and request.user.is_staff %}
+                                <div class="d-flex flex-column flex-md-row gap-2 justify-content-center">
+                                    <a href="{% url 'edit-product' product.id %}" class="btn btn-warning btn-sm rounded-pill px-3">
+                                        <i class="bi bi-pencil-square"></i> <span class="d-none d-md-inline">Edit</span>
+                                    </a>
+                                    <a href="{% url 'delete-product' product.id %}" class="btn btn-danger btn-sm rounded-pill px-3" onclick="return confirm('Are you sure you want to delete this product?');">
+                                        <i class="bi bi-trash"></i> <span class="d-none d-md-inline">Delete</span>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">No products found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    document.getElementById("searchInput").addEventListener("keyup", function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll("tbody tr");
+
+        rows.forEach(row => {
+            let productName = row.querySelector("td:nth-child(2)").textContent.toLowerCase();
+            row.style.display = productName.includes(filter) ? "" : "none";
+        });
+    });
+</script>
+<style>
+:root {
+            /* Nalenayurveda inspired color palette */
+            --background: #fcfaf4;
+            --background-rgb: 252, 250, 244;
+            --light-background: #cfdee2;
+            --light-background-rgb: 207, 222, 226;
+            --heading-color: #0b3e64;
+            --text-color: #363636;
+            --text-color-rgb: 54, 54, 54;
+            --text-color-light: #6b9aac;
+            --text-color-light-rgb: 107, 154, 172;
+            --link-color: #0b3e64;
+            --link-color-rgb: 11, 62, 100;
+            --border-color: #deddd8;
+            --border-color-rgb: 222, 221, 216;
+            --button-background: #0b3e64;
+            --button-background-rgb: 11, 62, 100;
+            --button-text-color: #f2f0e9;
+            --header-background: #fcfaf4;
+            --header-heading-color: #1c1b1b;
+            --header-light-text-color: #363636;
+            --header-border-color: #dad9d3;
+            --footer-background: #0b3e64;
+            --footer-text-color: #f2f0e9;
+            --footer-heading-color: #a0c4d2;
+            --footer-border-color: #2e5978;
+}
+
+body {
+    background: var(--background) !important;
+    color: var(--text-color);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+.kenrish-admin-table {
+    background: linear-gradient(180deg, rgba(var(--light-background-rgb),0.9), rgba(255,255,255,0.6)) !important;
+    border-radius: 1.5rem !important;
+    box-shadow: 0 8px 28px rgba(11,62,100,0.08), 0 2px 8px rgba(13,50,78,0.04);
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.table thead th {
+    background: linear-gradient(90deg, rgba(var(--light-background-rgb),1) 0%, rgba(255,255,255,0.9) 100%) !important;
+    color: var(--heading-color);
+    border-top: none;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.btn-primary, .btn-warning, .btn-danger, .btn-outline-primary, .btn-info {
+    border-radius: 20px !important;
+}
+
+.btn-primary {
+    background: var(--button-background);
+    color: var(--button-text-color);
+    border: none;
+}
+.btn-primary:hover {
+    background: rgba(var(--button-background-rgb),0.9);
+    color: var(--button-text-color);
+}
+
+.btn-outline-primary {
+    color: var(--link-color);
+    border-color: var(--border-color);
+    background: transparent;
+}
+.btn-outline-primary:hover {
+    background: rgba(var(--button-background-rgb),0.06);
+    color: var(--button-background);
+}
+
+.btn-warning {
+    background: #d4a76a;
+    color: #fff;
+    border: none;
+}
+.btn-warning:hover { background: #c59055; }
+
+.btn-danger {
+    background: #cf6760;
+    color: #fff;
+    border: none;
+}
+.btn-danger:hover { background: #b84b43; }
+
+.btn-info {
+    background: transparent;
+    color: var(--link-color);
+    border: 1px solid rgba(var(--link-color-rgb),0.12);
+}
+.btn-info:hover {
+    background: rgba(var(--link-color-rgb),0.06);
+}
+
+.img-thumbnail {
+    border: none;
+    box-shadow: 0 4px 18px rgba(11,62,100,0.06);
+    background: var(--background);
+    border-radius: 1rem;
+}
+
+.fw-semibold { font-weight: 600; color: var(--heading-color); }
+
+.product-price { color: #1b7a59; }
+
+.container.py-4 h2 { color: var(--heading-color); }
+
+@media (max-width: 767.98px) {
+    .container.py-4 { padding: 1.2rem 0.6rem !important; }
+    .kenrish-admin-table { border-radius: 0.9rem !important; }
+    .table thead th, .table td { font-size: 0.98rem; padding: 0.55rem 0.6rem !important; }
+    .btn, .btn-sm { font-size: 0.96rem; padding: 0.38rem 0.85rem !important; }
+    .img-thumbnail { width: 56px !important; height: 56px !important; border-radius: 0.7rem; }
+}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
+

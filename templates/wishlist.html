@@ -1,0 +1,185 @@
+{% extends "base_modern.html" %}
+
+{% block title %}My Wishlist - Kenrish Collection{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3" style="font-family: 'Playfair Display', serif;">
+            <i class="bi bi-heart-fill me-3"></i>My Wishlist
+        </h1>
+        <p class="lead mb-4">
+            Your favorite products and handbags saved for later
+        </p>
+    </div>
+</section>
+
+<!-- Wishlist Content -->
+<section class="py-5">
+    <div class="container">
+        {% if wishlist.products.all or wishlist.handbags.all %}
+        
+        <!-- Products Section -->
+        {% if wishlist.products.all %}
+        <div class="mb-5">
+            <h3 class="text-white mb-4" style="font-family: 'Playfair Display', serif;">
+                <i class="bi bi-box me-2"></i>Products
+            </h3>
+            <div class="row g-4">
+                {% for product in wishlist.products.all %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="product-card">
+                        <div class="product-image">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid">
+                            {% else %}
+                                <i class="bi bi-box" style="font-size: 4rem; color: rgba(255,255,255,0.7);"></i>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="product-info">
+                            <h5 class="product-title">{{ product.name }}</h5>
+                            <p class="text-muted mb-3">{{ product.description|truncatewords:10 }}</p>
+                            
+                            <div class="rating-stars mb-3">
+                                {% with avg=product.average_rating %}
+                                {% if avg > 0 %}
+                                    {% for i in "12345" %}
+                                        {% if avg >= forloop.counter %}
+                                            <i class="bi bi-star-fill" style="color: #ffd700;"></i>
+                                        {% elif avg >= forloop.counter0|add:"0.5" and avg < forloop.counter %}
+                                            <i class="bi bi-star-half" style="color: #ffd700;"></i>
+                                        {% else %}
+                                            <i class="bi bi-star" style="color: #e0e0e0;"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="ms-2 text-muted">({{ avg|floatformat:1 }})</span>
+                                {% else %}
+                                    <span class="text-muted">No ratings yet</span>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="product-price">Ksh {{ product.price }}</div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'product-detail' product.id %}" class="btn btn-primary flex-grow-1">
+                                    <i class="bi bi-eye me-2"></i>View
+                                </a>
+                                <a href="{% url 'remove-from-wishlist' product.id %}" class="btn btn-outline-danger">
+                                    <i class="bi bi-heart-fill"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Handbags Section -->
+        {% if wishlist.handbags.all %}
+        <div class="mb-5">
+            <h3 class="text-white mb-4" style="font-family: 'Playfair Display', serif;">
+                <i class="bi bi-bag me-2"></i>Handbags
+            </h3>
+            <div class="row g-4">
+                {% for handbag in wishlist.handbags.all %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="product-card">
+                        <div class="product-image">
+                            {% if handbag.image %}
+                                <img src="{{ handbag.image.url }}" alt="{{ handbag.name }}" class="img-fluid">
+                            {% else %}
+                                <i class="bi bi-bag" style="font-size: 4rem; color: rgba(255,255,255,0.7);"></i>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="product-info">
+                            <h5 class="product-title">{{ handbag.name }}</h5>
+                            <p class="text-muted mb-3">{{ handbag.description|truncatewords:10 }}</p>
+                            
+                            <div class="rating-stars mb-3">
+                                {% with avg=handbag.average_rating %}
+                                {% if avg > 0 %}
+                                    {% for i in "12345" %}
+                                        {% if avg >= forloop.counter %}
+                                            <i class="bi bi-star-fill" style="color: #ffd700;"></i>
+                                        {% elif avg >= forloop.counter0|add:"0.5" and avg < forloop.counter %}
+                                            <i class="bi bi-star-half" style="color: #ffd700;"></i>
+                                        {% else %}
+                                            <i class="bi bi-star" style="color: #e0e0e0;"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="ms-2 text-muted">({{ avg|floatformat:1 }})</span>
+                                {% else %}
+                                    <span class="text-muted">No ratings yet</span>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="product-price">Ksh {{ handbag.price }}</div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'handbag-detail' handbag.id %}" class="btn btn-primary flex-grow-1">
+                                    <i class="bi bi-eye me-2"></i>View
+                                </a>
+                                <a href="{% url 'remove-handbag-from-wishlist' handbag.id %}" class="btn btn-outline-danger">
+                                    <i class="bi bi-heart-fill"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Checkout Section -->
+        <div class="text-center">
+            <div class="glass-card p-4 d-inline-block">
+                <h4 class="text-gradient mb-3">Ready to Purchase?</h4>
+                <p class="text-muted mb-3">Contact us to place your order</p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="tel:0708440390" class="btn btn-primary">
+                        <i class="bi bi-telephone me-2"></i>
+                        Call to Order
+                    </a>
+                    <a href="{% url 'wishlist-checkout' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-cart me-2"></i>
+                        Checkout
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        {% else %}
+        <!-- Empty Wishlist -->
+        <div class="text-center">
+            <div class="glass-card p-5">
+                <i class="bi bi-heart display-1 text-muted mb-4"></i>
+                <h3 class="text-muted mb-3">Your Wishlist is Empty</h3>
+                <p class="text-muted mb-4">Start adding products and handbags you love to your wishlist</p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="{% url 'handbags' %}" class="btn btn-primary">
+                        <i class="bi bi-bag me-2"></i>
+                        Browse Products
+                    </a>
+                    <a href="{% url 'services' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-scissors me-2"></i>
+                        View Services
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base_modern.html" %}
+{% block title %}Delete Offer{% endblock %}
+{% block content %}
+<div class="container py-5" style="background: var(--kenrish-bg); border-radius: 1.5rem;">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow rounded-4 p-4 text-center" style="background: var(--kenrish-card);">
+                <h2 class="mb-3 text-danger"><i class="bi bi-trash"></i> Delete Offer</h2>
+                <img src="{{ offer.image.url }}" alt="" class="img-fluid rounded mb-3" style="max-height:180px;">
+                <p>Are you sure you want to delete <strong>{{ offer.name }}</strong>?</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger rounded-pill px-4">Delete</button>
+                    <a href="{% url 'offers' %}" class="btn btn-outline-secondary rounded-pill px-4 ms-2"
+                       style="color: var(--kenrish-turquoise-dark); border-color: var(--kenrish-turquoise-dark);">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}

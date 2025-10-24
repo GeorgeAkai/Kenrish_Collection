@@ -1,0 +1,232 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Sign Up - Kenrish Collection{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10">
+        <div class="auth-card">
+          <!-- Welcome / Left Panel -->
+          <div class="welcome-panel d-none d-md-flex">
+            <div class="welcome-inner">
+              <h2 class="welcome-title">Welcome to Kenrish Collection!</h2>
+              <p class="welcome-subtitle">
+                We provide quality beauty services. <strong>Sign Up</strong> and check them out.
+              </p>
+              <ul class="welcome-points">
+                <li>Trusted professionals & thoughtful care</li>
+                <li>Exclusive offers tailored for you</li>
+                <li>Seamless booking & updates</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Form / Right Panel -->
+          <div class="form-panel">
+            <div class="text-center mb-4">
+              <h3 class="panel-title">Create your account</h3>
+              <p class="panel-subtitle">Join us and enjoy a polished experience</p>
+            </div>
+
+            <form method="post" novalidate>
+              {% csrf_token %}
+
+              {% if form.non_field_errors %}
+              <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+              {% endif %}
+
+              <!-- Username -->
+              <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                <div class="invalid-feedback d-block">{{ form.username.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Email -->
+              <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div class="invalid-feedback d-block">{{ form.email.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Passwords side-by-side on desktop -->
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}">Password</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                    <div class="invalid-feedback d-block">{{ form.password1.errors|striptags }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-12 col-md-6">
+                  <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                    <div class="invalid-feedback d-block">{{ form.password2.errors|striptags }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100 mt-2">Create Account</button>
+            </form>
+
+            <div class="text-center mt-4">
+              <p class="text-muted mb-0">Already have an account?
+                <a href="{% url 'login' %}" class="signin-link">Sign in</a>
+              </p>
+            </div>
+          </div> <!-- /form-panel -->
+        </div> <!-- /auth-card -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Layout shell */
+  .auth-wrap {
+    padding: 3rem 0;
+  }
+  .auth-card {
+    display: grid;
+    grid-template-columns: 1fr;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    background: var(--card-bg, #fff);
+  }
+
+  /* Welcome panel (keeps your theme colors via CSS vars) */
+  .welcome-panel {
+    background: linear-gradient(135deg, rgba(0,0,0,0.04), rgba(0,0,0,0.06));
+    padding: 3rem;
+    align-items: center;
+    min-height: 100%;
+  }
+  .welcome-inner {
+    max-width: 520px;
+  }
+  .welcome-title {
+    color: var(--heading-color);
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    margin-bottom: 0.75rem;
+  }
+  .welcome-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+  }
+  .welcome-points {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--text-secondary);
+  }
+  .welcome-points li {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Form panel */
+  .form-panel {
+    padding: 2rem 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .form-panel { padding: 2.5rem; }
+  }
+  @media (min-width: 992px) {
+    .auth-card {
+      grid-template-columns: 5fr 7fr; /* left welcome, right form */
+    }
+    .form-panel { padding: 3rem; }
+  }
+
+  /* Headings inside form panel */
+  .panel-title {
+    color: var(--heading-color);
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  .panel-subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  /* Fields */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  label {
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+  /* Ensure inputs look consistent even if widgets change */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea,
+  .form-control {
+    display: block;
+    width: 100%;
+    border-radius: 12px !important;
+    padding: 0.75rem 0.9rem !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    background: var(--input-bg, #fff);
+    color: var(--text-primary, #222);
+    transition: box-shadow .2s ease, border-color .2s ease;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus,
+  .form-control:focus {
+    outline: none;
+    border-color: rgba(0,0,0,0.2) !important;
+    box-shadow: 0 0 0 4px rgba(0,0,0,0.06);
+  }
+
+  /* Button */
+  .btn-primary {
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  /* Links */
+  .signin-link {
+    color: var(--heading-color);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .signin-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Alerts / validation */
+  .alert {
+    border-radius: 12px;
+  }
+  .invalid-feedback {
+    font-size: 0.9rem;
+  }
+
+  /* Mobile spacing */
+  @media (max-width: 575.98px) {
+    .auth-wrap { padding: 2rem 0; }
+    .panel-title { font-size: 1.25rem; }
+  }
+</style>
+{% endblock %}
+

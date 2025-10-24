@@ -1,0 +1,144 @@
+{% extends "base_modern.html" %}
+{% block title %}{{ service|default:"Add" }} Service{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4" style="background: var(--kenrish-card);">
+                <div class="card-header text-center py-4" style="background: linear-gradient(90deg, var(--kenrish-turquoise), var(--kenrish-gold)); border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+                    <h2 class="fw-bold mb-0 text-white" style="letter-spacing: 1px;">
+                        <i class="bi bi-plus-circle"></i>
+                        {{ service|default:"Add" }} Service
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" autocomplete="off">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold" style="color: var(--kenrish-turquoise-dark);">
+                                {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                        <div class="d-flex justify-content-between gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary w-50 fw-bold rounded-pill py-2 shadow-sm" style="background: var(--kenrish-turquoise-dark); border: none;">
+                                <i class="bi bi-save"></i> Save
+                            </button>
+                            <a href="{% url 'services' %}" class="btn btn-outline-secondary w-50 fw-bold rounded-pill py-2 shadow-sm">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    :root {
+        --kenrish-gold: #ffb347;
+        --kenrish-turquoise: #1abc9c;
+        --kenrish-turquoise-dark: #009688;
+        --kenrish-bg: #fff;
+        --kenrish-card: #f8fcfc;
+        --kenrish-accent: #d17a4b;
+    }
+    body {
+        background: linear-gradient(135deg, #f8fcfc 60%, #eaf4fb 100%) !important;
+    }
+    .card {
+        border-radius: 1.5rem !important;
+        background: var(--kenrish-card) !important;
+        box-shadow: 0 8px 32px 0 rgba(53, 122, 184, 0.10), 0 1.5px 8px 0 #d17a4b22;
+    }
+    .card-header {
+        border-top-left-radius: 1rem !important;
+        border-top-right-radius: 1rem !important;
+    }
+    .form-label {
+        color: var(--kenrish-turquoise-dark);
+        font-size: 1.08rem;
+    }
+    .form-control, .form-select {
+        border-radius: 14px;
+        border: 1.5px solid #e0e0e0;
+        font-size: 1.08rem;
+        background: #fff;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        min-height: 48px;
+        padding: 0.75rem 1rem;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--kenrish-turquoise);
+        box-shadow: 0 0 0 2px #1abc9c33;
+    }
+    .btn-primary, .btn-outline-secondary {
+        font-size: 1.08rem;
+        min-height: 48px;
+        border-radius: 24px;
+    }
+    .btn-primary {
+        background: var(--kenrish-turquoise-dark);
+        border: none;
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover {
+        background: var(--kenrish-turquoise);
+        box-shadow: 0 2px 8px #1abc9c33;
+    }
+    .btn-outline-secondary {
+        border-radius: 24px;
+        transition: background 0.2s, color 0.2s;
+    }
+    .btn-outline-secondary:hover {
+        background: #eaf4fb;
+        color: var(--kenrish-turquoise-dark);
+    }
+    .fw-bold {
+        font-weight: 700 !important;
+    }
+    .fw-semibold {
+        font-weight: 600 !important;
+    }
+    .form-text, .text-danger {
+        font-size: 0.97rem;
+    }
+    @media (max-width: 767.98px) {
+        .container.py-5 {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+        }
+        .card {
+            border-radius: 1rem !important;
+        }
+        .card-header {
+            padding: 1.2rem 0.5rem !important;
+            border-top-left-radius: 1rem !important;
+            border-top-right-radius: 1rem !important;
+        }
+        .card-body {
+            padding: 1.2rem !important;
+        }
+        .btn-primary, .btn-outline-secondary {
+            font-size: 1rem;
+            min-height: 44px;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        .form-control, .form-select {
+            font-size: 1rem;
+            min-height: 44px;
+            padding: 0.6rem 0.8rem;
+        }
+    }
+</style>
+{% endblock %}

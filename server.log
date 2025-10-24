@@ -1,0 +1,1424 @@
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 02, 2025 - 23:34:22
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/kenrish/settings.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 04:54:44
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 67, in <module>
+    path("chatbot/", include("chatbot.urls")),
+NameError: name 'include' is not defined
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 04:55:37
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 05:14:55
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 05:17:28
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 05:19:37
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 05:25:16
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 05:30:28
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/views.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 05:33:31
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 67, in <module>
+    path("chatbot/", include("chatbot.urls")),
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/conf.py", line 38, in include
+    urlconf_module = import_module(urlconf_module)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/chatbot/urls.py", line 2, in <module>
+    from .views import start_conversation, send_message, chat_page, quick_chat
+  File "/home/ec2-user/kenrish/chatbot/views.py", line 6, in <module>
+    from .ai_service import KenrishAIService
+  File "/home/ec2-user/kenrish/chatbot/ai_service.py", line 147
+    def get_streaming_response(self, user_message, conversation_history=None):        # Just return the complete response        return self.get_response(user_message, conversation_history)
+                                                                                                                                                                                             ^
+IndentationError: expected an indented block
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 05:34:32
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 05:35:16
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 05:41:12
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 06:10:57
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 06:13:50
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 06:19:40
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 06:25:38
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 67, in <module>
+    path("chatbot/", include("chatbot.urls")),
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/conf.py", line 38, in include
+    urlconf_module = import_module(urlconf_module)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/chatbot/urls.py", line 2, in <module>
+    from .views import start_conversation, send_message, chat_page, quick_chat
+  File "/home/ec2-user/kenrish/chatbot/views.py", line 6, in <module>
+    from .ai_service import KenrishAIService
+  File "/home/ec2-user/kenrish/chatbot/ai_service.py", line 90
+    elif intent == 'contact':            return "📞 Contact Kenrish Collection
+IndentationError: expected an indented block
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 67, in <module>
+    path("chatbot/", include("chatbot.urls")),
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/conf.py", line 38, in include
+    urlconf_module = import_module(urlconf_module)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/chatbot/urls.py", line 2, in <module>
+    from .views import start_conversation, send_message, chat_page, quick_chat
+  File "/home/ec2-user/kenrish/chatbot/views.py", line 6, in <module>
+    from .ai_service import KenrishAIService
+  File "/home/ec2-user/kenrish/chatbot/ai_service.py", line 90
+    elif intent == 'contact':            return "📞 Contact Kenrish Collection
+IndentationError: expected an indented block
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 06:29:36
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 06:29:47
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 67, in <module>
+    path("chatbot/", include("chatbot.urls")),
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/conf.py", line 38, in include
+    urlconf_module = import_module(urlconf_module)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/chatbot/urls.py", line 2, in <module>
+    from .views import start_conversation, send_message, chat_page, quick_chat
+  File "/home/ec2-user/kenrish/chatbot/views.py", line 6, in <module>
+    from .ai_service import KenrishAIService
+  File "/home/ec2-user/kenrish/chatbot/ai_service.py", line 93
+    elif intent == 'contact':            return "📞 Contact Kenrish Collection
+IndentationError: expected an indented block
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 06:30:35
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/chatbot/ai_service.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 06:40:18
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/app1/views.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 08:16:24
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 105
+    path('api/chatbot/', ai_chatbot_response, name='ai-chatbot'),
+IndentationError: unexpected indent
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 106
+    path('api/chatbot/', ai_chatbot_response, name='ai-chatbot'),
+IndentationError: unexpected indent
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 105
+    path('api/chatbot/', ai_chatbot_response, name='ai-chatbot'),
+IndentationError: unexpected indent
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 103
+    path('toggle-gallery-like/<int:image_id>/'.*$
+                                               ^
+SyntaxError: invalid syntax
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 103
+    path('toggle-gallery-like/<int:image_id>/'.*$
+                                               ^
+SyntaxError: invalid syntax
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 103
+    path('toggle-gallery-like/<int:image_id>/'.*$
+                                               ^
+SyntaxError: invalid syntax
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 103
+    path('toggle-gallery-like/<int:image_id>/'.*$
+                                               ^
+SyntaxError: invalid syntax
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 103
+    path('toggle-gallery-like/<int:image_id>/'.*$
+                                               ^
+SyntaxError: invalid syntax
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 105
+    path('api/chatbot/', ai_chatbot_response, name='ai-chatbot'),
+IndentationError: unexpected indent
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 105
+    path('api/chatbot/', ai_chatbot_response, name='ai-chatbot'),
+IndentationError: unexpected indent
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 106
+    path('api/chatbot/', ai_chatbot_response, name='ai-chatbot'),
+IndentationError: unexpected indent
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 106
+    path('api/chatbot/', ai_chatbot_response, name='ai-chatbot'),
+IndentationError: unexpected indent
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 103
+    path('toggle-gallery-like/<int:image_id>/'.*$
+                                               ^
+SyntaxError: invalid syntax
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 105
+    path('api/chatbot/', ai_chatbot_response, name='ai-chatbot'),
+IndentationError: unexpected indent
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 105
+    path('api/chatbot/', ai_chatbot_response, name='ai-chatbot'),
+IndentationError: unexpected indent
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 846, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 983, in get_code
+  File "<frozen importlib._bootstrap_external>", line 913, in source_to_code
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 103
+    path('toggle-gallery-like/<int:image_id>/'.*$
+                                               ^
+SyntaxError: invalid syntax
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 08, 2025 - 08:23:42
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/app1/forms.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 13, 2025 - 22:43:12
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/app1/views.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 22, in <module>
+    from app1.views import (
+  File "/home/ec2-user/kenrish/app1/views.py", line 12
+    , SignUpForm
+    ^
+SyntaxError: invalid syntax
+/home/ec2-user/kenrish/app1/views.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 22, in <module>
+    from app1.views import (
+  File "/home/ec2-user/kenrish/app1/views.py", line 12
+    , SignUpForm
+    ^
+SyntaxError: invalid syntax
+/home/ec2-user/kenrish/app1/apps.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+Exception in thread django-main-thread:
+Traceback (most recent call last):
+  File "/usr/lib64/python3.9/threading.py", line 980, in _bootstrap_inner
+    self.run()
+  File "/usr/lib64/python3.9/threading.py", line 917, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/autoreload.py", line 64, in wrapper
+    fn(*args, **kwargs)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/commands/runserver.py", line 133, in inner_run
+    self.check(display_num_errors=True)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/management/base.py", line 485, in check
+    all_issues = checks.run_checks(
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/registry.py", line 88, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 14, in check_url_config
+    return check_resolver(resolver)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/core/checks/urls.py", line 24, in check_resolver
+    return check_method()
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 494, in check
+    for pattern in self.url_patterns:
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 715, in url_patterns
+    patterns = getattr(self.urlconf_module, "urlpatterns", self.urlconf_module)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/utils/functional.py", line 57, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+  File "/home/ec2-user/.local/lib/python3.9/site-packages/django/urls/resolvers.py", line 708, in urlconf_module
+    return import_module(self.urlconf_name)
+  File "/usr/lib64/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ec2-user/kenrish/kenrish/urls.py", line 22, in <module>
+    from app1.views import (
+  File "/home/ec2-user/kenrish/app1/views.py", line 12
+    , SignUpForm
+    ^
+SyntaxError: invalid syntax
+/home/ec2-user/kenrish/app1/views.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 13, 2025 - 23:30:50
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/app1/views.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 14, 2025 - 04:31:12
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/kenrish/urls.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 14, 2025 - 04:36:33
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/app1/views.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 14, 2025 - 05:19:27
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+/home/ec2-user/kenrish/app1/views.py changed, reloading.
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+October 14, 2025 - 05:30:47
+Django version 4.2.23, using settings 'kenrish.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
