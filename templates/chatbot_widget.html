@@ -352,10 +352,13 @@ function removeTypingIndicator(typingMsg) {
 
 async function getGeminiAIResponse(message) {
     try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        // NOTE: Do NOT include API keys in client-side code. The frontend should call a server-side
+        // proxy endpoint which injects the API key from environment variables. See EMAIL_SETUP.md
+        // for instructions on setting OPENROUTER_API_KEY.
+        const response = await fetch('/chatbot/api/chat/', {
             method: 'POST',
             headers: {
-                'Authorization': 'Bearer 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',
+                // Authorization header removed to avoid leaking secrets in the browser.
                 'Content-Type': 'application/json',
                 'HTTP-Referer': window.location.origin,
                 'X-Title': 'Kenrish Collection'

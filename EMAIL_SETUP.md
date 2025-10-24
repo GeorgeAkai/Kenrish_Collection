@@ -98,3 +98,34 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 This will print emails to the console instead of sending them.
 
+## AI Service API Key (OPENROUTER_API_KEY)
+
+The chatbot AI service expects its API key to be provided via an environment variable named `OPENROUTER_API_KEY`.
+Do NOT hard-code API keys in source code or commit them to version control.
+
+Set the environment variable for your platform:
+
+- Windows (PowerShell, current session):
+
+```powershell
+$env:OPENROUTER_API_KEY = "your_api_key_here"
+```
+
+- Windows (PowerShell, persist for the current user):
+
+```powershell
+setx OPENROUTER_API_KEY "your_api_key_here"
+```
+
+- macOS / Linux (bash/zsh):
+
+```bash
+export OPENROUTER_API_KEY="your_api_key_here"
+```
+
+In production, set `OPENROUTER_API_KEY` through your deployment environment (systemd service file, Docker secret, environment config in your hosting provider, CI/CD secrets, etc.).
+
+If the variable is not set, the application will raise a clear error on startup indicating that `OPENROUTER_API_KEY` is missing.
+
+Security tip: Use a secrets manager (AWS Secrets Manager, Azure Key Vault, GitHub Secrets, etc.) instead of storing credentials in plain text.
+

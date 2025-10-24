@@ -7,7 +7,14 @@ from django.conf import settings
 
 class KenrishAIService:
     def __init__(self):
-        self.api_key = "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"
+        # API key must come from an environment variable for security.
+        # Try environment first, then Django settings as a fallback.
+        self.api_key = os.getenv('OPENROUTER_API_KEY') or getattr(settings, 'OPENROUTER_API_KEY', None)
+        if not self.api_key:
+            raise RuntimeError(
+                "OPENROUTER_API_KEY is not set. Please set the environment variable OPENROUTER_API_KEY "
+                "or add OPENROUTER_API_KEY to your Django settings."
+            )
         self.api_url = "https://openrouter.ai/api/v1/chat/completions"
         self.model = "microsoft/wizardlm-2-8x22b"
         self.knowledge_base = self.load_knowledge_base()
