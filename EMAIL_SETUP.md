@@ -129,3 +129,4 @@ If the variable is not set, the application will raise a clear error on startup 
 
 Security tip: Use a secrets manager (AWS Secrets Manager, Azure Key Vault, GitHub Secrets, etc.) instead of storing credentials in plain text.
 
+

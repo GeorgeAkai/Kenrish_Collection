@@ -5,9 +5,18 @@
 
 {% block content %}
 <div class="container py-5">
-    <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold mb-3">Our Services</h1>
-        <p class="lead">Professional beauty services tailored for your needs</p>
+    <div class="d-flex align-items-center justify-content-between mb-5">
+        <div>
+            <h1 class="display-4 fw-bold mb-3">Our Services</h1>
+            <p class="lead">Professional beauty services tailored for your needs</p>
+        </div>
+        {% if user.is_staff %}
+        <div>
+            <a href="{% url 'add-service' %}" class="btn btn-lg btn-primary" >
+                <i class="bi bi-plus-circle me-2"></i> Add Service
+            </a>
+        </div>
+        {% endif %}
     </div>
     
     <div class="row g-4">

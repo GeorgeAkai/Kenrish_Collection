@@ -3,128 +3,140 @@
 {% block title %}Edit Product{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-7">
-            <div class="card shadow rounded-4 p-4 border-0" style="background: var(--kenrish-card);">
-                <h2 class="text-center mb-4 fw-bold" style="color: var(--kenrish-turquoise); letter-spacing: 1px;">
-                    <i class="bi bi-pencil-square"></i> Edit Product
-                </h2>
-                <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-                    {% csrf_token %}
-                    <div class="row g-3">
-                        {% for field in form.visible_fields %}
-                        <div class="col-12">
-                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold" style="color: var(--kenrish-turquoise-dark);">
-                                {{ field.label }}{% if field.field.required %} <span style="color:var(--kenrish-gold);">*</span>{% endif %}
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4" style="background: var(--background);">
+                <div class="card-header text-center py-4" style="background: var(--button-background); border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+                    <h2 class="fw-bold mb-0 text-white" style="letter-spacing: 1px;">
+                        <i class="bi bi-pencil-square"></i>
+                        Edit Product
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" autocomplete="off">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold" style="color: var(--heading-color);">
+                                {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
                             </label>
                             {{ field }}
                             {% if field.help_text %}
-                                <div class="form-text text-muted" style="font-size: 0.95em;">{{ field.help_text }}</div>
+                                <div class="form-text">{{ field.help_text }}</div>
                             {% endif %}
                             {% for error in field.errors %}
                                 <div class="text-danger small">{{ error }}</div>
                             {% endfor %}
                         </div>
                         {% endfor %}
-                    </div>
-                    <div class="d-flex justify-content-between gap-2 flex-wrap mt-4">
-                        <button type="submit" class="btn btn-primary px-4 rounded-pill fw-bold shadow-sm">
-                            <i class="bi bi-save"></i> Save Changes
-                        </button>
-                        <a href="{% url 'admin-product' %}" class="btn btn-outline-secondary px-4 rounded-pill shadow-sm">
-                            <i class="bi bi-x-circle"></i> Cancel
-                        </a>
-                    </div>
-                </form>
+                        <div class="d-flex justify-content-between gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary w-50 fw-bold rounded-pill py-2 shadow-sm" style="background: var(--button-background); border: none;">
+                                <i class="bi bi-save"></i> Save
+                            </button>
+                            <a href="{% url 'admin-product' %}" class="btn btn-outline-secondary w-50 fw-bold rounded-pill py-2 shadow-sm">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
-    :root {
-        --kenrish-gold: #ffb347;
-        --kenrish-turquoise: #1abc9c;
-        --kenrish-turquoise-dark: #009688;
-        --kenrish-bg: #fff;
-        --kenrish-card: #f8fcfc;
-    }
     body {
-        background: linear-gradient(135deg, #fff7f0 0%, #ffe5d0 100%);
+        background: linear-gradient(135deg, var(--light-background) 0%, var(--background) 100%) !important;
     }
     .card {
-        border: none;
-        background: var(--kenrish-card) !important;
-        box-shadow: 0 8px 32px rgba(209, 122, 75, 0.13);
-        border-radius: 2rem !important;
+        border-radius: 1.5rem !important;
+        background: var(--background) !important;
+        box-shadow: 0 8px 32px 0 rgba(11, 62, 100, 0.10), 0 1.5px 8px 0 rgba(11, 62, 100, 0.08);
+    }
+    .card-header {
+        border-top-left-radius: 1rem !important;
+        border-top-right-radius: 1rem !important;
+    }
+    .form-label {
+        color: var(--heading-color);
+        font-size: 1.08rem;
+    }
+    .form-control, .form-select {
+        border-radius: 14px;
+        border: 1.5px solid var(--border-color);
+        font-size: 1.08rem;
+        background: #fff;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        min-height: 48px;
+        padding: 0.75rem 1rem;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--link-color);
+        box-shadow: 0 0 0 2px rgba(11, 62, 100, 0.1);
+    }
+    .btn-primary, .btn-outline-secondary {
+        font-size: 1.08rem;
+        min-height: 48px;
+        border-radius: 24px;
     }
     .btn-primary {
-        background: linear-gradient(90deg, var(--kenrish-turquoise), var(--kenrish-gold));
+        background: var(--button-background);
         border: none;
-        border-radius: 20px;
-        font-weight: 600;
-        color: #fff;
-        letter-spacing: 1px;
+        color: var(--button-text-color);
         transition: background 0.2s, box-shadow 0.2s;
     }
-    .btn-primary:hover, .btn-primary:focus {
-        background: linear-gradient(90deg, #009688 60%, #ffd6b0 100%);
-        color: #fff;
-        box-shadow: 0 2px 12px rgba(209, 122, 75, 0.15);
+    .btn-primary:hover {
+        background: var(--text-color-light);
+        box-shadow: 0 2px 8px rgba(11, 62, 100, 0.15);
     }
     .btn-outline-secondary {
-        border-radius: 20px;
-        border-color: var(--kenrish-turquoise);
-        color: var(--kenrish-turquoise);
-        font-weight: 600;
-        background: #fff;
-        transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        border-radius: 24px;
+        border-color: var(--link-color);
+        color: var(--link-color);
+        transition: background 0.2s, color 0.2s;
     }
-    .btn-outline-secondary:hover, .btn-outline-secondary:focus {
-        background: var(--kenrish-turquoise);
-        color: #fff;
-        box-shadow: 0 2px 12px rgba(209, 122, 75, 0.10);
+    .btn-outline-secondary:hover {
+        background: var(--light-background);
+        color: var(--heading-color);
+        border-color: var(--heading-color);
     }
-    label {
-        color: var(--kenrish-turquoise-dark);
-        font-weight: 500;
-        margin-bottom: 0.3rem;
+    .fw-bold {
+        font-weight: 700 !important;
     }
-    .form-control, select, textarea {
-        border-radius: 2rem !important;
-        border: 1.5px solid #ffd6b0 !important;
-        background: #fff8f3 !important;
-        font-size: 1.08rem !important;
-        box-shadow: none !important;
-        padding-left: 1.2rem !important;
-        padding-right: 1.2rem !important;
-        min-height: 2.7rem;
+    .fw-semibold {
+        font-weight: 600 !important;
     }
-    .form-control:focus, select:focus, textarea:focus {
-        border-color: var(--kenrish-turquoise) !important;
-        box-shadow: 0 0 0 0.15rem #1abc9c33 !important;
-        background: #fff !important;
-    }
-    input[type="file"].form-control {
-        padding: 0.5rem 1.2rem !important;
-        background: #fff8f3 !important;
-        border-radius: 2rem !important;
-    }
-    .form-text {
-        color: var(--kenrish-turquoise-dark) !important;
+    .form-text, .text-danger {
+        font-size: 0.97rem;
     }
     @media (max-width: 767.98px) {
+        .container.py-5 {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+        }
         .card {
+            border-radius: 1rem !important;
+        }
+        .card-header {
+            padding: 1.2rem 0.5rem !important;
+            border-top-left-radius: 1rem !important;
+            border-top-right-radius: 1rem !important;
+        }
+        .card-body {
             padding: 1.2rem !important;
-            border-radius: 1.2rem !important;
         }
-        h2 {
-            font-size: 1.3rem !important;
+        .btn-primary, .btn-outline-secondary {
+            font-size: 1rem;
+            min-height: 44px;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
         }
-        .btn, .form-control {
-            font-size: 1rem !important;
+        .form-control, .form-select {
+            font-size: 1rem;
+            min-height: 44px;
+            padding: 0.6rem 0.8rem;
         }
     }
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 {% endblock %}
