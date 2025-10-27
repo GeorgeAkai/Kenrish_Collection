@@ -262,6 +262,19 @@
 {% endblock %}
 
 {% block content %}
+<!-- Alert Container -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1070;">
+  <div id="wishlistToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="bi bi-heart-fill me-2"></i>
+        Added to your wishlist!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
 <!-- Hero Section -->
 <section class="hero-section text-center position-relative">
     <div class="container position-relative">
@@ -477,7 +490,7 @@
         </div>
         
         <div class="text-center mt-5">
-            <a href="{% url 'services' %}" class="btn btn-outline-primary btn-lg">
+            <a href="{% url 'services' %}" class="btn btn-outline-primary btn-lg" style="color: black !important; background: goldenrod;">
                 <i class="bi bi-arrow-right"></i>
                 View All Services
             </a>
@@ -611,6 +624,14 @@ function initSearch() {
 function initWishlist() {
     const wishlistButtons = document.querySelectorAll('.add-to-wishlist');
     
+    // Toast handling
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('wishlistToast');
+        toast.className = `toast align-items-center text-bg-${type} border-0`;
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+    }
+    
     wishlistButtons.forEach(button => {
         button.addEventListener('click', function() {
             const productId = this.getAttribute('data-product-id');
@@ -628,6 +649,7 @@ function initWishlist() {
                     this.innerHTML = '<i class="bi bi-heart-fill"></i>';
                     this.style.backgroundColor = 'var(--link-color)';
                     this.style.color = 'white';
+                    showToast('Added to your wishlist!', 'success');
                 }
             });
         });

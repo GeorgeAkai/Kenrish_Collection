@@ -1,16 +1,121 @@
 {% extends "base_modern.html" %}
+{% load static %}
 
 {% block title %}My Wishlist - Kenrish Collection{% endblock %}
 
+{% block extra_css %}
+<style>
+    .wishlist-hero {
+        background: linear-gradient(135deg, var(--light-background) 0%, var(--background) 100%);
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+    }
+
+    .wishlist-card {
+        background: var(--background);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .wishlist-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .wishlist-image {
+        position: relative;
+        height: 250px;
+        overflow: hidden;
+    }
+
+    .wishlist-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .wishlist-card:hover .wishlist-image img {
+        transform: scale(1.05);
+    }
+
+    .wishlist-info {
+        padding: 1.5rem;
+    }
+
+    .wishlist-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--heading-color);
+    }
+
+    .wishlist-price {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--link-color);
+        margin-bottom: 1rem;
+    }
+
+    .rating-stars {
+        color: #ffd700;
+        margin-bottom: 1rem;
+    }
+
+    .wishlist-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .remove-from-wishlist {
+        color: var(--danger);
+        border-color: var(--danger);
+    }
+
+    .remove-from-wishlist:hover {
+        background-color: var(--danger);
+        color: white;
+    }
+
+    .empty-wishlist {
+        text-align: center;
+        padding: 4rem 0;
+    }
+
+    .empty-wishlist-icon {
+        font-size: 4rem;
+        color: var(--text-color-light);
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+{% csrf_token %}
+
+<!-- Alert Container -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1070;">
+  <div id="wishlistToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="bi bi-heart-fill me-2"></i>
+        <span id="toastMessage">Removed from your wishlist!</span>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
 <!-- Hero Section -->
-<section class="hero-section text-center">
+<section class="wishlist-hero text-center">
     <div class="container">
-        <h1 class="display-4 fw-bold mb-3" style="font-family: 'Playfair Display', serif;">
-            <i class="bi bi-heart-fill me-3"></i>My Wishlist
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="bi bi-heart-fill me-3 text-danger"></i>My Wishlist
         </h1>
-        <p class="lead mb-4">
-            Your favorite products and handbags saved for later
+        <p class="lead text-muted">
+            Your favorite items saved for later
         </p>
     </div>
 </section>
@@ -23,7 +128,7 @@
         <!-- Products Section -->
         {% if wishlist.products.all %}
         <div class="mb-5">
-            <h3 class="text-white mb-4" style="font-family: 'Playfair Display', serif;">
+            <h3 class="text mb-4" style="font-family: 'Playfair Display', serif;">
                 <i class="bi bi-box me-2"></i>Products
             </h3>
             <div class="row g-4">
@@ -69,9 +174,12 @@
                                 <a href="{% url 'product-detail' product.id %}" class="btn btn-primary flex-grow-1">
                                     <i class="bi bi-eye me-2"></i>View
                                 </a>
-                                <a href="{% url 'remove-from-wishlist' product.id %}" class="btn btn-outline-danger">
-                                    <i class="bi bi-heart-fill"></i>
-                                </a>
+                                <form method="post" action="{% url 'remove-from-wishlist' product.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger">
+                                        <i class="bi bi-heart-fill me-2"></i>Remove from Wishlist
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -130,9 +238,12 @@
                                 <a href="{% url 'handbag-detail' handbag.id %}" class="btn btn-primary flex-grow-1">
                                     <i class="bi bi-eye me-2"></i>View
                                 </a>
-                                <a href="{% url 'remove-handbag-from-wishlist' handbag.id %}" class="btn btn-outline-danger">
-                                    <i class="bi bi-heart-fill"></i>
-                                </a>
+                                <form method="post" action="{% url 'remove-handbag-from-wishlist' handbag.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger">
+                                        <i class="bi bi-heart-fill me-2"></i>Remove from Wishlist
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -182,4 +293,66 @@
         {% endif %}
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toast notification handling
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('wishlistToast');
+    const toastMessage = document.getElementById('toastMessage');
+    
+    // Update toast appearance based on type
+    toast.className = `toast align-items-center text-bg-${type} border-0`;
+    toastMessage.textContent = message;
+    
+    // Show the toast
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+}
+
+function removeFromWishlist(itemId, itemType) {
+    const url = itemType === 'product' 
+        ? `/wishlist/remove/${itemId}/`
+        : `/wishlist/remove-handbag/${itemId}/`;
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove the product card from the UI
+            const cardElement = document.querySelector(`button[onclick*="${itemId}"]`).closest('.col-lg-4');
+            cardElement.remove();
+            
+            // Show success message
+            showToast('Item removed from your wishlist!', 'danger');
+            
+            // Check if section is empty
+            const section = document.querySelector(itemType === 'product' ? '.products-section' : '.handbags-section');
+            if (section && !section.querySelector('.col-lg-4')) {
+                section.remove();
+            }
+            
+            // If both sections are empty, show empty state
+            const productSection = document.querySelector('.products-section');
+            const handbagSection = document.querySelector('.handbags-section');
+            if (!productSection && !handbagSection) {
+                location.reload(); // Reload to show empty wishlist template
+            }
+        } else {
+            showToast('Failed to remove item from wishlist', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('An error occurred', 'danger');
+    });
+}
+</script>
 {% endblock %}

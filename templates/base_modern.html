@@ -198,6 +198,11 @@
                             <i class="bi bi-person-plus"></i> Manage Admins
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin-user-wishlists' %}">
+                            <i class="bi bi-heart"></i> View User Wishlists
+                        </a>
+                    </li>
 		    <li class="nav-item">
 			<a class="nav-link" href="{% url 'inventory-dashboard' %}">
                            <i class="bi bi-gear"></i> Inventory Dashboard 
@@ -229,9 +234,9 @@
               </ul>
             </li>
           {% else %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+            <li class="nav-item"><a class="nav-link btn btn-lg" style="background: goldenrod;" href="{% url 'login' %}">Login</a></li>
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'signup' %}">
+              <a class="nav-link btn btn-lg" style="background: rgb(2, 178, 160); margin-left: 3px;" href="{% url 'signup' %}">
                 <i class="bi bi-person-plus"></i> Sign Up
               </a>
             </li>

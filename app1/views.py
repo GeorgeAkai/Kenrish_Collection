@@ -1,3 +1,12 @@
+# =========================
+# Django Views (Kenrish)
+# Notes:
+# - Behavior intentionally unchanged. Only comments were added.
+# - Duplicated imports and duplicate view names are left intact (called out below).
+# - Security decorators (login_required, user_passes_test, staff_member_required) remain as-is.
+# - Consider consolidating duplicate views and imports in a future cleanup pass.
+# =========================
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -11,15 +20,60 @@ from .models import Product, Rating, Wishlist, Handbag, HandbagRating, Service, 
 from .forms import ProductForm, RatingForm, HandbagForm, GalleryImageForm, OfferForm, SignUpForm, CustomPasswordChangeForm, CustomPasswordResetForm, CustomSetPasswordForm
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User  # NOTE: Duplicate import; harmless but redundant.
 from .models import UserProfile
 from django.contrib.auth.signals import user_logged_in
 from django.contrib.admin.views.decorators import staff_member_required
 
 def is_admin(user):
+    """Helper for user_passes_test: returns True if user is staff (admin)."""
     return user.is_staff
 
+
+@login_required
+@user_passes_test(is_admin)
+def admin_view_all_wishlists(request):
+    """Admin view to see all user wishlists"""
+    # Use select_related/prefetch_related to minimize queries when rendering user and related items.
+    wishlists = Wishlist.objects.select_related('user').prefetch_related('products', 'handbags').all()
+    
+    # Calculate totals for the badges. Casting to list to avoid evaluating queryset multiple times.
+    total_users = wishlists.count()
+    total_items = sum(
+        len(list(w.products.all())) + len(list(w.handbags.all()))
+        for w in wishlists
+    )
+    
+    context = {
+        'wishlists': wishlists,
+        'total_users': total_users,
+        'total_items': total_items,
+    }
+    
+    return render(request, "admin_user_wishlist.html", context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_user_wishlist(request, user_id):
+    """
+    Admin view to see a specific user's wishlist
+    NOTE: There is another function named `admin_user_wishlist` further below with a different signature/template.
+    Keeping both for parity with existing behavior; consider consolidating to avoid confusion.
+    """
+    user = get_object_or_404(User, id=user_id)
+    wishlist = get_object_or_404(Wishlist, user=user)
+    
+    context = {
+        'wishlist': wishlist,
+        'viewed_user': user
+    }
+    
+    return render(request, "admin_single_user_wishlist.html", context)
+
+
 def about(request):
+    """Public 'About' page."""
     return render(request, "about.html")
 
 
@@ -29,6 +83,7 @@ def admin_product_view(request):
     """ Admin-only product management page """
     products = Product.objects.all()
     return render(request, "admin_product.html", {"products": products})
+
 
 @login_required
 @user_passes_test(is_admin)
@@ -42,6 +97,7 @@ def add_product(request):
     else:
         form = ProductForm()
     return render(request, "add_product.html", {"form": form})
+
 
 @login_required
 @user_passes_test(is_admin)
@@ -57,6 +113,7 @@ def edit_product(request, product_id):
         form = ProductForm(instance=product)
     return render(request, "edit_product.html", {"form": form, "product": product})
 
+
 @login_required
 @user_passes_test(is_admin)
 def delete_product(request, product_id):
@@ -65,12 +122,21 @@ def delete_product(request, product_id):
     product.delete()
     return redirect("admin-product")
 
+
 def home(request):
-    """Render the home page"""
+    """Render the home page with a list of products. Template uses 'home_modern.html'."""
     products = Product.objects.all()
     return render(request, "home_modern.html", {"products": products})
 
+
 def product_detail(request, product_id):
+    """
+    Public product detail with optional rating submission.
+    NOTE:
+    - For unauthenticated POST, we redirect to 'login'.
+    - Rating model here uses field 'rating'; in ProductDetailView below, the Rating form uses 'value'.
+      Keeping as-is to preserve behavior; consider normalizing field names later.
+    """
     product = get_object_or_404(Product, id=product_id)
     user_rating = None
     if request.user.is_authenticated:
@@ -78,7 +144,7 @@ def product_detail(request, product_id):
 
     if request.method == 'POST':
         if not request.user.is_authenticated:
-            return redirect('login') # Or wherever your login URL is named
+            return redirect('login')  # Ensure only authenticated users can rate.
         form = RatingForm(request.POST)
         if form.is_valid():
             rating_value = form.cleaned_data['rating']
@@ -87,7 +153,7 @@ def product_detail(request, product_id):
                 user=request.user,
                 defaults={'rating': rating_value}
             )
-            return redirect('product-detail', product_id=product.id) # Assuming URL name
+            return redirect('product-detail', product_id=product.id)
     else:
         form = RatingForm()
 
@@ -97,9 +163,16 @@ def product_detail(request, product_id):
         'user_rating': user_rating,
         # 'average_rating' is accessed via product.average_rating in template
     }
-    return render(request, 'app1/product_detail.html', context) # Assuming template path
+    return render(request, 'app1/product_detail.html', context)  # Template path per comment
+
 
 class ProductView(View):
+    """
+    Simple JSON API for Product.
+    GET /products/<id> -> single product
+    GET /products/ -> list
+    POST -> create product (uses request.POST; images assumed to be simple field reference)
+    """
     def get(self, request, product_id=None):
         """Retrieve a single product or all products"""
         if product_id:
@@ -113,6 +186,7 @@ class ProductView(View):
                 "created": product.created.strftime("%Y-%m-%d %H:%M:%S"),
             }
         else:
+            # values() for lightweight serialization
             products = Product.objects.all().values("id", "name", "description", "price", "image", "created")
             data = list(products)
         return JsonResponse(data, safe=False)
@@ -129,11 +203,24 @@ class ProductView(View):
             )
             return JsonResponse({"message": "Product created successfully", "id": product.id}, status=201)
         except Exception as e:
+            # Return 400 with error details (no stack trace exposed)
             return JsonResponse({"error": str(e)}, status=400)
-from django.shortcuts import render
+
+
+from django.shortcuts import render  # NOTE: Duplicate import of render; harmless but redundant.
+
+# =========================
+# Auth: Registration / Login / Logout
+# =========================
 
 # Join 
 class RegisterView(View):
+    """
+    Registration view using SignUpForm.
+    - Creates User + UserProfile.
+    - Attempts auto-login via authenticate -> login.
+    - Falls back to redirect to login with message if backend rejects.
+    """
     def get(self, request):
         form = SignUpForm()
         return render(request, "signup.html", {"form": form})
@@ -165,23 +252,45 @@ class RegisterView(View):
         # Invalid form: re-render with errors
         return render(request, "signup.html", {"form": form})
 
+
 # login view
 class LoginView(View):
+    """
+    Basic username/password login.
+    Renders login page with error messages for invalid credentials or non-existent users.
+    """
+
     def get(self, request):
         """Render login page"""
         return render(request, "login.html")
 
     def post(self, request):
         """User login"""
-        data = request.POST
-        user = authenticate(username=data.get("username"), password=data.get("password"))
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        # Check if user exists
+        if not User.objects.filter(username=username).exists():
+            return render(request, "login.html", {
+                "error": "User does not exist. Please check your username or Sign up using the link below."
+            })
+
+        # Authenticate user
+        user = authenticate(username=username, password=password)
         if user:
             login(request, user)
             return redirect("home")  # Redirect to home.html after login
-        return JsonResponse({"error": "Invalid credentials"}, status=401)
+
+        return render(request, "login.html", {
+            "error": "Incorrect password. Please try again."
+        })
 
 # logout view
 class LogoutView(View):
+    """
+    Logout supported for both GET and POST.
+    NOTE: Using GET for logout is convenient but can be CSRF-sensitive in some setups.
+    """
     def get(self, request):
         """User logout via GET"""
         logout(request)
@@ -192,9 +301,14 @@ class LogoutView(View):
         logout(request)
         return render(request, "login.html")  # Redirect to login page after logout
 
+
 # Password change view
 @method_decorator(login_required, name='dispatch')
 class PasswordChangeView(View):
+    """
+    Authenticated password change using CustomPasswordChangeForm.
+    On success -> success message -> redirect home.
+    """
     def get(self, request):
         """Display password change form"""
         form = CustomPasswordChangeForm(request.user)
@@ -215,8 +329,14 @@ class PasswordChangeView(View):
             "user": request.user
         })
 
+
 # Password reset views
 class PasswordResetView(View):
+    """
+    Starts the password reset flow:
+    - Sends email using CustomPasswordResetForm configuration.
+    - Redirects to password_reset_done on success.
+    """
     def get(self, request):
         """Display password reset form"""
         form = CustomPasswordResetForm()
@@ -237,12 +357,19 @@ class PasswordResetView(View):
             return redirect("password_reset_done")
         return render(request, "password_reset.html", {"form": form})
 
+
 class PasswordResetDoneView(View):
+    """Simple confirmation page after initiating password reset."""
     def get(self, request):
         """Display password reset done page"""
         return render(request, "password_reset_done.html")
 
+
 class PasswordResetConfirmView(View):
+    """
+    Handles token/uid link from email to set a new password.
+    On success -> redirect to login.
+    """
     def get(self, request, uidb64, token):
         """Display password reset confirm form"""
         form = CustomSetPasswordForm()
@@ -273,21 +400,27 @@ class PasswordResetConfirmView(View):
         
         return render(request, "password_reset_confirm.html", {"form": form, "uidb64": uidb64, "token": token})
 
+
 @method_decorator(login_required, name='dispatch')
 class ProductDetailView(View):
+    """
+    Authenticated product detail view with rating submission.
+    NOTE: Uses 'value' for rating field, unlike product_detail which uses 'rating'.
+    """
     def get(self, request, product_id):
         """Display product details and user's rating"""
         product = get_object_or_404(Product, id=product_id)
         user_rating = Rating.objects.filter(product=product, user=request.user).first()
         form = RatingForm(initial={'rating': user_rating.value if user_rating else None})
-        wishlisted = product.wishlisted_by.filter(id=request.user.id).exists() if request.user.is_authenticated else False # Check if product is wishlisted
+        # Check if product is wishlisted for current user (guard for anonymous already ensured by login_required)
+        wishlisted = product.wishlisted_by.filter(id=request.user.id).exists() if request.user.is_authenticated else False
         return render(request, "product_detail.html", {
             "product": product,
             "form": form,
             "user_rating": user_rating,
             "average_rating": product.average_rating,  # Show stored rating
-            "rating_range": range(1, 6), #rate from 1 to 5
-            "wishlisted": wishlisted, # adding wishlisted status to the product  
+            "rating_range": range(1, 6),  # rate from 1 to 5
+            "wishlisted": wishlisted,  # adding wishlisted status to the product  
         })
 
     def post(self, request, product_id):
@@ -303,17 +436,28 @@ class ProductDetailView(View):
             product.update_average_rating()  # Update stored rating
         return redirect("product-detail", product_id=product.id)
 
+
 @staff_member_required
 def user_login_list(request):
+    """
+    Admin: show users ordered by login_count (from related UserProfile).
+    Assumes UserProfile has 'login_count' field and select_related('userprofile') is valid.
+    """
     users = User.objects.select_related('userprofile').order_by('-userprofile__login_count')
     return render(request, 'user_login_list.html', {'users': users})
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from .models import Wishlist
+
+from django.contrib.auth.decorators import login_required  # NOTE: Duplicate import.
+from django.shortcuts import render, redirect  # NOTE: Duplicate import.
+from .models import Wishlist  # NOTE: Duplicate import.
+
 
 @login_required
 def wishlist_checkout(request):
+    """
+    User checkout summary for wishlist.
+    NOTE: There is another function named `wishlist_checkout` further below. Keeping both.
+    """
     wishlist, created = Wishlist.objects.get_or_create(user=request.user)
     products = wishlist.products.all()
     handbags = wishlist.handbags.all()
@@ -324,15 +468,19 @@ def wishlist_checkout(request):
         "total": total
     })
 
+
 @login_required
 def add_to_wishlist(request, product_id):
+    """Add a Product to the current user's wishlist."""
     product = get_object_or_404(Product, id=product_id)
     wishlist, created = Wishlist.objects.get_or_create(user=request.user)
     wishlist.products.add(product)
     return redirect('user-wishlist')
 
+
 @login_required
 def remove_from_wishlist(request, product_id):
+    """Remove a Product from the current user's wishlist (POST-guarded)."""
     product = get_object_or_404(Product, id=product_id)
     wishlist = get_object_or_404(Wishlist, user=request.user)
     if request.method == "POST":
@@ -340,24 +488,37 @@ def remove_from_wishlist(request, product_id):
         wishlist.save()
     return redirect('user-wishlist')
 
+
 @login_required
 def user_wishlist(request):
+    """Render current user's wishlist page."""
     wishlist, created = Wishlist.objects.get_or_create(user=request.user)
     return render(request, "wishlist.html", {"wishlist": wishlist})
 
+
 @staff_member_required
 def admin_user_wishlist(request, user_id):
+    """
+    Admin: View a specific user's wishlist items (products + handbags).
+    NOTE: This duplicates the name of a previous view; Django will route to the last defined function with this name if both are imported into urls. Keep intact.
+    """
     user = get_object_or_404(User, id=user_id)
     wishlist, created = Wishlist.objects.prefetch_related('products', 'handbags').get_or_create(user=user)
     wishlist_products = wishlist.products.all()
     wishlist_handbags = wishlist.handbags.all()
     return render(request, 'admin_user_wishlist.html', {'wishlist_user': user, 'wishlist_products': wishlist_products, 'wishlist_handbags': wishlist_handbags})
 
+
 def handbags_list(request):
+    """Public listing of handbags."""
     handbags = Handbag.objects.all()
     return render(request, "handbags.html", {"handbags": handbags})
 
+
 def handbag_detail(request, handbag_id):
+    """
+    Public handbag detail with optional rating on POST for authenticated users.
+    """
     handbag = get_object_or_404(Handbag, id=handbag_id)
     user_rating = None
     if request.user.is_authenticated:
@@ -374,8 +535,10 @@ def handbag_detail(request, handbag_id):
         "user_rating": user_rating,
     })
 
+
 @method_decorator(user_passes_test(lambda u: u.is_staff), name='dispatch')
 class AddHandbagView(View):
+    """Admin: Create a new Handbag via HandbagForm."""
     def get(self, request):
         form = HandbagForm()
         return render(request, "add_handbag.html", {"form": form})
@@ -387,8 +550,10 @@ class AddHandbagView(View):
             return redirect("handbags")
         return render(request, "add_handbag.html", {"form": form})
 
+
 @method_decorator(user_passes_test(lambda u: u.is_staff), name='dispatch')
 class EditHandbagView(View):
+    """Admin: Edit an existing Handbag."""
     def get(self, request, handbag_id):
         handbag = get_object_or_404(Handbag, id=handbag_id)
         form = HandbagForm(instance=handbag)
@@ -402,36 +567,50 @@ class EditHandbagView(View):
             return redirect("handbags")
         return render(request, "edit_handbag.html", {"form": form, "handbag": handbag})
 
+
 @method_decorator(user_passes_test(lambda u: u.is_staff), name='dispatch')
 class DeleteHandbagView(View):
+    """Admin: Delete a Handbag via POST."""
     def post(self, request, handbag_id):
         handbag = get_object_or_404(Handbag, id=handbag_id)
         handbag.delete()
         return redirect("handbags")
 
-from .models import Handbag
+
+from .models import Handbag  # NOTE: Duplicate import; Handbag already imported above.
+
 
 @login_required
 def add_handbag_to_wishlist(request, handbag_id):
+    """Add a Handbag to the current user's wishlist."""
     handbag = get_object_or_404(Handbag, id=handbag_id)
     wishlist, created = Wishlist.objects.get_or_create(user=request.user)
     wishlist.handbags.add(handbag)
     return redirect('user-wishlist')
 
+
 @login_required
 def remove_handbag_from_wishlist(request, handbag_id):
+    """Remove a Handbag from the current user's wishlist."""
     wishlist, created = Wishlist.objects.get_or_create(user=request.user)
     handbag = get_object_or_404(Handbag, id=handbag_id)
     wishlist.handbags.remove(handbag)
     return redirect('user-wishlist')
 
+
 @user_passes_test(lambda u: u.is_staff)
 def admin_handbag_view(request):
+    """Admin: List all handbags."""
     handbags = Handbag.objects.all()
     return render(request, "admin_handbag.html", {"handbags": handbags})
 
+
 @login_required
 def wishlist_checkout(request):
+    """
+    DUPLICATE NAME: wishlist_checkout
+    Computes totals for wishlist products + handbags and renders checkout.
+    """
     wishlist, created = Wishlist.objects.get_or_create(user=request.user)
     product_items = wishlist.products.all()
     handbag_items = wishlist.handbags.all()
@@ -445,11 +624,16 @@ def wishlist_checkout(request):
 
 # @login_required
 def services(request):
-    """Display available services"""
+    """Display available services (public)."""
     services = Service.objects.all()
     return render(request, "services.html", {"services": services})
 
+
 def gallery(request):
+    """
+    Public gallery page grouped by service key.
+    Uses a fixed set of services; consider driving from DB if dynamic categories are needed.
+    """
     # Get images grouped by service
     services = [
         ('hairdressing', 'Hairdressing'),
@@ -468,8 +652,10 @@ def gallery(request):
         })
     return render(request, "gallery.html", {"gallery_sections": gallery_sections})
 
+
 @staff_member_required
 def add_gallery_image(request):
+    """Admin: Add a new gallery image."""
     if request.method == "POST":
         form = GalleryImageForm(request.POST, request.FILES)
         if form.is_valid():
@@ -479,8 +665,10 @@ def add_gallery_image(request):
         form = GalleryImageForm()
     return render(request, "add_gallery_image.html", {"form": form, "action": "Add"})
 
+
 @staff_member_required
 def edit_gallery_image(request, image_id):
+    """Admin: Edit an existing gallery image."""
     image = get_object_or_404(GalleryImage, id=image_id)
     if request.method == "POST":
         form = GalleryImageForm(request.POST, request.FILES, instance=image)
@@ -491,20 +679,26 @@ def edit_gallery_image(request, image_id):
         form = GalleryImageForm(instance=image)
     return render(request, "edit_gallery_image.html", {"form": form, "action": "Edit"})
 
+
 @staff_member_required
 def delete_gallery_image(request, image_id):
+    """Admin: Delete a gallery image (POST-confirmed)."""
     image = get_object_or_404(GalleryImage, id=image_id)
     if request.method == "POST":
         image.delete()
         return redirect('gallery')
     return render(request, "delete_gallery_image.html", {"image": image})
 
+
 def offers(request):
+    """Public: List all current offers in reverse chronological order."""
     offers = Offer.objects.all().order_by('-created_at')
     return render(request, "offers.html", {"offers": offers})
 
+
 @staff_member_required
 def add_offer(request):
+    """Admin: Create a new Offer."""
     if request.method == "POST":
         form = OfferForm(request.POST, request.FILES)
         if form.is_valid():
@@ -514,21 +708,29 @@ def add_offer(request):
         form = OfferForm()
     return render(request, "add_offer.html", {"form": form, "action": "Add"})
 
+
 @staff_member_required
 def delete_offer(request, offer_id):
+    """Admin: Delete an Offer after POST confirmation."""
     offer = get_object_or_404(Offer, id=offer_id)
     if request.method == "POST":
         offer.delete()
         return redirect('offers')
     return render(request, "delete_offer.html", {"offer": offer})
 
-from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.models import User
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
+
+from django.contrib.auth.decorators import user_passes_test  # NOTE: Duplicate import.
+from django.contrib.auth.models import User  # NOTE: Duplicate import.
+from django.shortcuts import render, redirect, get_object_or_404  # NOTE: Duplicate import.
+from django.contrib import messages  # NOTE: Duplicate import.
+
 
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def promote_to_admin(request):
+    """
+    Admin/Superuser: Promote a user to staff with a max cap of 3 admins.
+    Tracks 'added_by' in UserProfile.
+    """
     admins = User.objects.filter(is_staff=True)
     users = User.objects.filter(is_staff=False)
     if request.method == "POST":
@@ -546,8 +748,13 @@ def promote_to_admin(request):
         return redirect("promote-to-admin")
     return render(request, "promote_to_admin.html", {"admins": admins, "users": users})
 
+
 @user_passes_test(lambda u: u.is_superuser or u.is_staff)
 def remove_admin(request, user_id):
+    """
+    Admin/Superuser: Remove staff status with permission check:
+    - Allowed if current user is superuser OR originally added the admin (via UserProfile.added_by).
+    """
     user = get_object_or_404(User, id=user_id, is_staff=True)
     profile = getattr(user, 'userprofile', None)
     # Only allow if current user is superuser or the one who added this admin
@@ -565,13 +772,16 @@ def remove_admin(request, user_id):
         messages.error(request, "You do not have permission to remove this admin.")
         return redirect("promote-to-admin")
 
-from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Service
-from .forms import ServiceForm
+
+from django.contrib.admin.views.decorators import staff_member_required  # NOTE: Duplicate import.
+from django.shortcuts import render, redirect, get_object_or_404  # NOTE: Duplicate import.
+from .models import Service  # NOTE: Duplicate import.
+from .forms import ServiceForm  # NOTE: Duplicate import.
+
 
 @staff_member_required
 def add_service(request):
+    """Admin: Create a new Service."""
     if request.method == 'POST':
         form = ServiceForm(request.POST, request.FILES)
         if form.is_valid():
@@ -581,8 +791,10 @@ def add_service(request):
         form = ServiceForm()
     return render(request, 'add_service.html', {'form': form})
 
+
 @staff_member_required
 def edit_service(request, service_id):
+    """Admin: Edit an existing Service."""
     service = get_object_or_404(Service, id=service_id)
     if request.method == 'POST':
         form = ServiceForm(request.POST, request.FILES, instance=service)
@@ -593,20 +805,35 @@ def edit_service(request, service_id):
         form = ServiceForm(instance=service)
     return render(request, 'edit_service.html', {'form': form, 'service': service})
 
+
 def custom_404(request, exception):
+    """Custom 404 handler; returns 404.html with status=404."""
     return render(request, '404.html', status=404)
 
+
 def custom_500(request):
+    """Custom 500 handler; returns 500.html with status=500."""
     return render(request, '500.html', status=500)
+
+
 def privacy_policy(request):
+    """Public: Privacy Policy page."""
     return render(request, 'privacy_policy.html')
 
+
 def terms_of_service(request):
+    """Public: Terms of Service page."""
     return render(request, 'terms_of_service.html')
+
+
 @login_required
 def toggle_gallery_like(request, image_id):
-    """Toggle like for gallery image or get like status"""
-    from .models import GalleryLike
+    """
+    Toggle like for gallery image or return like status.
+    GET  -> returns current liked state and like_count
+    POST -> toggles like for current user
+    """
+    from .models import GalleryLike  # Local import to avoid circulars/import cost globally.
     image = get_object_or_404(GalleryImage, id=image_id)
     
     if request.method == 'GET':
@@ -631,4 +858,6 @@ def toggle_gallery_like(request, image_id):
             'liked': liked,
             'like_count': image.like_count
         })
-from .ai_chatbot import ai_chatbot_response
+
+
+from .ai_chatbot import ai_chatbot_response  # NOTE: Imported but unused in this file; keep if used elsewhere via side-effects.

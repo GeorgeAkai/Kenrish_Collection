@@ -135,3 +135,29 @@ class KenrishAIService:
     
     def get_streaming_response(self, user_message, conversation_history=None):
         return self.get_response(user_message, conversation_history)
+
+
+
+
+from openai import OpenAI
+
+client = OpenAI(
+  base_url="https://openrouter.ai/api/v1",
+  api_key="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",
+)
+
+completion = client.chat.completions.create(
+  extra_headers={
+    "HTTP-Referer": "http://34.236.156.39", # Optional. Site URL for rankings on openrouter.ai.
+    "X-Title": "Kenrish Collection", # Optional. Site title for rankings on openrouter.ai.
+  },
+  model="google/gemma-3n-e2b-it:free",
+  messages=[
+    {
+      "role": "user",
+      "content": "What is the meaning of life?"
+    }
+  ]
+)
+
+print(completion.choices[0].message.content)

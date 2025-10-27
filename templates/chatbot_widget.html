@@ -304,29 +304,23 @@ function openChat() {
     const panel = document.getElementById('kenrishChatPanel');
     const messages = document.getElementById('kenrishChatMessages');
     const fab = document.getElementById('kenrishChatFab');
-    if (panel) {
-        panel.classList.add('open');
-        panel.style.display = 'flex';
-        panel.setAttribute('aria-hidden', 'false');
-        if (window.innerWidth <= 768) {
-            fab.style.display = 'none';
-        }
-        if (!welcomeShown && messages.children.length === 0) {
-            addMessage("🤖 Hello! I'm your Gemini AI assistant for Kenrish Collection. I can understand natural language and help with products, services, pricing, and more. What would you like to know?", "bot");
-            welcomeShown = true;
-        }
+    panel.classList.add('open');
+    panel.style.display = 'flex';
+    panel.setAttribute('aria-hidden', 'false');
+    if (window.innerWidth <= 768) fab.style.display = 'none';
+    if (!welcomeShown && messages.children.length === 0) {
+        addMessage("🤖 Hello! I'm your Gemini AI assistant for Kenrish Collection. I can help with products, services, pricing, and more. What would you like to know?", "bot");
+        welcomeShown = true;
     }
 }
 
 function closeChat() {
     const panel = document.getElementById('kenrishChatPanel');
     const fab = document.getElementById('kenrishChatFab');
-    if (panel) {
-        panel.classList.remove('open');
-        panel.style.display = 'none';
-        panel.setAttribute('aria-hidden', 'true');
-        fab.style.display = 'flex';
-    }
+    panel.classList.remove('open');
+    panel.style.display = 'none';
+    panel.setAttribute('aria-hidden', 'true');
+    fab.style.display = 'flex';
 }
 
 function addMessage(text, sender) {
@@ -340,62 +334,27 @@ function addMessage(text, sender) {
 }
 
 function showTypingIndicator() {
-    const typingMsg = addMessage("🤖 Gemini AI is thinking...", "typing");
-    return typingMsg;
+    return addMessage("🤖 Gemini AI is thinking...", "typing");
 }
 
 function removeTypingIndicator(typingMsg) {
-    if (typingMsg && typingMsg.parentNode) {
-        typingMsg.parentNode.removeChild(typingMsg);
-    }
+    if (typingMsg?.parentNode) typingMsg.remove();
 }
 
 async function getGeminiAIResponse(message) {
     try {
-        // NOTE: Do NOT include API keys in client-side code. The frontend should call a server-side
-        // proxy endpoint which injects the API key from environment variables. See EMAIL_SETUP.md
-        // for instructions on setting OPENROUTER_API_KEY.
         const response = await fetch('/chatbot/api/chat/', {
             method: 'POST',
             headers: {
-                // Authorization header removed to avoid leaking secrets in the browser.
                 'Content-Type': 'application/json',
-                'HTTP-Referer': window.location.origin,
-                'X-Title': 'Kenrish Collection'
+                'X-CSRFToken': getCSRFToken()
             },
             body: JSON.stringify({
                 model: 'google/gemma-3n-e2b-it:free',
                 messages: [
                     {
                         role: 'system',
-                        content: `You are a helpful AI assistant for Kenrish Collection, a beauty salon and products store in Shabaab, Nakuru, Kenya. 
-
-BUSINESS INFO:
-- Location: Shabaab, Nakuru, Kenya
-- Phone: 0708440390
-- Hours: Monday-Saturday 8AM-8PM, Closed Sundays
-
-PRODUCTS & PRICES:
-- Cocoa Butter Cream: KSh 1,200 (for dry skin, moisturizing)
-- Shea Butter: KSh 900 (sensitive skin, unrefined)
-- Foundation: KSh 1,800 (8 shades, all-day coverage)
-- Lipstick: KSh 800 (matte/glossy, red/pink/nude/brown)
-- Mascara: KSh 1,000 (waterproof, volume & length)
-- Hair Care Set: KSh 1,200 (shampoo & conditioner)
-- Body Lotions: KSh 600-1,500
-
-SERVICES & PRICES:
-- Hair cutting: KSh 800
-- Hair styling: KSh 600
-- Manicure: KSh 500
-- Nail stickons: KSh 300 (last 2-3 weeks)
-
-HANDBAGS:
-- Leather handbags: KSh 2,500-6,000
-- Colors: Black, Brown, Tan
-- Styles: Small purse, Large tote, Professional bags
-
-Always be helpful, friendly, and provide specific pricing. Use emojis appropriately. Keep responses concise but informative. If asked about products not in stock, suggest alternatives and mention we can source special items by calling 0708440390.`
+                        content: `You are a helpful AI assistant for Kenrish Collection, a beauty salon and products store in Shabaab, Nakuru, Kenya. Provide friendly, concise answers with emojis.`
                     },
                     {
                         role: 'user',
@@ -406,18 +365,17 @@ Always be helpful, friendly, and provide specific pricing. Use emojis appropriat
                 temperature: 0.7
             })
         });
-        
-        if (response.ok) {
-            const data = await response.json();
+
+        const data = await response.json();
+        if (response.ok && data.choices?.[0]?.message?.content) {
             return data.choices[0].message.content;
         } else {
-            const errorData = await response.json();
-            console.error('API Error:', errorData);
-            return "I'm having trouble connecting to my AI brain right now. Please call us at 0708440390 for immediate assistance! 📞";
+            console.error('API Error:', data);
+            return "⚠️ I'm having trouble connecting to my AI brain. Please call 0708440390 for assistance!";
         }
     } catch (error) {
         console.error('Gemini AI Error:', error);
-        return "Sorry, I'm experiencing technical difficulties. Please call 0708440390 for help! 🔧";
+        return "⚠️ Sorry, I'm experiencing technical difficulties. Please call 0708440390 for help!";
     }
 }
 
@@ -425,37 +383,35 @@ async function sendMessage() {
     const input = document.getElementById('kenrishChatInput');
     const sendBtn = document.querySelector('.kenrish-send-btn');
     const message = input.value.trim();
-    
-    if (message) {
-        // Add user message
-        addMessage(message, 'user');
-        input.value = '';
-        
-        // Disable send button and show typing
-        sendBtn.disabled = true;
-        const typingIndicator = showTypingIndicator();
-        
-        // Get Gemini AI response
-        const aiResponse = await getGeminiAIResponse(message);
-        
-        // Remove typing indicator and show AI response
-        removeTypingIndicator(typingIndicator);
-        addMessage(aiResponse, 'bot');
-        
-        // Re-enable send button
-        sendBtn.disabled = false;
-    }
+    if (!message) return;
+
+    addMessage(message, 'user');
+    input.value = '';
+    sendBtn.disabled = true;
+
+    const typingIndicator = showTypingIndicator();
+    const aiResponse = await getGeminiAIResponse(message);
+    removeTypingIndicator(typingIndicator);
+    addMessage(aiResponse, 'bot');
+    sendBtn.disabled = false;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const input = document.getElementById('kenrishChatInput');
-    if (input) {
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
+function getCSRFToken() {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') return value;
     }
+    return '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('kenrishChatInput');
+    input?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
 });
 </script>

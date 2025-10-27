@@ -1,0 +1,146 @@
+/* General Styles */
+:root {
+    --primary-color: #0b3e64;
+    --secondary-color: #f2f0e9;
+    --danger-color: #dc3545;
+    --background-color: #ffffff;
+    --text-color: #363636;
+    --border-color: #e1e1e1;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #0a3451;
+    border-color: #0a3451;
+    transform: translateY(-2px);
+}
+
+.btn-outline-danger {
+    color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+/* Card Styles */
+.card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Toast Notification */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1070;
+}
+
+.toast {
+    min-width: 250px;
+}
+
+/* Text Styles */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-color);
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Rating Stars */
+.rating-stars .bi-star-fill {
+    color: #ffd700;
+}
+
+.rating-stars .bi-star {
+    color: #e0e0e0;
+}
+
+/* Product Cards */
+.product-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.product-image {
+    height: 250px;
+    overflow: hidden;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.05);
+}
+
+.product-info {
+    padding: 1rem;
+}
+
+.product-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.product-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* Form Elements */
+.form-control {
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(11, 62, 100, 0.25);
+}
+
+/* Utilities */
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-color), #2a6496);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}

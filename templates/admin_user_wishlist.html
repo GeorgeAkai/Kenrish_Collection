@@ -3,18 +3,18 @@
 {% block content %}
 <style>
 .admin-header {
-    background: linear-gradient(135deg, #20b2aa, #d4af37);
-    color: white;
+    background-color: var(--button-background);
+    color: var(--button-text-color);
     padding: 2rem 0;
     margin-bottom: 2rem;
     border-radius: 20px;
 }
 
 .wishlist-card {
-    background: white;
+    background: var(--background);
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-color);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     overflow: hidden;
 }
@@ -36,7 +36,7 @@
 }
 
 .section-title {
-    color: #20b2aa;
+    color: var(--heading-color);
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 1.5rem;
@@ -46,9 +46,9 @@
 }
 
 .back-btn {
-    background: linear-gradient(135deg, #20b2aa, #1a9b96);
+    background-color: var(--button-background);
     border: none;
-    color: white;
+    color: var(--button-text-color);
     padding: 12px 24px;
     border-radius: 25px;
     text-decoration: none;
@@ -59,27 +59,27 @@
 }
 
 .back-btn:hover {
-    background: linear-gradient(135deg, #1a9b96, #168a82);
-    color: white;
+    background-color: var(--text-color-light);
+    color: var(--background);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(32, 178, 170, 0.3);
+    box-shadow: 0 8px 25px rgba(var(--light-background-rgb), 0.3);
 }
 
 .empty-state {
     text-align: center;
     padding: 4rem 2rem;
-    color: #64748b;
+    color: var(--text-color-light);
 }
 
 .empty-icon {
     font-size: 4rem;
-    color: #e2e8f0;
+    color: var(--border-color);
     margin-bottom: 1rem;
 }
 
 .price-tag {
-    background: linear-gradient(135deg, #d4af37, #b8941f);
-    color: white;
+    background-color: var(--button-background);
+    color: var(--button-text-color);
     padding: 0.5rem 1rem;
     border-radius: 20px;
     font-weight: 700;
