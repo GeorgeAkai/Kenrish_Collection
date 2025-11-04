@@ -60,6 +60,10 @@
                                     </a>
                                 </td>
                             </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No products found.</td>
+                            </tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -115,12 +119,76 @@
                                     </a>
                                 </td>
                             </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No handbags found.</td>
+                            </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+
+        <!-- Clothes Section -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Clothes Inventory</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                <th>Sell Price</th>
+                                <th>Value</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in clothes %}
+                            <tr>
+                                <td>
+                                    {% if item.image %}
+                                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="bi bi-shirt text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-semibold">{{ item.name }}</td>
+                                <td>{{ item.stock_quantity|default:0 }}</td>
+                                <td>Ksh {{ item.price|floatformat:0 }}</td>
+                                <td>Ksh {{ item.inventory_value|floatformat:0 }}</td>
+                                <td>
+                                    {% if item.is_low_stock %}
+                                        <span class="badge bg-warning">Low Stock</span>
+                                    {% else %}
+                                        <span class="badge bg-success">In Stock</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'add-stock' %}?item_type=clothes&item_id={{ item.id }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-plus-circle"></i> Restock
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No clothes found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 </section>
 {% endblock %}

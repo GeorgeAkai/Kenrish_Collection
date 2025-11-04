@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import User
-from .models import Product, Rating, Handbag, GalleryImage, Offer, Service
+from .models import Product, Rating, Handbag, GalleryImage, Offer, Service, Clothes
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(
@@ -33,6 +33,12 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = ["name", "description", "price", "image"]
+
+# Clothes form here
+class ClothesForm(forms.ModelForm):
+    class Meta:
+        model = Clothes
+        fields = ['name', 'description', 'price', 'image', 'stock_quantity', 'cost_price', 'reorder_level']
 
 
 class RatingForm(forms.ModelForm):

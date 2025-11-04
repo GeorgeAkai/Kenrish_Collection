@@ -1,0 +1,170 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Admin Clothes Management{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <h2 class="fw-bold mb-0" style="color: var(--heading-color); letter-spacing: 1px;">Manage Clothes</h2>
+        <a href="{% url 'add-clothes' %}" class="btn btn-primary shadow-sm rounded-pill px-4 py-2">
+            <i class="bi bi-plus-circle"></i> Add New Clothes
+        </a>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+        <a href="{% url 'home' %}" class="btn btn-outline-primary rounded-pill px-3">Go to Home Page</a>
+        <input type="text" id="searchInput" class="form-control flex-grow-1 rounded-pill" style="max-width: 300px;" placeholder="Search for a clothing item...">
+    </div>
+
+    <div class="table-responsive rounded-4 shadow-sm kenrish-admin-table" style="background: var(--light-background);">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="text-center">Image</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in clothes %}
+                    <tr>
+                        <td class="text-center">
+                            {% if item.image %}
+                                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: contain;">
+                            {% else %}
+                                <i class="bi bi-shirt" style="font-size: 2rem; color: var(--text-color-light);"></i>
+                            {% endif %}
+                        </td>
+                        <td class="fw-semibold" style="color: var(--heading-color);">{{ item.name }}</td>
+                        <td class="product-price fw-bold">Ksh {{ item.price }}</td>
+                        <td>
+                            <span class="{% if item.is_low_stock %}text-danger fw-bold{% endif %}">
+                                {{ item.stock_quantity }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            {% if request.user.is_authenticated and request.user.is_staff %}
+                                <div class="d-flex flex-column flex-md-row gap-2 justify-content-center">
+                                    <a href="{% url 'edit-clothes' item.id %}" class="btn btn-warning btn-sm rounded-pill px-3">
+                                        <i class="bi bi-pencil-square"></i> <span class="d-none d-md-inline">Edit</span>
+                                    </a>
+                                    <a href="{% url 'delete-clothes' item.id %}" class="btn btn-danger btn-sm rounded-pill px-3" onclick="return confirm('Are you sure you want to delete this clothing item?');">
+                                        <i class="bi bi-trash"></i> <span class="d-none d-md-inline">Delete</span>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">No clothes found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.getElementById("searchInput").addEventListener("keyup", function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll("tbody tr");
+        rows.forEach(row => {
+            let name = row.querySelector("td:nth-child(2)").textContent.toLowerCase();
+            row.style.display = name.includes(filter) ? "" : "none";
+        });
+    });
+</script>
+
+<style>
+:root {
+    --background: #fcfaf4;
+    --light-background: #cfdee2;
+    --heading-color: #0b3e64;
+    --text-color: #363636;
+    --text-color-light: #6b9aac;
+    --link-color: #0b3e64;
+    --border-color: #deddd8;
+    --button-background: #0b3e64;
+    --button-text-color: #f2f0e9;
+}
+
+body {
+    background: var(--background) !important;
+    color: var(--text-color);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+.kenrish-admin-table {
+    background: linear-gradient(180deg, rgba(207,222,226,0.9), rgba(255,255,255,0.6)) !important;
+    border-radius: 1.5rem !important;
+    box-shadow: 0 8px 28px rgba(11,62,100,0.08), 0 2px 8px rgba(13,50,78,0.04);
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.table thead th {
+    background: linear-gradient(90deg, rgba(207,222,226,1) 0%, rgba(255,255,255,0.9) 100%) !important;
+    color: var(--heading-color);
+    border-top: none;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.btn-primary, .btn-warning, .btn-danger, .btn-outline-primary {
+    border-radius: 20px !important;
+}
+
+.btn-primary {
+    background: var(--button-background);
+    color: var(--button-text-color);
+    border: none;
+}
+.btn-primary:hover { background: rgba(11,62,100,0.9); }
+
+.btn-outline-primary {
+    color: var(--link-color);
+    border-color: var(--border-color);
+}
+.btn-outline-primary:hover {
+    background: rgba(11,62,100,0.06);
+    color: var(--button-background);
+}
+
+.btn-warning {
+    background: #d4a76a;
+    color: #fff;
+    border: none;
+}
+.btn-warning:hover { background: #c59055; }
+
+.btn-danger {
+    background: #cf6760;
+    color: #fff;
+    border: none;
+}
+.btn-danger:hover { background: #b84b43; }
+
+.img-thumbnail {
+    border: none;
+    box-shadow: 0 4px 18px rgba(11,62,100,0.06);
+    background: var(--background);
+    border-radius: 1rem;
+}
+
+.product-price { color: #1b7a59; }
+
+@media (max-width: 767.98px) {
+    .container.py-4 { padding: 1.2rem 0.6rem !important; }
+    .kenrish-admin-table { border-radius: 0.9rem !important; }
+    .table thead th, .table td { font-size: 0.98rem; padding: 0.55rem 0.6rem !important; }
+    .btn, .btn-sm { font-size: 0.96rem; padding: 0.38rem 0.85rem !important; }
+    .img-thumbnail { width: 56px !important; height: 56px !important; border-radius: 0.7rem; }
+}
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}

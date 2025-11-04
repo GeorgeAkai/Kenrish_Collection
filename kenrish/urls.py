@@ -30,7 +30,7 @@ from django.conf.urls.static import static
 from app1.views import (
     home, RegisterView, LoginView, LogoutView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, admin_product_view, add_product, edit_product, delete_product, about, ProductDetailView, user_login_list, user_wishlist, add_to_wishlist, remove_from_wishlist, admin_view_all_wishlists, admin_user_wishlist, wishlist_checkout,
     handbags_list, handbag_detail,
-    AddHandbagView, EditHandbagView, DeleteHandbagView, add_handbag_to_wishlist, remove_handbag_from_wishlist, admin_handbag_view, services, add_service, edit_service, gallery, add_gallery_image, edit_gallery_image, delete_gallery_image, offers, add_offer, delete_offer, remove_admin, promote_to_admin, toggle_gallery_like
+    AddHandbagView, EditHandbagView, DeleteHandbagView, add_handbag_to_wishlist, remove_handbag_from_wishlist, admin_handbag_view, services, add_service, edit_service, gallery, add_gallery_image, edit_gallery_image, delete_gallery_image, offers, add_offer, delete_offer, remove_admin, promote_to_admin, toggle_gallery_like, clothes_list, add_clothes, clothes_detail, edit_clothes, delete_clothes, admin_clothes, add_clothes_to_wishlist, remove_clothes_from_wishlist
 )
 
 # =========================
@@ -77,6 +77,19 @@ urlpatterns = [
     # ---------- Public: Handbags ----------
     path('handbags/', handbags_list, name='handbags'),
     path('handbags/<int:handbag_id>/', handbag_detail, name='handbag-detail'),
+
+    #---------- Public: Clothes ----------
+    path('clothes/', clothes_list, name='clothes-list'),
+    path('clothes/add/', add_clothes, name='add-clothes'),
+    path('clothes/<int:pk>/', clothes_detail, name='clothes-detail'),
+    path('clothes/<int:pk>/edit/', edit_clothes, name='edit-clothes'),
+    path('clothes/<int:pk>/delete/', delete_clothes, name='delete-clothes'),
+    path("clothes/<int:pk>/wishlist/add/", add_clothes_to_wishlist, name="add-clothes-to-wishlist"),
+    path("clothes/<int:pk>/wishlist/remove/", remove_clothes_from_wishlist, name="remove-clothes-from-wishlist"),
+
+    # ---------- Admin: Clothes Management ----------
+    path('admin/clothes/', admin_clothes, name='admin-clothes'),
+
 
     # ---------- Admin: Handbag Management ----------
     # (Access control enforced in views)

@@ -16,14 +16,15 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views import View
-from .models import Product, Rating, Wishlist, Handbag, HandbagRating, Service, GalleryImage, Offer
-from .forms import ProductForm, RatingForm, HandbagForm, GalleryImageForm, OfferForm, SignUpForm, CustomPasswordChangeForm, CustomPasswordResetForm, CustomSetPasswordForm
+from .models import Product, Rating, Wishlist, Handbag, HandbagRating, Service, GalleryImage, Offer, Clothes
+from .forms import ProductForm, RatingForm, HandbagForm, GalleryImageForm, OfferForm, SignUpForm, CustomPasswordChangeForm, CustomPasswordResetForm, CustomSetPasswordForm, ClothesForm
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User  # NOTE: Duplicate import; harmless but redundant.
 from .models import UserProfile
 from django.contrib.auth.signals import user_logged_in
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Q
 
 def is_admin(user):
     """Helper for user_passes_test: returns True if user is staff (admin)."""
@@ -165,6 +166,84 @@ def product_detail(request, product_id):
     }
     return render(request, 'app1/product_detail.html', context)  # Template path per comment
 
+# clothes views
+@login_required
+def clothes_list(request):
+    """Display all clothes."""
+    clothes = Clothes.objects.all().order_by('-created_at')
+    return render(request, 'clothes/clothes_list.html', {'clothes': clothes})
+
+
+@login_required
+def clothes_detail(request, pk):
+    """Show details of a specific clothing item."""
+    item = get_object_or_404(Clothes, pk=pk)
+    return render(request, 'clothes/clothes_detail.html', {'item': item})
+
+
+@login_required
+@user_passes_test(is_admin)
+def add_clothes(request):
+    """Add a new clothing item."""
+    if request.method == 'POST':
+        form = ClothesForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Clothing item added successfully!")
+            return redirect('clothes-list')
+    else:
+        form = ClothesForm()
+    return render(request, 'clothes/clothes_form.html', {'form': form, 'title': 'Add Clothes'})
+
+
+@login_required
+@user_passes_test(is_admin)
+def edit_clothes(request, pk):
+    """Edit an existing clothing item."""
+    item = get_object_or_404(Clothes, pk=pk)
+    if request.method == 'POST':
+        form = ClothesForm(request.POST, request.FILES, instance=item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Clothing item updated successfully!")
+            return redirect('clothes-list')
+    else:
+        form = ClothesForm(instance=item)
+    return render(request, 'clothes/clothes_form.html', {'form': form, 'title': 'Edit Clothes'})
+
+
+@login_required
+@user_passes_test(is_admin)
+def delete_clothes(request, pk):
+    """Delete a clothing item."""
+    item = get_object_or_404(Clothes, pk=pk)
+    if request.method == 'POST':
+        item.delete()
+        messages.success(request, "Clothing item deleted successfully!")
+        return redirect('clothes-list')
+    return render(request, 'clothes/clothes_confirm_delete.html', {'item': item})
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_clothes(request):
+    """
+    Admin-only page for managing clothes inventory.
+    Shows all clothes with search functionality.
+    """
+    query = request.GET.get("q", "")
+    clothes = Clothes.objects.all().order_by("-created_at")
+
+    if query:
+        clothes = clothes.filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        )
+
+    context = {
+        "clothes": clothes,
+        "query": query,
+    }
+    return render(request, "clothes/admin_clothes.html", context)
 
 class ProductView(View):
     """
@@ -206,12 +285,6 @@ class ProductView(View):
             # Return 400 with error details (no stack trace exposed)
             return JsonResponse({"error": str(e)}, status=400)
 
-
-from django.shortcuts import render  # NOTE: Duplicate import of render; harmless but redundant.
-
-# =========================
-# Auth: Registration / Login / Logout
-# =========================
 
 # Join 
 class RegisterView(View):
@@ -577,9 +650,6 @@ class DeleteHandbagView(View):
         return redirect("handbags")
 
 
-from .models import Handbag  # NOTE: Duplicate import; Handbag already imported above.
-
-
 @login_required
 def add_handbag_to_wishlist(request, handbag_id):
     """Add a Handbag to the current user's wishlist."""
@@ -603,6 +673,50 @@ def admin_handbag_view(request):
     """Admin: List all handbags."""
     handbags = Handbag.objects.all()
     return render(request, "admin_handbag.html", {"handbags": handbags})
+
+
+# clothes details
+def clothes_detail(request, pk):
+    clothes = get_object_or_404(Clothes, pk=pk)
+
+    if request.method == "POST" and request.user.is_authenticated:
+        rating_val = int(request.POST.get("rating", 0))
+        if 1 <= rating_val <= 5:
+            from .models import ClothesRating
+            ClothesRating.objects.update_or_create(
+                clothes=clothes, user=request.user,
+                defaults={"rating": rating_val}
+            )
+            clothes.update_average_rating()
+
+    return render(request, "clothes/clothes_detail.html", {"clothes": clothes})
+
+#clothes wishlist actions
+@login_required
+def add_clothes_to_wishlist(request, pk):
+    if request.method != "POST":
+        messages.error(request, "Invalid request method.")
+        return redirect("clothes-detail", pk=pk)
+
+    item = get_object_or_404(Clothes, pk=pk)
+    wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
+    wishlist.clothes.add(item)  # idempotent
+    messages.success(request, f"Added “{item.name}” to your wishlist.")
+    next_url = request.POST.get("next") or reverse("clothes-detail", kwargs={"pk": pk})
+    return redirect(next_url)
+
+@login_required
+def remove_clothes_from_wishlist(request, pk):
+    if request.method != "POST":
+        messages.error(request, "Invalid request method.")
+        return redirect("clothes-detail", pk=pk)
+
+    item = get_object_or_404(Clothes, pk=pk)
+    wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
+    wishlist.clothes.remove(item)
+    messages.success(request, f"Removed “{item.name}” from your wishlist.")
+    next_url = request.POST.get("next") or reverse("clothes-detail", kwargs={"pk": pk})
+    return redirect(next_url)
 
 
 @login_required
@@ -771,12 +885,6 @@ def remove_admin(request, user_id):
     else:
         messages.error(request, "You do not have permission to remove this admin.")
         return redirect("promote-to-admin")
-
-
-from django.contrib.admin.views.decorators import staff_member_required  # NOTE: Duplicate import.
-from django.shortcuts import render, redirect, get_object_or_404  # NOTE: Duplicate import.
-from .models import Service  # NOTE: Duplicate import.
-from .forms import ServiceForm  # NOTE: Duplicate import.
 
 
 @staff_member_required

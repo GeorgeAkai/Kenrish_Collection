@@ -147,6 +147,7 @@
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'handbags' %}">Handbags</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'clothes-list' %}">Attire</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'services' %}">Services</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'gallery' %}">Gallery</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'offers' %}">Offers</a></li>
@@ -186,6 +187,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'admin-handbag' %}">
                             <i class="bi bi-bag"></i> Manage Handbags
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin-clothes' %}">
+                            <i class="bi bi-person-plus"></i> Manage Clothes
                         </a>
                     </li>
                     <li class="nav-item">

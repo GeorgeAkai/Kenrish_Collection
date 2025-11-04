@@ -1,0 +1,175 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Clothes - Kenrish Collection{% endblock %}
+
+{% block extra_css %}
+<style>
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+
+  .product-card {
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .product-image {
+    position: relative;
+    overflow: hidden;
+    height: 250px;
+  }
+
+  .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .product-card:hover .product-image img {
+    transform: scale(1.05);
+  }
+
+  .product-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(11, 62, 100, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .product-card:hover .product-overlay {
+    opacity: 1;
+  }
+
+  .product-info {
+    padding: 1.5rem;
+  }
+
+  .product-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--heading-color);
+    margin-bottom: 0.5rem;
+  }
+
+  .product-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--link-color);
+  }
+
+  .rating-stars .star {
+    color: goldenrod !important;
+    margin-right: 2px;
+  }
+
+  .rating-stars .star.empty {
+    color: var(--border-color);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5" style="background-color: var(--light-background);">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h1 class="display-4 fw-bold mb-3">Our Clothes Collection</h1>
+      <p class="lead">Discover our premium collection of apparel</p>
+    </div>
+  </div>
+</section>
+
+<section class="py-5">
+  <div class="container">
+    <div class="product-grid">
+      {% for item in clothes %}
+      <div class="product-card" data-clothes-id="{{ item.id }}">
+        <div class="product-image">
+          {% if item.image %}
+          <img src="{{ item.image.url }}" alt="{{ item.name }}" loading="lazy" class="img-fluid">
+          {% else %}
+          <div class="d-flex align-items-center justify-content-center h-100"
+            style="background-color: var(--light-background);">
+            <i class="bi bi-shirt" style="font-size: 3rem; color: var(--text-color-light);"></i>
+          </div>
+          {% endif %}
+          <div class="product-overlay">
+            <a href="{% url 'clothes-detail' item.id %}" class="btn btn-primary">
+              <i class="bi bi-eye"></i>
+              View Details
+            </a>
+          </div>
+        </div>
+
+        <div class="product-info">
+          <h5 class="product-title">{{ item.name }}</h5>
+          <p class="text-muted mb-3">{{ item.description|truncatewords:10 }}</p>
+
+          <div class="rating-stars mb-3">
+            {% with avg=item.average_rating|default:0 %}
+            {% if avg > 0 %}
+            {% for i in "12345" %}
+            {% if avg >= forloop.counter %}
+            <i class="bi bi-star-fill star"></i>
+            {% elif avg >= forloop.counter0|add:"0.5" and avg < forloop.counter %} <i class="bi bi-star-half star"></i>
+              {% else %}
+              <i class="bi bi-star star empty"></i>
+              {% endif %}
+              {% endfor %}
+              <span class="rating-value">({{ avg|floatformat:1 }})</span>
+              {% else %}
+              <span class="text-muted">No ratings yet</span>
+              {% endif %}
+              {% endwith %}
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="product-price">Ksh {{ item.price }}</div>
+            <div class="d-flex gap-2">
+              {% if request.user.is_authenticated %}
+              <form method="post" action="{% url 'add-clothes-to-wishlist' item.id %}" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button class="btn btn-outline-primary btn-sm">
+                  <i class="bi bi-heart"></i><span class="d-none d-sm-inline"> Wishlist</span>
+                </button>
+              </form>
+              {% endif %}
+
+              <a href="{% url 'clothes-detail' item.id %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-eye"></i>
+                <span class="d-none d-sm-inline">View</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center">
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          No clothes available at the moment. Please check back later!
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

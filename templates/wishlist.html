@@ -11,7 +11,8 @@
         margin-bottom: 3rem;
     }
 
-    .wishlist-card {
+    .wishlist-card,
+    .product-card {
         background: var(--background);
         border: 1px solid var(--border-color);
         border-radius: 10px;
@@ -20,76 +21,64 @@
         height: 100%;
     }
 
-    .wishlist-card:hover {
+    .wishlist-card:hover,
+    .product-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
 
-    .wishlist-image {
+    .wishlist-image,
+    .product-image {
         position: relative;
         height: 250px;
         overflow: hidden;
+        display: flex; align-items: center; justify-content: center;
+        background: var(--light-background);
     }
 
-    .wishlist-image img {
+    .wishlist-image img,
+    .product-image img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         transition: transform 0.3s ease;
     }
 
-    .wishlist-card:hover .wishlist-image img {
+    .wishlist-card:hover .wishlist-image img,
+    .product-card:hover .product-image img {
         transform: scale(1.05);
     }
 
-    .wishlist-info {
+    .wishlist-info,
+    .product-info {
         padding: 1.5rem;
     }
 
-    .wishlist-title {
+    .wishlist-title,
+    .product-title {
         font-size: 1.2rem;
         font-weight: 600;
         margin-bottom: 0.5rem;
         color: var(--heading-color);
     }
 
-    .wishlist-price {
+    .wishlist-price,
+    .product-price {
         font-size: 1.25rem;
         font-weight: 700;
         color: var(--link-color);
         margin-bottom: 1rem;
     }
 
-    .rating-stars {
-        color: #ffd700;
-        margin-bottom: 1rem;
-    }
+    .rating-stars { color: #ffd700; margin-bottom: 1rem; }
 
-    .wishlist-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
+    .wishlist-actions { display: flex; gap: 0.5rem; }
 
-    .remove-from-wishlist {
-        color: var(--danger);
-        border-color: var(--danger);
-    }
+    .remove-from-wishlist { color: var(--danger); border-color: var(--danger); }
+    .remove-from-wishlist:hover { background-color: var(--danger); color: white; }
 
-    .remove-from-wishlist:hover {
-        background-color: var(--danger);
-        color: white;
-    }
-
-    .empty-wishlist {
-        text-align: center;
-        padding: 4rem 0;
-    }
-
-    .empty-wishlist-icon {
-        font-size: 4rem;
-        color: var(--text-color-light);
-        margin-bottom: 1.5rem;
-    }
+    .empty-wishlist { text-align: center; padding: 4rem 0; }
+    .empty-wishlist-icon { font-size: 4rem; color: var(--text-color-light); margin-bottom: 1.5rem; }
 </style>
 {% endblock %}
 
@@ -108,26 +97,25 @@
     </div>
   </div>
 </div>
+
 <!-- Hero Section -->
 <section class="wishlist-hero text-center">
     <div class="container">
         <h1 class="display-4 fw-bold mb-3">
             <i class="bi bi-heart-fill me-3 text-danger"></i>My Wishlist
         </h1>
-        <p class="lead text-muted">
-            Your favorite items saved for later
-        </p>
+        <p class="lead text-muted">Your favorite items saved for later</p>
     </div>
 </section>
 
 <!-- Wishlist Content -->
 <section class="py-5">
     <div class="container">
-        {% if wishlist.products.all or wishlist.handbags.all %}
+        {% if wishlist.products.all or wishlist.handbags.all or wishlist.clothes.all %}
         
         <!-- Products Section -->
         {% if wishlist.products.all %}
-        <div class="mb-5">
+        <div class="mb-5 products-section">
             <h3 class="text mb-4" style="font-family: 'Playfair Display', serif;">
                 <i class="bi bi-box me-2"></i>Products
             </h3>
@@ -139,22 +127,21 @@
                             {% if product.image %}
                                 <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid">
                             {% else %}
-                                <i class="bi bi-box" style="font-size: 4rem; color: rgba(255,255,255,0.7);"></i>
+                                <i class="bi bi-box" style="font-size: 4rem; color: rgba(0,0,0,0.3);"></i>
                             {% endif %}
                         </div>
-                        
                         <div class="product-info">
                             <h5 class="product-title">{{ product.name }}</h5>
                             <p class="text-muted mb-3">{{ product.description|truncatewords:10 }}</p>
-                            
+
                             <div class="rating-stars mb-3">
                                 {% with avg=product.average_rating %}
                                 {% if avg > 0 %}
                                     {% for i in "12345" %}
                                         {% if avg >= forloop.counter %}
-                                            <i class="bi bi-star-fill" style="color: #ffd700;"></i>
+                                            <i class="bi bi-star-fill"></i>
                                         {% elif avg >= forloop.counter0|add:"0.5" and avg < forloop.counter %}
-                                            <i class="bi bi-star-half" style="color: #ffd700;"></i>
+                                            <i class="bi bi-star-half"></i>
                                         {% else %}
                                             <i class="bi bi-star" style="color: #e0e0e0;"></i>
                                         {% endif %}
@@ -165,11 +152,11 @@
                                 {% endif %}
                                 {% endwith %}
                             </div>
-                            
+
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div class="product-price">Ksh {{ product.price }}</div>
                             </div>
-                            
+
                             <div class="d-flex gap-2">
                                 <a href="{% url 'product-detail' product.id %}" class="btn btn-primary flex-grow-1">
                                     <i class="bi bi-eye me-2"></i>View
@@ -177,7 +164,7 @@
                                 <form method="post" action="{% url 'remove-from-wishlist' product.id %}" style="display: inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-outline-danger">
-                                        <i class="bi bi-heart-fill me-2"></i>Remove from Wishlist
+                                        <i class="bi bi-heart-fill me-2"></i>Remove
                                     </button>
                                 </form>
                             </div>
@@ -188,11 +175,11 @@
             </div>
         </div>
         {% endif %}
-        
+
         <!-- Handbags Section -->
         {% if wishlist.handbags.all %}
-        <div class="mb-5">
-            <h3 class="text-white mb-4" style="font-family: 'Playfair Display', serif;">
+        <div class="mb-5 handbags-section">
+            <h3 class="text mb-4" style="font-family: 'Playfair Display', serif;">
                 <i class="bi bi-bag me-2"></i>Handbags
             </h3>
             <div class="row g-4">
@@ -203,22 +190,21 @@
                             {% if handbag.image %}
                                 <img src="{{ handbag.image.url }}" alt="{{ handbag.name }}" class="img-fluid">
                             {% else %}
-                                <i class="bi bi-bag" style="font-size: 4rem; color: rgba(255,255,255,0.7);"></i>
+                                <i class="bi bi-bag" style="font-size: 4rem; color: rgba(0,0,0,0.3);"></i>
                             {% endif %}
                         </div>
-                        
                         <div class="product-info">
                             <h5 class="product-title">{{ handbag.name }}</h5>
                             <p class="text-muted mb-3">{{ handbag.description|truncatewords:10 }}</p>
-                            
+
                             <div class="rating-stars mb-3">
                                 {% with avg=handbag.average_rating %}
                                 {% if avg > 0 %}
                                     {% for i in "12345" %}
                                         {% if avg >= forloop.counter %}
-                                            <i class="bi bi-star-fill" style="color: #ffd700;"></i>
+                                            <i class="bi bi-star-fill"></i>
                                         {% elif avg >= forloop.counter0|add:"0.5" and avg < forloop.counter %}
-                                            <i class="bi bi-star-half" style="color: #ffd700;"></i>
+                                            <i class="bi bi-star-half"></i>
                                         {% else %}
                                             <i class="bi bi-star" style="color: #e0e0e0;"></i>
                                         {% endif %}
@@ -229,11 +215,11 @@
                                 {% endif %}
                                 {% endwith %}
                             </div>
-                            
+
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div class="product-price">Ksh {{ handbag.price }}</div>
                             </div>
-                            
+
                             <div class="d-flex gap-2">
                                 <a href="{% url 'handbag-detail' handbag.id %}" class="btn btn-primary flex-grow-1">
                                     <i class="bi bi-eye me-2"></i>View
@@ -241,7 +227,7 @@
                                 <form method="post" action="{% url 'remove-handbag-from-wishlist' handbag.id %}" style="display: inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-outline-danger">
-                                        <i class="bi bi-heart-fill me-2"></i>Remove from Wishlist
+                                        <i class="bi bi-heart-fill me-2"></i>Remove
                                     </button>
                                 </form>
                             </div>
@@ -252,7 +238,70 @@
             </div>
         </div>
         {% endif %}
-        
+
+        <!-- Clothes Section -->
+        {% if wishlist.clothes.all %}
+        <div class="mb-5 clothes-section">
+            <h3 class="text mb-4" style="font-family: 'Playfair Display', serif;">
+                <i class="bi bi-shirt me-2"></i>Clothes
+            </h3>
+            <div class="row g-4">
+                {% for item in wishlist.clothes.all %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="product-card">
+                        <div class="product-image">
+                            {% if item.image %}
+                                <img src="{{ item.image.url }}" alt="{{ item.name }}" class="img-fluid">
+                            {% else %}
+                                <i class="bi bi-shirt" style="font-size: 4rem; color: rgba(0,0,0,0.3);"></i>
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+                            <h5 class="product-title">{{ item.name }}</h5>
+                            <p class="text-muted mb-3">{{ item.description|truncatewords:10 }}</p>
+
+                            <div class="rating-stars mb-3">
+                                {% with avg=item.average_rating %}
+                                {% if avg > 0 %}
+                                    {% for i in "12345" %}
+                                        {% if avg >= forloop.counter %}
+                                            <i class="bi bi-star-fill"></i>
+                                        {% elif avg >= forloop.counter0|add:"0.5" and avg < forloop.counter %}
+                                            <i class="bi bi-star-half"></i>
+                                        {% else %}
+                                            <i class="bi bi-star" style="color: #e0e0e0;"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="ms-2 text-muted">({{ avg|floatformat:1 }})</span>
+                                {% else %}
+                                    <span class="text-muted">No ratings yet</span>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="product-price">Ksh {{ item.price }}</div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'clothes-detail' item.id %}" class="btn btn-primary flex-grow-1">
+                                    <i class="bi bi-eye me-2"></i>View
+                                </a>
+                                <form method="post" action="{% url 'remove-clothes-from-wishlist' item.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger">
+                                        <i class="bi bi-heart-fill me-2"></i>Remove
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Checkout Section -->
         <div class="text-center">
             <div class="glass-card p-4 d-inline-block">
@@ -270,22 +319,23 @@
                 </div>
             </div>
         </div>
-        
+
         {% else %}
         <!-- Empty Wishlist -->
         <div class="text-center">
             <div class="glass-card p-5">
                 <i class="bi bi-heart display-1 text-muted mb-4"></i>
                 <h3 class="text-muted mb-3">Your Wishlist is Empty</h3>
-                <p class="text-muted mb-4">Start adding products and handbags you love to your wishlist</p>
-                <div class="d-flex gap-3 justify-content-center">
-                    <a href="{% url 'handbags' %}" class="btn btn-primary">
-                        <i class="bi bi-bag me-2"></i>
-                        Browse Products
+                <p class="text-muted mb-4">Start adding products, handbags, and clothes you love to your wishlist</p>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="{% url 'clothes-list' %}" class="btn btn-primary">
+                        <i class="bi bi-shirt me-2"></i> Browse Clothes
+                    </a>
+                    <a href="{% url 'handbags' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-bag me-2"></i> Browse Handbags
                     </a>
                     <a href="{% url 'services' %}" class="btn btn-outline-primary">
-                        <i class="bi bi-scissors me-2"></i>
-                        View Services
+                        <i class="bi bi-scissors me-2"></i> View Services
                     </a>
                 </div>
             </div>
@@ -301,21 +351,20 @@
 function showToast(message, type = 'success') {
     const toast = document.getElementById('wishlistToast');
     const toastMessage = document.getElementById('toastMessage');
-    
-    // Update toast appearance based on type
     toast.className = `toast align-items-center text-bg-${type} border-0`;
     toastMessage.textContent = message;
-    
-    // Show the toast
     const bsToast = new bootstrap.Toast(toast);
     bsToast.show();
 }
 
+// Optional AJAX removal helper (if you want to wire buttons to JS instead of forms)
 function removeFromWishlist(itemId, itemType) {
-    const url = itemType === 'product' 
-        ? `/wishlist/remove/${itemId}/`
-        : `/wishlist/remove-handbag/${itemId}/`;
-    
+    let url;
+    if (itemType === 'product') url = `/wishlist/remove/${itemId}/`;
+    else if (itemType === 'handbag') url = `/wishlist/remove-handbag/${itemId}/`;
+    else if (itemType === 'clothes') url = `/wishlist/remove-clothes/${itemId}/`;
+    else return;
+
     fetch(url, {
         method: 'POST',
         headers: {
@@ -323,36 +372,17 @@ function removeFromWishlist(itemId, itemType) {
             'Content-Type': 'application/json',
         },
     })
-    .then(response => response.json())
+    .then(r => r.json())
     .then(data => {
         if (data.success) {
-            // Remove the product card from the UI
-            const cardElement = document.querySelector(`button[onclick*="${itemId}"]`).closest('.col-lg-4');
-            cardElement.remove();
-            
-            // Show success message
             showToast('Item removed from your wishlist!', 'danger');
-            
-            // Check if section is empty
-            const section = document.querySelector(itemType === 'product' ? '.products-section' : '.handbags-section');
-            if (section && !section.querySelector('.col-lg-4')) {
-                section.remove();
-            }
-            
-            // If both sections are empty, show empty state
-            const productSection = document.querySelector('.products-section');
-            const handbagSection = document.querySelector('.handbags-section');
-            if (!productSection && !handbagSection) {
-                location.reload(); // Reload to show empty wishlist template
-            }
+            // You may also remove the DOM card here if needed.
+            setTimeout(() => location.reload(), 500);
         } else {
             showToast('Failed to remove item from wishlist', 'danger');
         }
     })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('An error occurred', 'danger');
-    });
+    .catch(() => showToast('An error occurred', 'danger'));
 }
 </script>
 {% endblock %}

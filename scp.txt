@@ -1,0 +1,9 @@
+forms.py
+inventory_views.py
+models.py
+views.py
+urls.py
+templates/clothes/
+templates/inventory/
+
+

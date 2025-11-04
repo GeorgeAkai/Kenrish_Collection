@@ -1,0 +1,91 @@
+{% extends "base_modern.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0" style="color: var(--kenrish-turquoise); letter-spacing:.5px;">
+      <i class="bi bi-plus-circle"></i> {{ title }}
+    </h2>
+    <a href="{% url 'clothes-list' %}" class="btn btn-outline-primary rounded-pill shadow-sm">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4" style="background: var(--kenrish-card);">
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data" class="row g-3">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger rounded-4">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="col-12">
+          <label class="form-label">Name</label>
+          {{ form.name }}
+          {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Description</label>
+          {{ form.description }}
+          {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Price</label>
+          {{ form.price }}
+          {% if form.price.errors %}<div class="text-danger small">{{ form.price.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-8">
+          <label class="form-label">Image</label>
+          {{ form.image }}
+          {% if form.image.errors %}<div class="text-danger small">{{ form.image.errors }}</div>{% endif %}
+        </div>
+
+        {% if form.fields.stock_quantity %}
+        <div class="col-md-4">
+          <label class="form-label">Stock Quantity</label>
+          {{ form.stock_quantity }}
+        </div>
+        {% endif %}
+
+        {% if form.fields.cost_price %}
+        <div class="col-md-4">
+          <label class="form-label">Cost Price</label>
+          {{ form.cost_price }}
+        </div>
+        {% endif %}
+
+        {% if form.fields.reorder_level %}
+        <div class="col-md-4">
+          <label class="form-label">Reorder Level</label>
+          {{ form.reorder_level }}
+        </div>
+        {% endif %}
+
+        <div class="col-12 d-flex gap-2">
+          <button class="btn btn-primary rounded-pill shadow-sm">
+            <i class="bi bi-check2-circle"></i> Save
+          </button>
+          <a href="{% url 'clothes-list' %}" class="btn btn-outline-secondary rounded-pill shadow-sm">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% comment %}
+Helpers to add consistent classes to widgets without crispy forms.
+{% endcomment %}
+{% load static %}
+{% block extra_js %}
+<script>
+  // no-op; keep for future enhancements
+</script>
+{% endblock %}
+
+{% endblock %}

@@ -20,24 +20,38 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Item Type</label>
-                                    <select name="item_type" class="form-select" required>
+                                    <select name="item_type" id="itemType" class="form-select" required>
                                         <option value="">Select Type</option>
-                                        <option value="product">Product</option>
-                                        <option value="handbag">Handbag</option>
+                                        <option value="product" {% if preselected_type == 'product' %}selected{% endif %}>Product</option>
+                                        <option value="handbag" {% if preselected_type == 'handbag' %}selected{% endif %}>Handbag</option>
+                                        <option value="clothes" {% if preselected_type == 'clothes' %}selected{% endif %}>Clothes</option>
                                     </select>
                                 </div>
                                 
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Item</label>
-                                    <select name="item_id" class="form-select" required>
+                                    <select name="item_id" id="itemSelect" class="form-select" required>
                                         <option value="">Select Item</option>
                                         {% for product in products %}
-                                        <option value="{{ product.id }}" data-type="product">{{ product.name }}</option>
+                                        <option value="{{ product.id }}" data-type="product"
+                                                {% if preselected_type == 'product' and preselected_id|default:''|stringformat:"s" == product.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ product.name }}
+                                        </option>
                                         {% endfor %}
                                         {% for handbag in handbags %}
-                                        <option value="{{ handbag.id }}" data-type="handbag">{{ handbag.name }}</option>
+                                        <option value="{{ handbag.id }}" data-type="handbag"
+                                                {% if preselected_type == 'handbag' and preselected_id|default:''|stringformat:"s" == handbag.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ handbag.name }}
+                                        </option>
+                                        {% endfor %}
+                                        {% for item in clothes %}
+                                        <option value="{{ item.id }}" data-type="clothes"
+                                                {% if preselected_type == 'clothes' and preselected_id|default:''|stringformat:"s" == item.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ item.name }}
+                                        </option>
                                         {% endfor %}
                                     </select>
+                                    <small class="text-muted">Only items for the selected type will be shown.</small>
                                 </div>
                                 
                                 <div class="col-md-6">
@@ -48,13 +62,13 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-danger">Total Cost Paid (Ksh) *</label>
                                     <input type="number" name="total_cost" class="form-control" step="0.01" min="0.01" required>
-                                    <small class="text-muted">Total amount paid for this stock purchase</small>
+                                    <small class="text-muted">Total amount paid for this stock purchase (we’ll compute unit cost automatically).</small>
                                 </div>
                                 
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">New Selling Price (Ksh)</label>
                                     <input type="number" name="new_price" class="form-control" step="0.01" min="0" placeholder="Optional">
-                                    <small class="text-muted">Leave empty to keep current price</small>
+                                    <small class="text-muted">Leave empty to keep current price.</small>
                                 </div>
                                 
                                 <div class="col-12">
@@ -78,4 +92,34 @@
         </div>
     </div>
 </section>
+
+<script>
+(function() {
+    const typeSelect = document.getElementById('itemType');
+    const itemSelect = document.getElementById('itemSelect');
+
+    function filterItemsByType() {
+        const selectedType = typeSelect.value;
+        const options = Array.from(itemSelect.options);
+
+        // Always keep the first "Select Item" placeholder visible
+        options.forEach((opt, idx) => {
+            if (idx === 0) { opt.hidden = false; return; }
+            const t = opt.getAttribute('data-type');
+            opt.hidden = (selectedType && t !== selectedType);
+        });
+
+        // If current selected option is hidden, reset to placeholder
+        if (itemSelect.selectedIndex > 0 && itemSelect.options[itemSelect.selectedIndex].hidden) {
+            itemSelect.selectedIndex = 0;
+        }
+    }
+
+    // Initialize on load (handles preselected_type/id)
+    filterItemsByType();
+
+    // React to type changes
+    typeSelect.addEventListener('change', filterItemsByType);
+})();
+</script>
 {% endblock %}
