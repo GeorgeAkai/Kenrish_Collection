@@ -159,9 +159,7 @@
           {% if user.is_authenticated %}
             <!-- Wishlist -->
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'user-wishlist' %}">
-                <i class="bi bi-heart"></i> Wishlist
-              </a>
+              <a class="nav-link" href="{% url 'user-wishlist' %}">Wishlist</a>
             </li>
 
             {% if user.is_staff or user.is_superuser %}
