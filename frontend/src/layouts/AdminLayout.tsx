@@ -6,7 +6,7 @@ import { LOGO_URL } from '@/lib/brand'
 import {
   LayoutDashboard, Package, ShoppingBag, Shirt, Warehouse,
   Scissors, Image, Tag, Users, FileText, LogOut, Menu, X,
-  Sun, Moon, ChevronRight, Sparkles, CalendarCheck, ClipboardList, Settings2,
+  Sun, Moon, ChevronRight, CalendarCheck, ClipboardList, Settings2,
 } from 'lucide-react'
 
 const navItems = [
