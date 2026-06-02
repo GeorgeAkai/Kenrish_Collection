@@ -1,8 +1,44 @@
-.env.env
+# Environment & secrets
 .env
-/venv
-__pycache__/
-*.pyc
+.env.*
 ~.env
-node_modules
-.claude
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+/venv/
+/env/
+/.venv/
+
+# Django
+db.sqlite3
+staticfiles/
+media/
+*.log
+
+# Node / frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+.npm/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Claude
+.claude/
