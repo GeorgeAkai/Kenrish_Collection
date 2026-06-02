@@ -206,7 +206,7 @@ else:
 #     "https://bug-free-space-couscous-x74pgpwr647cv6rp.github.dev/",
 # ]
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/django-admin/login/'
 
 # Custom authentication backends
 AUTHENTICATION_BACKENDS = [
