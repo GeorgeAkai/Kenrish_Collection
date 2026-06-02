@@ -33,7 +33,7 @@ class KenrishChat {
     addWelcomeMessage() {
         const welcomeMsg = `👋 Welcome to Kenrish Collection! 
 
-I'm here to help you with information about our:
+I'm Rexi, your virtual assistant here to help you with information about our:
 • Beauty products and cosmetics
 • Stylish handbags and accessories  
 • Professional beauty services

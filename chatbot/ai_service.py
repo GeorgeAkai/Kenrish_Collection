@@ -137,27 +137,25 @@ class KenrishAIService:
         return self.get_response(user_message, conversation_history)
 
 
+def build_system_prompt(products, handbags, clothes):
+    def fmt(items, label):
+        if not items:
+            return f'{label}: None available\n'
+        lines = [f'  - {i["name"]}: KES {i["price"]} (stock: {i["stock_quantity"]})' for i in items]
+        return f'{label}:\n' + '\n'.join(lines) + '\n'
 
+    catalogue = fmt(products, 'Products') + fmt(handbags, 'Handbags') + fmt(clothes, 'Clothes')
+    return (
+        "You are a friendly and knowledgeable shop assistant for Kenrish Collection, "
+        "a cosmetics and fashion boutique located in Nakuru, Kenya. "
+        "You speak warmly and helpfully to customers. "
+        "All prices are in Kenyan Shillings (KES). "
+        "Store hours: Monday to Saturday, 8AM to 8PM EAT. "
+        "Phone: 0708440390. "
+        "If customers ask about products, refer to our live catalogue below. "
+        "Always be concise and helpful. Do not make up products not in the catalogue.\n\n"
+        "=== LIVE CATALOGUE ===\n"
+        + catalogue
+        + "=== END CATALOGUE ==="
+    )
 
-from openai import OpenAI
-
-client = OpenAI(
-  base_url="https://openrouter.ai/api/v1",
-  api_key="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",
-)
-
-completion = client.chat.completions.create(
-  extra_headers={
-    "HTTP-Referer": "http://34.236.156.39", # Optional. Site URL for rankings on openrouter.ai.
-    "X-Title": "Kenrish Collection", # Optional. Site title for rankings on openrouter.ai.
-  },
-  model="google/gemma-3n-e2b-it:free",
-  messages=[
-    {
-      "role": "user",
-      "content": "What is the meaning of life?"
-    }
-  ]
-)
-
-print(completion.choices[0].message.content)

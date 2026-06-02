@@ -19,7 +19,7 @@ Including another URLconf
 # Core Imports
 # =========================
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -30,7 +30,9 @@ from django.conf.urls.static import static
 from app1.views import (
     home, RegisterView, LoginView, LogoutView, PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, admin_product_view, add_product, edit_product, delete_product, about, ProductDetailView, user_login_list, user_wishlist, add_to_wishlist, remove_from_wishlist, admin_view_all_wishlists, admin_user_wishlist, wishlist_checkout,
     handbags_list, handbag_detail,
-    AddHandbagView, EditHandbagView, DeleteHandbagView, add_handbag_to_wishlist, remove_handbag_from_wishlist, admin_handbag_view, services, add_service, edit_service, gallery, add_gallery_image, edit_gallery_image, delete_gallery_image, offers, add_offer, delete_offer, remove_admin, promote_to_admin, toggle_gallery_like, clothes_list, add_clothes, clothes_detail, edit_clothes, delete_clothes, admin_clothes, add_clothes_to_wishlist, remove_clothes_from_wishlist
+    AddHandbagView, EditHandbagView, DeleteHandbagView, add_handbag_to_wishlist, remove_handbag_from_wishlist, admin_handbag_view, services, add_service, edit_service, gallery, add_gallery_image, edit_gallery_image, delete_gallery_image, offers, add_offer, delete_offer, remove_admin, promote_to_admin, toggle_gallery_like, clothes_list, add_clothes, clothes_detail, edit_clothes, delete_clothes, admin_clothes, add_clothes_to_wishlist, remove_clothes_from_wishlist,
+    reservation_calendar, request_reservation, my_reservations, cancel_reservation,
+    admin_reservations, admin_add_reservation, admin_approve_reservation,
 )
 
 # =========================
@@ -39,6 +41,9 @@ from app1.views import (
 # Order preserved exactly as provided.
 # =========================
 urlpatterns = [
+    # ---------- API ----------
+    path('api/', include('api.urls')),
+
     # ---------- Public: Home & Content ----------
     path("", home, name="home"),                             # Home page
     path("about/", about, name="about"),                     # About page
@@ -153,4 +158,25 @@ urlpatterns += [
 
     # ---------- Social/Interactions ----------
     path("toggle-gallery-like/<int:image_id>/", toggle_gallery_like, name="toggle-gallery-like"),
+
+    # ---------- Reservations ----------
+    path('reservation/', reservation_calendar, name='reservation-calendar'),
+    path('reservation/request/', request_reservation, name='request-reservation'),
+    path('reservation/my/', my_reservations, name='my-reservations'),
+    path('reservation/cancel/<int:reservation_id>/', cancel_reservation, name='cancel-reservation'),
+    path('manage/reservations/', admin_reservations, name='admin-reservations'),
+    path('manage/reservations/add/', admin_add_reservation, name='admin-add-reservation'),
+    path('manage/reservations/<int:reservation_id>/action/', admin_approve_reservation, name='admin-approve-reservation'),
 ]
+
+# ---------- React SPA catch-all (must be last) ----------
+import os
+from django.http import FileResponse, HttpResponseNotFound
+
+def react_index(request):
+    index = settings.REACT_APP_DIR / 'index.html'
+    if index.exists():
+        return FileResponse(open(index, 'rb'))
+    return HttpResponseNotFound('React build not found. Run: cd frontend && npm run build')
+
+urlpatterns += [re_path(r'^(?!api/|admin/|media/|static/).*$', react_index)]

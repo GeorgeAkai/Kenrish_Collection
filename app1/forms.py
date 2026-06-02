@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import User
-from .models import Product, Rating, Handbag, GalleryImage, Offer, Service, Clothes
+from datetime import date
+from .models import Product, Rating, Handbag, GalleryImage, Offer, Service, Clothes, Reservation
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(
@@ -112,4 +113,33 @@ class CustomSetPasswordForm(SetPasswordForm):
             'class': 'form-control',
             'placeholder': 'Confirm New Password'
         })
+
+
+class ReservationForm(forms.ModelForm):
+    class Meta:
+        model = Reservation
+        fields = ['service', 'reservation_date', 'reservation_time', 'notes']
+        widgets = {
+            'service': forms.Select(attrs={'class': 'form-select'}),
+            'reservation_date': forms.DateInput(
+                attrs={'type': 'date', 'class': 'form-control', 'min': date.today().isoformat()}
+            ),
+            'reservation_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Any special requests or notes...'}),
+        }
+
+
+class AdminReservationForm(forms.ModelForm):
+    class Meta:
+        model = Reservation
+        fields = ['customer', 'service', 'reservation_date', 'reservation_time', 'notes', 'status', 'admin_notes']
+        widgets = {
+            'customer': forms.Select(attrs={'class': 'form-select'}),
+            'service': forms.Select(attrs={'class': 'form-select'}),
+            'reservation_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'reservation_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'admin_notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Internal notes (visible to admin only)...'}),
+        }
 

@@ -919,6 +919,146 @@ def custom_404(request, exception):
     return render(request, '404.html', status=404)
 
 
+# =========================
+# Reservation Views
+# =========================
+import json
+from django.views.decorators.http import require_POST
+from .models import Reservation
+from .forms import ReservationForm, AdminReservationForm
+
+
+@login_required
+def reservation_calendar(request):
+    """Public calendar showing approved reservations; customers also see their own pending ones."""
+    if request.user.is_staff:
+        reservations = Reservation.objects.select_related('customer', 'service').exclude(
+            status=Reservation.STATUS_CANCELLED
+        )
+    else:
+        reservations = Reservation.objects.select_related('service').filter(
+            status=Reservation.STATUS_APPROVED
+        ) | Reservation.objects.select_related('service').filter(
+            customer=request.user
+        )
+        reservations = reservations.distinct()
+
+    events = []
+    color_map = {
+        Reservation.STATUS_APPROVED: '#198754',
+        Reservation.STATUS_PENDING: '#ffc107',
+        Reservation.STATUS_REJECTED: '#dc3545',
+        Reservation.STATUS_CANCELLED: '#6c757d',
+    }
+    for r in reservations:
+        label = r.service.name if r.service else 'Reservation'
+        if request.user.is_staff:
+            label = f"{label} — {r.customer.get_full_name() or r.customer.username}"
+        events.append({
+            'id': r.pk,
+            'title': label,
+            'start': f"{r.reservation_date}T{str(r.reservation_time)[:5]}",
+            'color': color_map.get(r.status, '#0b3e64'),
+            'extendedProps': {
+                'status': r.get_status_display(),
+                'notes': r.notes,
+            },
+        })
+
+    return render(request, 'reservations/calendar.html', {
+        'events_json': json.dumps(events),
+        'pending_count': Reservation.objects.filter(status=Reservation.STATUS_PENDING).count() if request.user.is_staff else 0,
+    })
+
+
+@login_required
+def request_reservation(request):
+    """Customer submits a new reservation request."""
+    if request.method == 'POST':
+        form = ReservationForm(request.POST)
+        if form.is_valid():
+            reservation = form.save(commit=False)
+            reservation.customer = request.user
+            reservation.status = Reservation.STATUS_PENDING
+            reservation.save()
+            messages.success(request, 'Your reservation request has been submitted. We will confirm shortly.')
+            return redirect('my-reservations')
+    else:
+        form = ReservationForm()
+    return render(request, 'reservations/request.html', {'form': form})
+
+
+@login_required
+def my_reservations(request):
+    """Customer views their own reservations."""
+    reservations = Reservation.objects.filter(customer=request.user).select_related('service')
+    return render(request, 'reservations/my_reservations.html', {'reservations': reservations})
+
+
+@require_POST
+@login_required
+def cancel_reservation(request, reservation_id):
+    """Customer cancels their own pending reservation."""
+    reservation = get_object_or_404(Reservation, pk=reservation_id, customer=request.user)
+    if reservation.status == Reservation.STATUS_PENDING:
+        reservation.status = Reservation.STATUS_CANCELLED
+        reservation.save()
+        messages.success(request, 'Reservation cancelled.')
+    else:
+        messages.error(request, 'Only pending reservations can be cancelled.')
+    return redirect('my-reservations')
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_reservations(request):
+    """Admin: list and filter all reservations."""
+    status_filter = request.GET.get('status', '')
+    qs = Reservation.objects.select_related('customer', 'service').all()
+    if status_filter:
+        qs = qs.filter(status=status_filter)
+    pending_count = Reservation.objects.filter(status=Reservation.STATUS_PENDING).count()
+    return render(request, 'reservations/admin_list.html', {
+        'reservations': qs,
+        'status_filter': status_filter,
+        'pending_count': pending_count,
+        'status_choices': Reservation.STATUS_CHOICES,
+    })
+
+
+@login_required
+@user_passes_test(is_admin)
+def admin_add_reservation(request):
+    """Admin: add a reservation directly (status set in form, defaults approved)."""
+    if request.method == 'POST':
+        form = AdminReservationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Reservation added successfully.')
+            return redirect('admin-reservations')
+    else:
+        form = AdminReservationForm(initial={'status': Reservation.STATUS_APPROVED})
+    return render(request, 'reservations/admin_add.html', {'form': form})
+
+
+@require_POST
+@login_required
+@user_passes_test(is_admin)
+def admin_approve_reservation(request, reservation_id):
+    """Admin: approve or reject a reservation."""
+    reservation = get_object_or_404(Reservation, pk=reservation_id)
+    action = request.POST.get('action')
+    reservation.admin_notes = request.POST.get('admin_notes', reservation.admin_notes)
+    if action == 'approve':
+        reservation.status = Reservation.STATUS_APPROVED
+        messages.success(request, f'Reservation for {reservation.customer.username} approved.')
+    elif action == 'reject':
+        reservation.status = Reservation.STATUS_REJECTED
+        messages.warning(request, f'Reservation for {reservation.customer.username} rejected.')
+    reservation.save()
+    return redirect('admin-reservations')
+
+
 def custom_500(request):
     """Custom 500 handler; returns 500.html with status=500."""
     return render(request, '500.html', status=500)

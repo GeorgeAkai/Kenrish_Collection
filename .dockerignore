@@ -1,0 +1,31 @@
+# Secrets — never bake into image
+.env
+.env.*
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+db.sqlite3
+
+# Django generated dirs
+staticfiles/
+media/
+
+# Node — stage 1 installs its own
+node_modules/
+frontend/node_modules/
+
+# Frontend build — stage 1 produces a fresh one
+frontend/dist/
+
+# Git & IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Docker files themselves
+docker-compose*.yml

@@ -8,11 +8,12 @@ from datetime import timedelta
 from .models import (
     Product,
     Handbag,
-    Clothes,               # ✅ include Clothes in inventory views
+    Clothes,
     Sale,
     InventoryTransaction,
     Expense,
 )
+from .inventory import add_stock as _add_stock, record_sale as _record_sale, InsufficientStockError
 from django.contrib.auth.models import User
 
 
@@ -129,35 +130,15 @@ def add_stock(request):
             messages.error(request, 'Invalid item type.')
             return redirect('add-stock')
 
-        # Update selling price if provided
-        if new_price:
-            item.price = new_price
-            item.save()
-
-        # Update stock locally (InventoryTransaction also adjusts as a safety net)
-        item.stock_quantity += quantity
-        item.save()
-
-        # Create transaction (use 'IN' to match model choices)
-        InventoryTransaction.objects.create(
-            product=item if item_type == 'product' else None,
-            handbag=item if item_type == 'handbag' else None,
-            clothes=item if item_type == 'clothes' else None,
-            transaction_type='IN',  # ✅ was 'STOCK_IN'
+        unit_cost = (total_cost / quantity) if quantity > 0 else 0
+        _add_stock(
+            item,
             quantity=quantity,
-            unit_cost=(total_cost / quantity) if quantity > 0 else 0,
+            unit_cost=unit_cost,
+            actor=request.user,
             notes=notes,
-            created_by=request.user
+            new_price=new_price if new_price else None,
         )
-
-        # Create expense record
-        Expense.objects.create(
-            description=f'Stock purchase: {item.name} (Qty: {quantity})',
-            amount=total_cost,
-            category='Stock Purchase',
-            created_by=request.user
-        )
-
         messages.success(request, f'Added {quantity} units to {item.name}')
         return redirect('inventory-dashboard')
 
@@ -198,38 +179,11 @@ def record_sale(request):
             messages.error(request, 'Invalid item type.')
             return redirect('record-sale')
 
-        if item.stock_quantity < quantity:
+        try:
+            _record_sale(item, quantity=quantity, unit_price=unit_price, actor=request.user)
+        except InsufficientStockError:
             messages.error(request, f'Insufficient stock. Available: {item.stock_quantity}')
             return redirect('record-sale')
-
-        # Create sale
-        sale = Sale.objects.create(
-            product=item if item_type == 'product' else None,
-            handbag=item if item_type == 'handbag' else None,
-            clothes=item if item_type == 'clothes' else None,
-            quantity=quantity,
-            unit_price=unit_price,
-            # customer_name=customer_name,
-            # customer_phone=customer_phone,
-            created_by=request.user
-        )
-
-        # Update stock (Sale.save also adjusts, but keep here to reflect immediately in UI)
-        item.stock_quantity -= quantity
-        item.save()
-
-        # Create matching inventory transaction
-        # Use unit_cost as COST of goods, not selling price (use item's cost_price).
-        InventoryTransaction.objects.create(
-            product=item if item_type == 'product' else None,
-            handbag=item if item_type == 'handbag' else None,
-            clothes=item if item_type == 'clothes' else None,
-            transaction_type='SALE',
-            quantity=quantity,
-            unit_cost=getattr(item, 'cost_price', 0),
-            # notes=f'Sale to {customer_name or "Customer"}',
-            created_by=request.user
-        )
 
         messages.success(request, f'Sale recorded: {item.name} x{quantity}')
         return redirect('inventory-dashboard')

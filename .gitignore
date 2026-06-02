@@ -1,1 +1,8 @@
 .env.env
+.env
+/venv
+__pycache__/
+*.pyc
+~.env
+node_modules
+.claude

@@ -1,2 +1,5 @@
 #!/bin/sh
-python manage.py runserver 0.0.0.0:80
+set -e
+python manage.py migrate --noinput
+python manage.py collectstatic --noinput
+exec gunicorn kenrish.wsgi:application --bind "0.0.0.0:${PORT:-10000}" --workers 2 --timeout 120

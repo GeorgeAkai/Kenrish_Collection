@@ -1,0 +1,89 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Add Reservation - Kenrish Collection{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="mb-4">
+        <a href="{% url 'admin-reservations' %}" class="text-muted text-decoration-none">
+          <i class="bi bi-arrow-left me-1"></i> Back to Reservations
+        </a>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body p-4 p-md-5">
+          <h2 class="fw-bold mb-1" style="color: var(--heading-color);">
+            <i class="bi bi-calendar-plus me-2"></i>Add Reservation
+          </h2>
+          <p class="text-muted mb-4">Create a reservation on behalf of a customer.</p>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Customer</label>
+              {{ form.customer }}
+              {% if form.customer.errors %}
+                <div class="text-danger small mt-1">{{ form.customer.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Service</label>
+              {{ form.service }}
+              {% if form.service.errors %}
+                <div class="text-danger small mt-1">{{ form.service.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-sm-6">
+                <label class="form-label fw-semibold">Date</label>
+                {{ form.reservation_date }}
+                {% if form.reservation_date.errors %}
+                  <div class="text-danger small mt-1">{{ form.reservation_date.errors.0 }}</div>
+                {% endif %}
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label fw-semibold">Time</label>
+                {{ form.reservation_time }}
+                {% if form.reservation_time.errors %}
+                  <div class="text-danger small mt-1">{{ form.reservation_time.errors.0 }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Status</label>
+              {{ form.status }}
+              {% if form.status.errors %}
+                <div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Customer Notes <span class="text-muted fw-normal">(optional)</span></label>
+              {{ form.notes }}
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold">Admin Notes <span class="text-muted fw-normal">(internal, optional)</span></label>
+              {{ form.admin_notes }}
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-check-circle me-2"></i>Save Reservation
+              </button>
+              <a href="{% url 'admin-reservations' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+/* Modern Cosmetics Shop - theme overrides and utilities
+   Imported from the provided Figma design assets (fonts + theme variables).
+   Purpose: supply colors, fonts, and small component overrides without changing markup.
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap');
+
+:root {
+  --mc-background: #F9F6FB;
+  --mc-foreground: #1A1220;
+  --mc-card: #FDFAFF;
+  --mc-primary: #7C3060;
+  --mc-primary-foreground: #FFFFFF;
+  --mc-secondary: #F0E8F5;
+  --mc-accent: #C07DB0;
+  --mc-muted: #E5D8EE;
+  --mc-border: rgba(124, 48, 96, 0.14);
+  --mc-radius: 12px;
+  --mc-ring: #7C3060;
+
+  /* map previous project vars to new theme where convenient */
+  --background: var(--mc-background);
+  --text-color: var(--mc-foreground);
+  --heading-color: var(--mc-primary);
+  --button-background: var(--mc-primary);
+  --button-text-color: var(--mc-primary-foreground);
+  --footer-background: var(--mc-primary);
+  --footer-text-color: var(--mc-primary-foreground);
+}
+
+/* Body / typography */
+body {
+  font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--background);
+  color: var(--text-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, .site-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--heading-color);
+}
+
+/* Navbar adjustments to match design */
+.navbar {
+  background: rgba(255,255,255,0.96) !important;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 18px rgba(16,12,26,0.06);
+  border-bottom: 1px solid var(--mc-border);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.4rem;
+  background: linear-gradient(135deg, var(--mc-primary) 0%, var(--mc-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-link { font-weight: 600; color: var(--text-color) !important; }
+.nav-link:hover, .nav-link.active { color: var(--heading-color) !important; }
+
+/* Buttons: modern rounded pill buttons */
+.btn-primary {
+  background: var(--button-background) !important;
+  color: var(--button-text-color) !important;
+  border-radius: 999px;
+  padding: 10px 26px;
+  box-shadow: 0 8px 24px rgba(124,48,96,0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(124,48,96,0.12); }
+
+.btn-secondary { background: white !important; color: var(--mc-primary) !important; border: 2px solid var(--mc-primary); }
+
+/* Hero helpers */
+.hero-section { padding: 64px 0; background: linear-gradient(135deg,var(--mc-primary),var(--mc-accent)); color: white; }
+.hero-title { font-size: clamp(2rem,5vw,3.6rem); font-weight:700; }
+
+/* Product card updates */
+.product-card { border-radius: var(--mc-radius); box-shadow: 0 8px 26px rgba(16,12,26,0.06); background: var(--mc-card); overflow: hidden; }
+.product-title { color: var(--text-color); font-weight:600; }
+.product-price { background: linear-gradient(135deg,var(--mc-primary),var(--mc-accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:800; }
+
+/* Footer */
+.footer { background: var(--footer-background); color: var(--footer-text-color); }
+.footer a { color: var(--footer-text-color); }
+
+/* Minor utilities */
+.rounded-lg { border-radius: var(--mc-radius) !important; }
+.card-soft { box-shadow: 0 6px 20px rgba(16,12,26,0.05); }
+
+/* Dark-mode (respect user's preference) */
+@media (prefers-color-scheme: dark) {
+  :root { --background: #08060E; --text-color: #F2EEF8; --mc-card: #1A1220; }
+  .navbar { background: rgba(16,12,26,0.85) !important; }
+  .product-card { background: #1A1220; }
+}

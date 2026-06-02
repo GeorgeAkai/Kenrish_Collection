@@ -245,15 +245,14 @@ class InventoryTransaction(models.Model):
         return self.product or self.handbag or self.clothes
 
     def save(self, *args, **kwargs):
-        # compute total cost
         self.total_cost = self.quantity * self.unit_cost
 
         is_new = self.pk is None
+        # inventory.add_stock / record_sale set this flag to take ownership of stock adjustment
+        skip = getattr(self, '_skip_stock_adjustment', False)
         super().save(*args, **kwargs)
 
-        # Adjust stock only when the transaction is first created
-        # NOTE: If you also adjust stock in Sale.save for 'SALE', avoid double-counting by not creating a matching InventoryTransaction.
-        if is_new:
+        if is_new and not skip:
             item = self._target_item()
             if item and hasattr(item, 'stock_quantity'):
                 if self.transaction_type in ['IN', 'RETURN']:
@@ -261,7 +260,6 @@ class InventoryTransaction(models.Model):
                 elif self.transaction_type in ['OUT', 'SALE']:
                     item.stock_quantity = max(0, item.stock_quantity - max(self.quantity, 0))
                 elif self.transaction_type == 'ADJUSTMENT':
-                    # treat quantity as delta; can be positive or negative
                     item.stock_quantity = max(0, item.stock_quantity + self.quantity)
                 item.save()
 
@@ -289,16 +287,16 @@ class Sale(models.Model):
     def save(self, *args, **kwargs):
         self.total_amount = self.quantity * self.unit_price
         is_new = self.pk is None
+        # inventory.record_sale sets this flag to take ownership of stock/cashflow handling
+        skip = getattr(self, '_skip_stock_adjustment', False)
         super().save(*args, **kwargs)
 
-        # Adjust stock on first creation of a sale
-        if is_new:
+        if is_new and not skip:
             item = self._target_item()
             if item and hasattr(item, 'stock_quantity'):
                 item.stock_quantity = max(0, item.stock_quantity - self.quantity)
                 item.save()
 
-            # Create cash flow entry for new sales
             CashFlow.objects.create(
                 transaction_type='REVENUE',
                 amount=self.total_amount,
@@ -372,3 +370,169 @@ class Expense(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class Invoice(models.Model):
+    invoice_number = models.CharField(max_length=30, unique=True, editable=False)
+    customer_name = models.CharField(max_length=255)
+    customer_phone = models.CharField(max_length=20)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    grand_total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    def save(self, *args, **kwargs):
+        if not self.invoice_number:
+            from datetime import date
+            today = date.today().strftime('%Y%m%d')
+            count = Invoice.objects.filter(created_at__date=date.today()).count() + 1
+            self.invoice_number = f'KRC-{today}-{count:04d}'
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.invoice_number} - {self.customer_name}"
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class InvoiceItem(models.Model):
+    ITEM_TYPES = [('product', 'Product'), ('handbag', 'Handbag'), ('clothes', 'Clothes')]
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='items')
+    item_type = models.CharField(max_length=10, choices=ITEM_TYPES)
+    product = models.ForeignKey('Product', null=True, blank=True, on_delete=models.SET_NULL)
+    handbag = models.ForeignKey('Handbag', null=True, blank=True, on_delete=models.SET_NULL)
+    clothes = models.ForeignKey('Clothes', null=True, blank=True, on_delete=models.SET_NULL)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def save(self, *args, **kwargs):
+        self.subtotal = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        item = self.product or self.handbag or self.clothes
+        name = item.name if item else 'Unknown'
+        return f"{self.invoice.invoice_number} - {name} x{self.quantity}"
+
+
+class SlotConfiguration(models.Model):
+    """Per-service booking slot configuration. Controls worker count, duration, and hours."""
+
+    service = models.OneToOneField('Service', on_delete=models.CASCADE, related_name='slot_config')
+    worker_count = models.PositiveIntegerField(default=1, help_text='Max simultaneous bookings (= number of workers)')
+    slot_duration_minutes = models.PositiveIntegerField(default=30, help_text='Appointment duration in minutes')
+    start_time = models.TimeField(default='08:00')
+    end_time = models.TimeField(default='20:00')
+    # List of weekday ints: 0=Mon … 6=Sun. Empty = all days.
+    active_days = models.JSONField(default=list, help_text='Active weekdays (0=Mon, 5=Sat, 6=Sun)')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['service__name']
+
+    def __str__(self):
+        return f'{self.service.name} — {self.worker_count} worker(s), {self.slot_duration_minutes}min slots'
+
+    def is_day_active(self, date):
+        if not self.active_days:
+            return True
+        return date.weekday() in self.active_days
+
+    def generate_slots(self, date):
+        """Return list of HH:MM strings for a given date according to this config."""
+        from datetime import datetime, timedelta
+        if not self.is_day_active(date):
+            return []
+        slots = []
+        current = datetime.combine(date, self.start_time)
+        end = datetime.combine(date, self.end_time)
+        delta = timedelta(minutes=self.slot_duration_minutes)
+        while current < end:
+            slots.append(current.strftime('%H:%M'))
+            current += delta
+        return slots
+
+
+class Order(models.Model):
+    STATUS_PENDING = 'PENDING'
+    STATUS_CONFIRMED = 'CONFIRMED'
+    STATUS_COMPLETED = 'COMPLETED'
+    STATUS_CANCELLED = 'CANCELLED'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_CONFIRMED, 'Confirmed'),
+        (STATUS_COMPLETED, 'Completed'),
+        (STATUS_CANCELLED, 'Cancelled'),
+    ]
+
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    notes = models.TextField(blank=True)
+    admin_notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Order #{self.id} by {self.customer.username} ({self.get_status_display()})'
+
+
+class OrderItem(models.Model):
+    ITEM_TYPES = [('product', 'Product'), ('handbag', 'Handbag'), ('clothes', 'Clothes')]
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey('Product', null=True, blank=True, on_delete=models.SET_NULL)
+    handbag = models.ForeignKey('Handbag', null=True, blank=True, on_delete=models.SET_NULL)
+    clothes = models.ForeignKey('Clothes', null=True, blank=True, on_delete=models.SET_NULL)
+    item_type = models.CharField(max_length=10, choices=ITEM_TYPES)
+    item_name = models.CharField(max_length=255)
+    quantity = models.PositiveIntegerField(default=1)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def _target_item(self):
+        return self.product or self.handbag or self.clothes
+
+    def save(self, *args, **kwargs):
+        self.subtotal = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.item_name} x{self.quantity}'
+
+
+class Reservation(models.Model):
+    STATUS_PENDING = 'PENDING'
+    STATUS_APPROVED = 'APPROVED'
+    STATUS_REJECTED = 'REJECTED'
+    STATUS_CANCELLED = 'CANCELLED'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_APPROVED, 'Approved'),
+        (STATUS_REJECTED, 'Rejected'),
+        (STATUS_CANCELLED, 'Cancelled'),
+    ]
+
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reservations')
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True, related_name='reservations')
+    reservation_date = models.DateField()
+    reservation_time = models.TimeField()
+    notes = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    admin_notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['reservation_date', 'reservation_time']
+
+    def __str__(self):
+        return f"{self.customer.username} - {self.reservation_date} {self.reservation_time} ({self.get_status_display()})"

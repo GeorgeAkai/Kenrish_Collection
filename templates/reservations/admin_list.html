@@ -1,0 +1,146 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Manage Reservations - Kenrish Collection{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <div>
+      <h1 class="display-5 fw-bold mb-1">Manage Reservations</h1>
+      {% if pending_count > 0 %}
+      <p class="mb-0 text-warning fw-semibold">
+        <i class="bi bi-exclamation-circle me-1"></i>{{ pending_count }} pending approval
+      </p>
+      {% else %}
+      <p class="text-muted mb-0">All reservations are up to date</p>
+      {% endif %}
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'reservation-calendar' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-calendar3 me-1"></i> Calendar
+      </a>
+      <a href="{% url 'admin-add-reservation' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Add Reservation
+      </a>
+    </div>
+  </div>
+
+  <!-- Status filter tabs -->
+  <ul class="nav nav-pills mb-4 flex-wrap">
+    <li class="nav-item">
+      <a class="nav-link {% if not status_filter %}active{% endif %}" href="{% url 'admin-reservations' %}">
+        All
+      </a>
+    </li>
+    {% for val, label in status_choices %}
+    <li class="nav-item">
+      <a class="nav-link {% if status_filter == val %}active{% endif %}"
+         href="{% url 'admin-reservations' %}?status={{ val }}">
+        {{ label }}
+        {% if val == 'PENDING' and pending_count > 0 %}
+          <span class="badge bg-warning text-dark ms-1">{{ pending_count }}</span>
+        {% endif %}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+
+  {% if reservations %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Customer</th>
+          <th>Service</th>
+          <th>Date & Time</th>
+          <th>Notes</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reservations %}
+        <tr>
+          <td>
+            <span class="fw-semibold">{{ r.customer.get_full_name|default:r.customer.username }}</span>
+            <br><small class="text-muted">@{{ r.customer.username }}</small>
+          </td>
+          <td>{{ r.service.name|default:"—" }}</td>
+          <td>
+            {{ r.reservation_date|date:"d M Y" }}<br>
+            <small class="text-muted">{{ r.reservation_time|time:"H:i" }}</small>
+          </td>
+          <td>
+            <small class="text-muted">{{ r.notes|truncatechars:50|default:"—" }}</small>
+          </td>
+          <td>
+            {% if r.status == 'APPROVED' %}
+              <span class="badge bg-success">Approved</span>
+            {% elif r.status == 'PENDING' %}
+              <span class="badge bg-warning text-dark">Pending</span>
+            {% elif r.status == 'REJECTED' %}
+              <span class="badge bg-danger">Rejected</span>
+            {% else %}
+              <span class="badge bg-secondary">Cancelled</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.status == 'PENDING' %}
+            <div class="d-flex gap-1 flex-wrap">
+              <form method="post" action="{% url 'admin-approve-reservation' r.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="approve">
+                <button type="submit" class="btn btn-sm btn-success">
+                  <i class="bi bi-check-lg me-1"></i>Approve
+                </button>
+              </form>
+              <button type="button" class="btn btn-sm btn-outline-danger"
+                      data-bs-toggle="modal" data-bs-target="#rejectModal{{ r.pk }}">
+                <i class="bi bi-x-lg me-1"></i>Reject
+              </button>
+            </div>
+
+            <!-- Reject modal -->
+            <div class="modal fade" id="rejectModal{{ r.pk }}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <form method="post" action="{% url 'admin-approve-reservation' r.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reject">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Reject Reservation</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>Rejecting reservation for <strong>{{ r.customer.username }}</strong> on
+                         {{ r.reservation_date|date:"d M Y" }} at {{ r.reservation_time|time:"H:i" }}.</p>
+                      <label class="form-label">Reason (optional)</label>
+                      <textarea name="admin_notes" class="form-control" rows="3"
+                                placeholder="Explain the reason to the customer..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <button type="submit" class="btn btn-danger">Confirm Reject</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            {% else %}
+            <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-calendar-x" style="font-size: 3rem; color: var(--text-color-light);"></i>
+    <p class="mt-3 text-muted">No reservations found{% if status_filter %} with status "{{ status_filter }}"{% endif %}.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

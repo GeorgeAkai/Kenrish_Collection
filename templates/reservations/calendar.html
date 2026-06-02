@@ -1,0 +1,112 @@
+{% extends "base_modern.html" %}
+{% load static %}
+
+{% block title %}Reservations Calendar - Kenrish Collection{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<style>
+  .fc-event { cursor: pointer; }
+  .fc .fc-toolbar-title { font-size: 1.2rem; font-weight: 700; color: var(--heading-color); }
+  .legend-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <div>
+      <h1 class="display-5 fw-bold mb-1">Reservations</h1>
+      <p class="text-muted mb-0">Book an appointment at Kenrish Collection</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      {% if user.is_staff %}
+        {% if pending_count > 0 %}
+        <a href="{% url 'admin-reservations' %}?status=PENDING" class="btn btn-warning">
+          <i class="bi bi-clock me-1"></i> {{ pending_count }} Pending
+        </a>
+        {% endif %}
+        <a href="{% url 'admin-reservations' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-list-ul me-1"></i> Manage List
+        </a>
+        <a href="{% url 'admin-add-reservation' %}" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-1"></i> Add Reservation
+        </a>
+      {% else %}
+        <a href="{% url 'my-reservations' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-person-lines-fill me-1"></i> My Reservations
+        </a>
+        <a href="{% url 'request-reservation' %}" class="btn btn-primary">
+          <i class="bi bi-calendar-plus me-1"></i> Request Reservation
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if user.is_staff %}
+  <div class="d-flex gap-3 mb-4 flex-wrap">
+    <span class="d-flex align-items-center gap-2"><span class="legend-dot" style="background:#198754"></span> Approved</span>
+    <span class="d-flex align-items-center gap-2"><span class="legend-dot" style="background:#ffc107"></span> Pending</span>
+    <span class="d-flex align-items-center gap-2"><span class="legend-dot" style="background:#dc3545"></span> Rejected</span>
+  </div>
+  {% endif %}
+
+  <div class="card shadow-sm">
+    <div class="card-body p-3">
+      <div id="calendar"></div>
+    </div>
+  </div>
+
+  <!-- Event detail modal -->
+  <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="eventModalTitle">Reservation Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="eventModalBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+  const eventsData = {{ events_json|safe }};
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,listWeek',
+      },
+      events: eventsData,
+      eventClick: function (info) {
+        const p = info.event.extendedProps;
+        const start = info.event.start;
+        const timeStr = start ? start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+        const dateStr = start ? start.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '';
+        document.getElementById('eventModalTitle').textContent = info.event.title;
+        document.getElementById('eventModalBody').innerHTML = `
+          <p><i class="bi bi-calendar3 me-2"></i><strong>${dateStr}</strong></p>
+          <p><i class="bi bi-clock me-2"></i>${timeStr}</p>
+          <p><span class="badge" style="background:${info.event.backgroundColor}">${p.status || ''}</span></p>
+          ${p.notes ? `<p class="text-muted mt-2"><i class="bi bi-chat-left-text me-2"></i>${p.notes}</p>` : ''}
+        `;
+        new bootstrap.Modal(document.getElementById('eventModal')).show();
+      },
+      height: 'auto',
+    });
+    calendar.render();
+  });
+</script>
+{% endblock %}
