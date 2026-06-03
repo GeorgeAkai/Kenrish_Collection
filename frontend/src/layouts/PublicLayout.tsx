@@ -50,7 +50,7 @@ export default function PublicLayout() {
       >
         <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between gap-4">
           <Link to="/" className="shrink-0 select-none">
-            <img src={LOGO_URL} alt="Kenrish Collection" className="h-10 w-auto object-contain" />
+            <img src={LOGO_URL} alt="Kenrish Collection" className="h-14 w-auto object-contain" />
           </Link>
 
           {/* Desktop nav */}
@@ -196,7 +196,7 @@ export default function PublicLayout() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10">
             {/* Brand column */}
             <div className="sm:col-span-2 md:col-span-1">
-              <img src={LOGO_URL} alt="Kenrish Collection" className="h-12 w-auto object-contain mb-3" />
+              <img src={LOGO_URL} alt="Kenrish Collection" className="h-16 w-auto object-contain mb-3" />
               <p className="text-sm text-muted-foreground leading-relaxed mb-5 max-w-[220px]">
                 Premium fashion &amp; cosmetics boutique in the heart of Nakuru, Kenya.
               </p>

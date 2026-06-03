@@ -41,7 +41,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
       {/* Logo */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border shrink-0">
         <Link to="/" className="flex items-center gap-2" onClick={onClose}>
-          <img src={LOGO_URL} alt="Kenrish Collection" className="h-8 w-auto object-contain" />
+          <img src={LOGO_URL} alt="Kenrish Collection" className="h-12 w-auto object-contain" />
           <span className="text-xs font-semibold text-primary uppercase tracking-wider">Admin</span>
         </Link>
         {onClose && (

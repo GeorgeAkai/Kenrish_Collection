@@ -52,7 +52,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           <div className="text-center mb-8">
             <div className="mb-4">
-              <img src={LOGO_URL} alt="Kenrish Collection" className="h-16 w-auto object-contain mx-auto" />
+              <img src={LOGO_URL} alt="Kenrish Collection" className="h-24 w-auto object-contain mx-auto" />
             </div>
             <h1 className="text-2xl font-bold">Sign in to your account</h1>
             <p className="text-muted-foreground text-sm mt-1">Enter your details below</p>
