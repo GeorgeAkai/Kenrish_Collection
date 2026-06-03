@@ -9,6 +9,7 @@ import ChatbotWidget from '@/components/ChatbotWidget'
 // Auth
 import LoginPage from '@/pages/auth/LoginPage'
 import SignupPage from '@/pages/auth/SignupPage'
+import ChangePasswordPage from '@/pages/auth/ChangePasswordPage'
 
 // Public
 import HomePage from '@/pages/public/HomePage'
@@ -74,6 +75,7 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/change-password" element={<ChangePasswordPage />} />
           </Route>
         </Route>
 

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Avg
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
 
 
 class Product(models.Model):
@@ -536,3 +537,13 @@ class Reservation(models.Model):
 
     def __str__(self):
         return f"{self.customer.username} - {self.reservation_date} {self.reservation_time} ({self.get_status_display()})"
+
+
+class PasswordChangeCode(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='pw_change_code')
+    code = models.CharField(max_length=6)
+    new_password = models.CharField(max_length=255)
+    expires_at = models.DateTimeField()
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at

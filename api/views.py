@@ -1,9 +1,12 @@
 import json
 import os
+import random
+import string
 from datetime import timedelta, date
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.db.models import Sum, Count, Q
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from django.http import StreamingHttpResponse
@@ -23,6 +26,7 @@ from app1.models import (
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
+    PasswordChangeCode,
 )
 
 from app1.inventory import add_stock, record_sale as _record_sale, InsufficientStockError
@@ -108,6 +112,77 @@ def register_view(request):
 @permission_classes([IsAuthenticated])
 def me_view(request):
     return Response(UserSerializer(request.user).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password_request(request):
+    current_password = request.data.get('current_password', '')
+    new_password = request.data.get('new_password', '')
+
+    if not current_password or not new_password:
+        return Response({'error': 'Both fields are required.'}, status=400)
+
+    user = authenticate(request, username=request.user.username, password=current_password)
+    if user is None:
+        return Response({'error': 'Current password is incorrect.'}, status=400)
+
+    if len(new_password) < 8:
+        return Response({'error': 'New password must be at least 8 characters.'}, status=400)
+
+    if not user.email:
+        return Response({'error': 'No email address on your account.'}, status=400)
+
+    code = ''.join(random.choices(string.digits, k=6))
+    expires_at = timezone.now() + timedelta(minutes=10)
+
+    PasswordChangeCode.objects.update_or_create(
+        user=user,
+        defaults={'code': code, 'new_password': new_password, 'expires_at': expires_at},
+    )
+
+    send_mail(
+        subject='Kenrish Collection — Password Change Code',
+        message=(
+            f'Hi {user.username},\n\n'
+            f'Your password change verification code is:\n\n'
+            f'  {code}\n\n'
+            f'This code expires in 10 minutes.\n\n'
+            f'If you did not request this, please ignore this email.\n\n'
+            f'— Kenrish Collection'
+        ),
+        from_email=None,
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+    masked = user.email[:2] + '***@' + user.email.split('@')[-1]
+    return Response({'message': f'Code sent to {masked}.'})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password_confirm(request):
+    code = request.data.get('code', '').strip()
+    if not code:
+        return Response({'error': 'Code is required.'}, status=400)
+
+    try:
+        record = PasswordChangeCode.objects.get(user=request.user)
+    except PasswordChangeCode.DoesNotExist:
+        return Response({'error': 'No pending password change. Please start over.'}, status=400)
+
+    if record.is_expired():
+        record.delete()
+        return Response({'error': 'Code has expired. Please start over.'}, status=400)
+
+    if record.code != code:
+        return Response({'error': 'Incorrect code.'}, status=400)
+
+    request.user.set_password(record.new_password)
+    request.user.save()
+    record.delete()
+    return Response({'message': 'Password changed successfully. Please log in again.'})
 
 
 # ---------------------------------------------------------------------------

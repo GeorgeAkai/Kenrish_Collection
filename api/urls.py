@@ -8,6 +8,8 @@ urlpatterns = [
     path('auth/register/', views.register_view, name='api-register'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='api-token-refresh'),
     path('auth/me/', views.me_view, name='api-me'),
+    path('auth/change-password/request/', views.change_password_request, name='api-change-password-request'),
+    path('auth/change-password/confirm/', views.change_password_confirm, name='api-change-password-confirm'),
 
     # --- 1. Public Catalogue ---
     path('products/', views.product_list, name='api-product-list'),

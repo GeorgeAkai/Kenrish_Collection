@@ -168,6 +168,9 @@ export default function PublicLayout() {
                     <Link to="/orders" className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">
                       📦 My Orders
                     </Link>
+                    <Link to="/change-password" className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">
+                      🔑 Change Password
+                    </Link>
                     <button onClick={logout} className="text-left px-4 py-2.5 rounded-xl text-sm text-muted-foreground hover:bg-muted transition-colors">
                       Logout
                     </button>
