@@ -171,6 +171,11 @@ STATICFILES_DIRS = [
 
 REACT_APP_DIR = BASE_DIR / "frontend" / "dist"
 
+# Serve the React build's assets (e.g. /assets/index-xxx.js) at the root URL.
+# WhiteNoise middleware intercepts these before URL routing, so the SPA catch-all
+# never accidentally returns index.html for a JS/CSS request.
+WHITENOISE_ROOT = BASE_DIR / "frontend" / "dist"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
