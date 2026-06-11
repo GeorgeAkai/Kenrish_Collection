@@ -30,10 +30,15 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = False 
 # DEBUG = True 
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'kenrishcollection.com', 'www.kenrishcollection.com']
 _render_host = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if _render_host:
     ALLOWED_HOSTS.append(_render_host)
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://kenrishcollection.com',
+    'https://www.kenrishcollection.com',
+]
 
 
 # Application definition
