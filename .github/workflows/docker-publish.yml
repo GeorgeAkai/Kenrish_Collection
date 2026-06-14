@@ -16,7 +16,7 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: georgeakai/kenrish_collection
+  IMAGE_NAME: georgeakai/kenrish
 
 jobs:
   build-and-push:
