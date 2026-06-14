@@ -34,12 +34,24 @@ export default function GalleryPage() {
   }
 
   return (
+    <div>
+      {/* Page hero */}
+      <section className="py-14 px-5 text-center bg-secondary/40">
+        <div className="max-w-2xl mx-auto">
+          <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">Visual Stories</p>
+          <h1
+            className="text-4xl font-bold mb-3"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            Gallery
+          </h1>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Our work &amp; collection, beautifully captured
+          </p>
+        </div>
+      </section>
+
     <div className="max-w-7xl mx-auto px-4 py-10">
-      <div className="text-center mb-10">
-        <h1 className="section-heading">Gallery</h1>
-        <div className="w-12 h-0.5 bg-primary rounded-full mx-auto mt-2 mb-3" />
-        <p className="text-muted-foreground text-sm">Our work &amp; collection, beautifully captured</p>
-      </div>
 
       {loading ? (
         <div className="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-3">
@@ -151,6 +163,7 @@ export default function GalleryPage() {
           </div>
         </div>
       )}
+    </div>
     </div>
   )
 }

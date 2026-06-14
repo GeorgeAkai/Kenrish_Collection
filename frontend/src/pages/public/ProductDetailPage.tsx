@@ -65,9 +65,9 @@ export default function ProductDetailPage() {
           <div className="mt-3 flex items-center gap-3">
             <p className="product-price text-2xl">{formatKES(product.price)}</p>
             {product.average_rating > 0 && (
-              <div className="flex items-center gap-1 bg-muted px-2 py-1">
-                <Star size={13} className="text-gold" fill="currentColor" />
-                <span className="text-xs font-medium">{product.average_rating.toFixed(1)}</span>
+              <div className="flex items-center gap-1 bg-muted px-2.5 py-1 rounded-full">
+                <Star size={12} className="text-gold" fill="currentColor" />
+                <span className="text-xs font-semibold">{product.average_rating.toFixed(1)}</span>
               </div>
             )}
           </div>
@@ -107,7 +107,7 @@ export default function ProductDetailPage() {
           {/* Wishlist */}
           <button
             onClick={() => toggle('products', product.id)}
-            className={`mt-5 btn-modern ${inWishlist ? 'btn-modern--primary' : ''}`}
+            className={`mt-5 btn-modern ${inWishlist ? 'btn-modern--primary' : 'btn-modern--secondary'}`}
           >
             <Heart size={16} fill={inWishlist ? 'currentColor' : 'none'} />
             {inWishlist ? 'Saved to Wishlist' : 'Add to Wishlist'}

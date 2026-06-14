@@ -1,23 +1,41 @@
-import { Sparkles, MapPin, Clock, Phone } from 'lucide-react'
+import { Sparkles, MapPin, Clock, Phone, Heart, Star } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 export default function AboutPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-primary text-primary-foreground py-20 px-4 text-center relative overflow-hidden">
+      <section
+        className="relative py-24 px-4 text-center overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #7C3060 0%, #9B3D78 50%, #A85090 100%)' }}
+      >
+        {/* Decorative circles */}
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute -bottom-24 -left-14 w-72 h-72 rounded-full bg-white/5 pointer-events-none" />
+
         <div className="relative max-w-2xl mx-auto">
-          <Sparkles size={40} className="text-primary-foreground/80 mx-auto mb-5" />
-          <h1 className="text-4xl font-bold mb-4" style={{ fontFamily: 'Georgia, serif' }}>About Kenrish Collection</h1>
-          <p className="text-primary-foreground/70 leading-relaxed">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/15 mb-6">
+            <Sparkles size={26} className="text-white" />
+          </div>
+          <h1
+            className="text-4xl lg:text-5xl font-bold mb-4 text-white"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            About Kenrish Collection
+          </h1>
+          <p className="text-white/70 leading-relaxed text-base">
             Where fashion meets beauty in the heart of Nakuru, Kenya
           </p>
         </div>
       </section>
 
       {/* Story */}
-      <section className="max-w-3xl mx-auto px-4 py-16">
+      <section className="max-w-3xl mx-auto px-5 py-16">
         <div className="space-y-5 text-muted-foreground leading-relaxed">
-          <p className="text-lg text-foreground font-medium" style={{ fontFamily: 'Georgia, serif' }}>
+          <p
+            className="text-lg text-foreground font-medium"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
             Kenrish Collection is a premium fashion and cosmetics boutique located in Shabaab, Nakuru, Kenya.
           </p>
           <p>
@@ -30,6 +48,21 @@ export default function AboutPage() {
             Collection has something for every woman. We take pride in offering exceptional customer service
             and a personalized shopping experience.
           </p>
+        </div>
+
+        {/* Values strip */}
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {[
+            { icon: Star, label: 'Curated Quality', desc: 'Every product is hand-selected for quality and style.' },
+            { icon: Heart, label: 'Client First', desc: 'Personalized service and expert advice, always.' },
+            { icon: Sparkles, label: 'Authentic Only', desc: '100% genuine products sourced from trusted suppliers.' },
+          ].map(({ icon: Icon, label, desc }) => (
+            <div key={label} className="flex flex-col gap-2 p-5 rounded-2xl bg-secondary/50 border border-border">
+              <Icon size={20} className="text-primary" />
+              <p className="font-semibold text-sm text-foreground">{label}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -58,9 +91,23 @@ export default function AboutPage() {
       {/* CTA */}
       <section className="py-16 px-4 text-center">
         <div className="max-w-xl mx-auto">
-          <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: 'Georgia, serif' }}>Come Visit Us</h2>
-          <p className="text-muted-foreground mb-7">Experience our collection in person. Our team is ready to help you find your perfect look.</p>
-          <a href="tel:+254708440390" className="btn-primary">📞 Call 0708 440390</a>
+          <h2
+            className="text-2xl font-bold mb-3"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            Come Visit Us
+          </h2>
+          <p className="text-muted-foreground mb-7 text-sm leading-relaxed">
+            Experience our collection in person. Our team is ready to help you find your perfect look.
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <a href="tel:+254708440390" className="btn-primary">
+              📞 Call 0708 440390
+            </a>
+            <Link to="/reservation" className="btn-outline">
+              Book an Appointment
+            </Link>
+          </div>
         </div>
       </section>
     </div>

@@ -49,9 +49,9 @@ export default function HandbagDetailPage() {
           <div className="mt-3 flex items-center gap-3">
             <p className="text-2xl text-primary font-bold">{formatKES(item.price)}</p>
             {item.average_rating > 0 && (
-              <div className="flex items-center gap-1 bg-muted px-2 py-1">
-                <Star size={13} className="text-gold" fill="currentColor" />
-                <span className="text-xs font-medium">{item.average_rating.toFixed(1)}</span>
+              <div className="flex items-center gap-1 bg-muted px-2.5 py-1 rounded-full">
+                <Star size={12} className="text-gold" fill="currentColor" />
+                <span className="text-xs font-semibold">{item.average_rating.toFixed(1)}</span>
               </div>
             )}
           </div>

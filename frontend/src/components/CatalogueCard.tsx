@@ -27,7 +27,7 @@ export default function CatalogueCard({ item, href, onWishlist, inWishlist }: Pr
           onClick={e => { e.preventDefault(); onWishlist(item.id) }}
           className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center
             shadow-md transition-all duration-200
-            opacity-0 group-hover:opacity-100
+            sm:opacity-0 sm:group-hover:opacity-100
             ${inWishlist
               ? 'bg-rose-500 text-white scale-110'
               : 'bg-card/85 backdrop-blur-sm text-muted-foreground hover:scale-110'

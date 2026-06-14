@@ -151,24 +151,27 @@
   box-shadow: 0 4px 16px rgba(16, 12, 26, 0.05);
 }
 
-/* ── Dark mode adjustments ────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --mc-background: #08060E;
-    --mc-foreground: #F2EEF8;
-    --mc-card: rgba(255, 255, 255, 0.04);
-    --mc-border: rgba(255, 255, 255, 0.1);
-    --mc-muted: rgba(255, 255, 255, 0.06);
-    --mc-primary: #D48EC0;
-    --mc-accent: #A06090;
-    --mc-secondary: rgba(255, 255, 255, 0.06);
-  }
+/* ── Dark mode adjustments (uses .dark class from ThemeContext) ── */
+.dark {
+  --mc-background: #08060E;
+  --mc-foreground: #F2EEF8;
+  --mc-card: rgba(255, 255, 255, 0.04);
+  --mc-border: rgba(255, 255, 255, 0.1);
+  --mc-muted: rgba(255, 255, 255, 0.06);
+  --mc-primary: #D48EC0;
+  --mc-accent: #A06090;
+  --mc-secondary: rgba(255, 255, 255, 0.06);
+}
 
-  .product-card {
-    background: rgba(255, 255, 255, 0.04);
-  }
+.dark .product-card {
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
 
-  .hero-section {
-    background: linear-gradient(135deg, #110A1C 0%, #08060E 100%);
-  }
+.dark .product-card:hover {
+  box-shadow: 0 16px 40px rgba(212, 142, 192, 0.12);
+}
+
+.dark .hero-section {
+  background: linear-gradient(135deg, #110A1C 0%, #08060E 100%);
 }

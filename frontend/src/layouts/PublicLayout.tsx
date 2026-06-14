@@ -35,9 +35,24 @@ export default function PublicLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Announcement bar */}
-      <div className="bg-primary text-primary-foreground text-center text-xs py-2 px-4 tracking-wide font-medium">
-        ✦ Free beauty consultations · Mon–Sat 8AM–8PM · Shabaab, Nakuru · 0708 440390 ✦
+      {/* Announcement bar — scrolling marquee */}
+      <div className="bg-primary text-primary-foreground py-2.5 overflow-hidden select-none">
+        <div className="marquee-track">
+          {[
+            '✦ 500+ Curated Products',
+            '✦ Free Beauty Consultations',
+            '✦ Same-Day Service Bookings',
+            '✦ Mon–Sat 8AM–8PM · Shabaab, Nakuru',
+            '✦ Call 0708 440390',
+            '✦ 500+ Curated Products',
+            '✦ Free Beauty Consultations',
+            '✦ Same-Day Service Bookings',
+            '✦ Mon–Sat 8AM–8PM · Shabaab, Nakuru',
+            '✦ Call 0708 440390',
+          ].map((text, i) => (
+            <span key={i} className="text-xs font-medium px-10 whitespace-nowrap">{text}</span>
+          ))}
+        </div>
       </div>
 
       {/* Header */}

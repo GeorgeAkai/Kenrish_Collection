@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import api from '@/lib/axios'
 import { formatKES } from '@/lib/utils'
-import { Sparkles, ChevronRight } from 'lucide-react'
+import { Sparkles, ChevronRight, CalendarDays } from 'lucide-react'
 import type { Service } from '@/lib/types'
 
 export default function ServicesPage() {
@@ -79,16 +80,25 @@ export default function ServicesPage() {
                   >
                     {s.name}
                   </h2>
-                  <p className="product-price font-bold text-base mb-3">{formatKES(s.price)}</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{s.short_description}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">{s.short_description}</p>
                   {s.full_description && s.full_description !== s.short_description && (
-                    <details className="mt-3">
+                    <details className="mb-4">
                       <summary className="text-xs text-primary cursor-pointer hover:underline underline-offset-2 flex items-center gap-1">
                         Read more <ChevronRight size={11} />
                       </summary>
                       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.full_description}</p>
                     </details>
                   )}
+                  <div className="flex items-center justify-between">
+                    <p className="product-price font-bold text-base">{formatKES(s.price)}</p>
+                    <Link
+                      to="/reservation"
+                      className="inline-flex items-center gap-1.5 text-xs bg-primary text-primary-foreground px-4 py-2 rounded-full font-semibold hover:opacity-90 transition-opacity shadow-md"
+                    >
+                      <CalendarDays size={11} />
+                      Book Now
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
