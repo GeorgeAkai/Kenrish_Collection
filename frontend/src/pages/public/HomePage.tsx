@@ -326,7 +326,7 @@ export default function HomePage() {
           </div>
 
           {tabItems[activeTab].length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               {tabItems[activeTab].slice(0, 8).map(item => (
                 <ItemCard key={item.id} item={item} href={tabHrefs[activeTab](item.id)} />
               ))}
