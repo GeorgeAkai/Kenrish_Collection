@@ -10,6 +10,8 @@ urlpatterns = [
     path('auth/me/', views.me_view, name='api-me'),
     path('auth/change-password/request/', views.change_password_request, name='api-change-password-request'),
     path('auth/change-password/confirm/', views.change_password_confirm, name='api-change-password-confirm'),
+    path('profile/', views.profile_view, name='api-profile'),
+    path('profile/delete/', views.delete_account, name='api-delete-account'),
 
     # --- 1. Public Catalogue ---
     path('products/', views.product_list, name='api-product-list'),
@@ -83,6 +85,7 @@ urlpatterns = [
     path('admin/invoices/<int:pk>/', views.admin_invoice_detail, name='api-admin-invoice-detail'),
 
     # --- 13. Analytics ---
+    path('admin/analytics/reset/', views.analytics_reset, name='api-analytics-reset'),
     path('admin/analytics/summary/', views.analytics_summary, name='api-analytics-summary'),
     path('admin/analytics/sales-trend/', views.analytics_sales_trend, name='api-analytics-sales-trend'),
     path('admin/analytics/top-sellers/', views.analytics_top_sellers, name='api-analytics-top-sellers'),

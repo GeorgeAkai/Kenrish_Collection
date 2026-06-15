@@ -7,6 +7,7 @@ import type { PieLabelRenderProps } from 'recharts'
 import api from '@/lib/axios'
 import { formatKES } from '@/lib/utils'
 import type { GalleryImage } from '@/lib/types'
+import { AlertTriangle, RotateCcw, Download } from 'lucide-react'
 
 type Period = 'today' | 'week' | 'month'
 
@@ -28,6 +29,8 @@ function StatCard({ label, value, accent }: { label: string; value: string; acce
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6']
 
+type ResetModal = null | 'confirm' | 'busy' | 'done'
+
 export default function AdminDashboardPage() {
   const [period, setPeriod] = useState<Period>('month')
   const [summary, setSummary] = useState<Summary | null>(null)
@@ -37,6 +40,32 @@ export default function AdminDashboardPage() {
   const [stockValue, setStockValue] = useState<number | null>(null)
   const [expenses, setExpenses] = useState<ExpenseRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [resetModal, setResetModal] = useState<ResetModal>(null)
+  const [resetMsg, setResetMsg] = useState('')
+
+  async function handleReset(save: boolean) {
+    setResetModal('busy')
+    try {
+      const { data } = await api.post('/admin/analytics/reset/', { save })
+      if (save && data.snapshot) {
+        const blob = new Blob([JSON.stringify(data.snapshot, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `kenrish-analytics-${new Date().toISOString().slice(0, 10)}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+      }
+      const d = data.deleted
+      setResetMsg(`Cleared ${d.sales} sale${d.sales !== 1 ? 's' : ''}, ${d.expenses} expense${d.expenses !== 1 ? 's' : ''}, and ${d.cash_flow} cash-flow record${d.cash_flow !== 1 ? 's' : ''}.`)
+      setResetModal('done')
+      // Reload analytics
+      setPeriod(p => p)
+    } catch {
+      setResetMsg('Reset failed. Please try again.')
+      setResetModal('done')
+    }
+  }
 
   const [wishlistStats, setWishlistStats] = useState<WishlistStat[]>([])
   const [topLiked, setTopLiked] = useState<GalleryImage[]>([])
@@ -94,15 +123,85 @@ export default function AdminDashboardPage() {
     <div>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h2 className="text-xl font-semibold">Analytics Dashboard</h2>
-        <div className="flex gap-1 border rounded-lg overflow-hidden">
-          {periods.map(p => (
-            <button key={p.key} onClick={() => setPeriod(p.key)}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors ${period === p.key ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}>
-              {p.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex gap-1 border rounded-lg overflow-hidden">
+            {periods.map(p => (
+              <button key={p.key} onClick={() => setPeriod(p.key)}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${period === p.key ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}>
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setResetModal('confirm')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30 transition-colors"
+          >
+            <RotateCcw size={14} /> Reset Dashboard
+          </button>
         </div>
       </div>
+
+      {/* ── Reset Modal ── */}
+      {resetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+          <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            {resetModal === 'confirm' && (
+              <>
+                <div className="flex items-center gap-3 mb-4 text-red-600 dark:text-red-400">
+                  <AlertTriangle size={22} />
+                  <h3 className="text-lg font-semibold">Reset Analytics Dashboard?</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  This will permanently delete <strong>all sales, expense, and cash-flow records</strong>.
+                  This action <strong>cannot be undone</strong>.
+                </p>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Choose <em>Save &amp; Reset</em> to download a JSON snapshot of current data before clearing,
+                  or <em>Wipe</em> to clear immediately without saving.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    onClick={() => handleReset(true)}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all"
+                  >
+                    <Download size={15} /> Save &amp; Reset
+                  </button>
+                  <button
+                    onClick={() => handleReset(false)}
+                    className="flex-1 px-4 py-2.5 rounded-xl border-2 border-red-500 text-red-600 dark:text-red-400 text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+                  >
+                    Wipe (No Save)
+                  </button>
+                  <button
+                    onClick={() => setResetModal(null)}
+                    className="px-4 py-2.5 rounded-xl text-sm text-muted-foreground hover:bg-muted transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            )}
+            {resetModal === 'busy' && (
+              <div className="flex flex-col items-center gap-4 py-4">
+                <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+                <p className="text-sm text-muted-foreground">Resetting analytics…</p>
+              </div>
+            )}
+            {resetModal === 'done' && (
+              <>
+                <h3 className="font-semibold mb-2">Reset Complete</h3>
+                <p className="text-sm text-muted-foreground mb-4">{resetMsg}</p>
+                <button
+                  onClick={() => { setResetModal(null); setPeriod('month') }}
+                  className="w-full px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-all"
+                >
+                  Close &amp; Refresh
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center h-64 text-muted-foreground">Loading analytics…</div>

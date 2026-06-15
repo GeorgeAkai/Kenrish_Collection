@@ -18,10 +18,16 @@ export default function SignupPage() {
   const strengthLabel = ['', 'Weak', 'Fair', 'Strong'][pwStrength]
   const strengthColor = ['', 'bg-red-400', 'bg-amber-400', 'bg-green-500'][pwStrength]
 
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
   function validate() {
     const e: Record<string, string> = {}
     if (!form.username.trim()) e.username = 'Username is required'
-    if (!form.email.trim()) e.email = 'Email is required'
+    if (!form.email.trim()) {
+      e.email = 'Email is required'
+    } else if (!EMAIL_RE.test(form.email.trim())) {
+      e.email = 'Enter a valid email address (e.g. you@example.com)'
+    }
     if (form.password.length < 8) e.password = 'Password must be at least 8 characters'
     if (form.password !== form.confirm) e.confirm = 'Passwords do not match'
     return e

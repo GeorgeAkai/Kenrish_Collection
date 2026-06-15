@@ -3,7 +3,7 @@ import { Link, Outlet, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { Menu, X, Sun, Moon, Heart, MapPin, Phone, Clock, Globe } from 'lucide-react'
+import { Menu, X, Sun, Moon, Heart, MapPin, Phone, Clock, Globe, UserCircle } from 'lucide-react'
 import { LOGO_URL } from '@/lib/brand'
 
 export default function PublicLayout() {
@@ -122,6 +122,13 @@ export default function PublicLayout() {
                   </Link>
                 )}
                 <Link
+                  to="/profile"
+                  className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-primary"
+                  aria-label="My Profile"
+                >
+                  <UserCircle size={18} />
+                </Link>
+                <Link
                   to="/wishlist"
                   className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-primary"
                   aria-label="Wishlist"
@@ -199,6 +206,9 @@ export default function PublicLayout() {
                         {t('nav.adminPanel')}
                       </Link>
                     )}
+                    <Link to="/profile" className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">
+                      👤 My Profile
+                    </Link>
                     <Link to="/wishlist" className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">
                       {t('nav.wishlist')}
                     </Link>

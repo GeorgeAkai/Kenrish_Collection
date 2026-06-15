@@ -52,6 +52,7 @@ from .serializers import (
     ReservationSerializer, ReservationAdminSerializer,
     OrderSerializer, OrderCreateSerializer,
     SlotConfigurationSerializer,
+    UserProfileSerializer, UserProfileUpdateSerializer,
 )
 
 
@@ -183,6 +184,30 @@ def change_password_confirm(request):
     request.user.save()
     record.delete()
     return Response({'message': 'Password changed successfully. Please log in again.'})
+
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def profile_view(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    if request.method == 'GET':
+        return Response(UserProfileSerializer(profile, context={'request': request}).data)
+
+    serializer = UserProfileUpdateSerializer(profile, data=request.data, partial=True)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.save()
+    return Response(UserProfileSerializer(profile, context={'request': request}).data)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_account(request):
+    user = request.user
+    user.is_active = False
+    user.save()
+    return Response({'message': 'Account deactivated.'}, status=status.HTTP_200_OK)
 
 
 # ---------------------------------------------------------------------------
@@ -1128,6 +1153,43 @@ def analytics_expenses_breakdown(request):
     return Response(_expenses_breakdown(period))
 
 
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def analytics_reset(request):
+    """
+    Zero out all analytics data.
+    Body: {"save": true}  →  returns snapshot JSON before wiping.
+    Body: {"save": false} →  wipes without returning snapshot (Wipe mode).
+    """
+    do_save = bool(request.data.get('save', False))
+
+    snapshot = None
+    if do_save:
+        snapshot = {
+            'generated_at': timezone.now().isoformat(),
+            'summary_today': _sales_summary('today'),
+            'summary_week': _sales_summary('week'),
+            'summary_month': _sales_summary('month'),
+            'top_sellers_month': _top_sellers('month'),
+            'expenses_month': _expenses_breakdown('month'),
+            'total_stock_value': _stock_value(),
+            'total_sales': Sale.objects.count(),
+            'total_expenses': Expense.objects.count(),
+        }
+
+    sales_del, _ = Sale.objects.all().delete()
+    expenses_del, _ = Expense.objects.all().delete()
+    cashflow_del, _ = CashFlow.objects.all().delete()
+
+    result = {
+        'success': True,
+        'deleted': {'sales': sales_del, 'expenses': expenses_del, 'cash_flow': cashflow_del},
+    }
+    if snapshot:
+        result['snapshot'] = snapshot
+    return Response(result)
+
+
 # ---------------------------------------------------------------------------
 # 14. Chatbot streaming
 # ---------------------------------------------------------------------------
@@ -1152,6 +1214,25 @@ def chatbot_stream(request):
 
     if not api_key:
         return Response({'detail': 'OPENROUTER_API_KEY not configured.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    # Guardrail: reject messages probing admin/internal paths
+    import re as _re
+    _admin_pattern = _re.compile(
+        r'(/admin|/api/admin|django.admin|admin\s+panel|admin\s+login|staff\s+account'
+        r'|system\s+prompt|ignore\s+your|jailbreak|pretend\s+you|act\s+as\s+(a\s+)?different'
+        r'|reveal\s+(your|the)\s+(prompt|instructions)|database\s+record)',
+        _re.IGNORECASE,
+    )
+    last_user_msg = next(
+        (m.get('content', '') for m in reversed(messages_data) if m.get('role') == 'user'),
+        '',
+    )
+    if _admin_pattern.search(last_user_msg):
+        def _blocked():
+            msg = json.dumps({'choices': [{'delta': {'content': 'I can only help with shopping and salon services at Kenrish Collection.'}}]})
+            yield f'data: {msg}\n\n'
+            yield 'data: [DONE]\n\n'
+        return StreamingHttpResponse(_blocked(), content_type='text/event-stream')
 
     products = list(Product.objects.values('name', 'price', 'stock_quantity').order_by('-id')[:20])
     handbags = list(Handbag.objects.values('name', 'price', 'stock_quantity').order_by('-id')[:20])

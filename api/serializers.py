@@ -1,4 +1,7 @@
+import re
 from django.contrib.auth.models import User
+from django.core.validators import validate_email as django_validate_email
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from app1.models import (
@@ -14,6 +17,18 @@ from app1.models import (
 # Auth
 # ---------------------------------------------------------------------------
 
+_DISPOSABLE_DOMAINS = {
+    'mailinator.com', 'guerrillamail.com', 'tempmail.com', 'throwam.com',
+    'sharklasers.com', 'guerrillamailblock.com', 'grr.la', 'guerrillamail.info',
+    'yopmail.com', 'yopmail.fr', 'cool.fr.nf', 'jetable.fr.nf', 'nospam.ze.tc',
+    'nomail.xl.cx', 'mega.zik.dj', 'speed.1s.fr', 'courriel.fr.nf', 'moncourrier.fr.nf',
+    'monemail.fr.nf', 'monmail.fr.nf', 'trashmail.at', 'trashmail.com', 'trashmail.io',
+    'trashmail.me', 'trashmail.net', 'dispostable.com', 'spamgourmet.com', 'spam4.me',
+    'spamfree24.org', 'spamfree24.de', 'spamfree24.eu', 'spamfree24.info', 'spamfree24.net',
+    'fakeinbox.com', 'mailnull.com', 'maildrop.cc', 'getnada.com', 'mailnesia.com',
+}
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
 
@@ -21,7 +36,30 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email', 'password']
 
+    def validate_email(self, value):
+        value = value.strip().lower()
+        # Basic format check
+        try:
+            django_validate_email(value)
+        except DjangoValidationError:
+            raise serializers.ValidationError('Enter a valid email address.')
+
+        # Reject single-segment domains (e.g. user@localhost)
+        if not re.search(r'@.+\..+', value):
+            raise serializers.ValidationError('Enter a valid email address with a real domain.')
+
+        domain = value.split('@', 1)[1]
+        if domain in _DISPOSABLE_DOMAINS:
+            raise serializers.ValidationError('Disposable email addresses are not allowed. Please use a real email.')
+
+        # Enforce uniqueness
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError('An account with this email already exists.')
+
+        return value
+
     def create(self, validated_data):
+        validated_data['email'] = validated_data['email'].strip().lower()
         return User.objects.create_user(**validated_data)
 
 
@@ -475,3 +513,32 @@ class OrderCreateItemSerializer(serializers.Serializer):
 class OrderCreateSerializer(serializers.Serializer):
     items = OrderCreateItemSerializer(many=True)
     notes = serializers.CharField(required=False, allow_blank=True, default='')
+
+
+# ---------------------------------------------------------------------------
+# User Profile
+# ---------------------------------------------------------------------------
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+    date_joined = serializers.DateTimeField(source='user.date_joined', read_only=True)
+    avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserProfile
+        fields = ['username', 'email', 'date_joined', 'avatar', 'bio', 'phone']
+
+    def get_avatar(self, obj):
+        request = self.context.get('request')
+        if obj.avatar and request:
+            return request.build_absolute_uri(obj.avatar.url)
+        return None
+
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    avatar = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = UserProfile
+        fields = ['avatar', 'bio', 'phone']

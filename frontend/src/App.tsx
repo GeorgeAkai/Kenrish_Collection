@@ -27,6 +27,7 @@ import AboutPage from '@/pages/public/AboutPage'
 import WishlistPage from '@/pages/public/WishlistPage'
 import OrdersPage from '@/pages/public/OrdersPage'
 import ReservationPage from '@/pages/public/ReservationPage'
+import ProfilePage from '@/pages/public/ProfilePage'
 
 // Admin
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
@@ -75,6 +76,7 @@ export default function App() {
           <Route path="/terms-of-service" element={<div className="max-w-3xl mx-auto px-4 py-10"><h1 className="text-2xl font-bold mb-4">Terms of Service</h1><p className="text-muted-foreground">By using Kenrish Collection, you agree to our terms. All sales are final unless goods are defective. Contact us at 0708440390 for any issues.</p></div>} />
           <Route path="/reservation" element={<ReservationPage />} />
           <Route element={<ProtectedRoute />}>
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/change-password" element={<ChangePasswordPage />} />
