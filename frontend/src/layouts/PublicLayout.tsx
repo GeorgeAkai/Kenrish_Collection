@@ -3,7 +3,7 @@ import { Link, Outlet, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { Menu, X, Sun, Moon, Heart, MapPin, Phone, Clock, Globe, UserCircle } from 'lucide-react'
+import { Menu, X, Sun, Moon, Heart, MapPin, Phone, Clock, Globe, UserCircle, LayoutDashboard } from 'lucide-react'
 import { LOGO_URL } from '@/lib/brand'
 
 export default function PublicLayout() {
@@ -116,8 +116,9 @@ export default function PublicLayout() {
                 {user?.is_staff && (
                   <Link
                     to="/admin"
-                    className="hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
+                    className="hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all shadow-sm"
                   >
+                    <LayoutDashboard size={12} />
                     {t('nav.admin')}
                   </Link>
                 )}
@@ -137,7 +138,7 @@ export default function PublicLayout() {
                 </Link>
                 <button
                   onClick={logout}
-                  className="hidden sm:block text-xs px-4 py-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  className="hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full text-red-500/80 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                 >
                   {t('nav.logout')}
                 </button>
@@ -202,12 +203,13 @@ export default function PublicLayout() {
                 {isAuthenticated ? (
                   <>
                     {user?.is_staff && (
-                      <Link to="/admin" className="px-4 py-2.5 rounded-xl text-sm text-primary hover:bg-primary/10 transition-colors">
+                      <Link to="/admin" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all">
+                        <LayoutDashboard size={14} />
                         {t('nav.adminPanel')}
                       </Link>
                     )}
-                    <Link to="/profile" className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">
-                      👤 My Profile
+                    <Link to="/profile" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">
+                      <UserCircle size={14} /> My Profile
                     </Link>
                     <Link to="/wishlist" className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">
                       {t('nav.wishlist')}
@@ -218,7 +220,7 @@ export default function PublicLayout() {
                     <Link to="/change-password" className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">
                       {t('nav.changePassword')}
                     </Link>
-                    <button onClick={logout} className="text-left px-4 py-2.5 rounded-xl text-sm text-muted-foreground hover:bg-muted transition-colors">
+                    <button onClick={logout} className="text-left flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm text-red-500/80 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors">
                       {t('nav.logout')}
                     </button>
                   </>

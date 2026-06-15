@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '@/lib/axios'
 import { formatKES, formatDate } from '@/lib/utils'
-import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Ban } from 'lucide-react'
+import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Ban, Truck, ShieldCheck, Headphones } from 'lucide-react'
 import type { Product, Handbag, Clothes, Offer, Service } from '@/lib/types'
 import { useLanguage } from '@/contexts/LanguageContext'
 
@@ -164,10 +164,10 @@ export default function HomePage() {
   }
 
   const features = [
-    { icon: '✦', titleKey: 'home.feature1Title', descKey: 'home.feature1Desc' },
-    { icon: '✦', titleKey: 'home.feature2Title', descKey: 'home.feature2Desc' },
-    { icon: '✦', titleKey: 'home.feature3Title', descKey: 'home.feature3Desc' },
-    { icon: '✦', titleKey: 'home.feature4Title', descKey: 'home.feature4Desc' },
+    { Icon: Truck, titleKey: 'home.feature1Title', descKey: 'home.feature1Desc' },
+    { Icon: ShieldCheck, titleKey: 'home.feature2Title', descKey: 'home.feature2Desc' },
+    { Icon: Sparkles, titleKey: 'home.feature3Title', descKey: 'home.feature3Desc' },
+    { Icon: Headphones, titleKey: 'home.feature4Title', descKey: 'home.feature4Desc' },
   ]
 
   return (
@@ -212,24 +212,6 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* Stats row */}
-              <div className="flex items-center gap-10">
-                {[
-                  ['500+', t('home.statsProducts')],
-                  ['1000+', t('home.statsClients')],
-                  ['15+', t('home.statsServices')],
-                ].map(([val, label]) => (
-                  <div key={label}>
-                    <div
-                      className="text-2xl font-semibold text-foreground"
-                      style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-                    >
-                      {val}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">{label}</div>
-                  </div>
-                ))}
-              </div>
             </div>
 
             {/* Right — image mosaic (desktop only) */}
@@ -381,11 +363,11 @@ export default function HomePage() {
       {/* ═══ FEATURE STRIP ══════════════════════════════════════════════ */}
       <section className="py-12 border-y border-border">
         <div className="max-w-7xl mx-auto px-5 grid grid-cols-2 md:grid-cols-4 gap-6">
-          {features.map(f => (
-            <div key={f.titleKey} className="flex flex-col gap-2">
-              <span className="text-primary text-base font-bold">{f.icon}</span>
-              <h4 className="font-semibold text-sm text-foreground">{t(f.titleKey)}</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">{t(f.descKey)}</p>
+          {features.map(({ Icon, titleKey, descKey }) => (
+            <div key={titleKey} className="flex flex-col gap-2">
+              <Icon size={18} className="text-primary" />
+              <h4 className="font-semibold text-sm text-foreground">{t(titleKey)}</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">{t(descKey)}</p>
             </div>
           ))}
         </div>

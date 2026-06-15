@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Heart, Star, Sparkles } from 'lucide-react'
 import { formatKES } from '@/lib/utils'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface CatalogueItem {
   id: number
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export default function CatalogueCard({ item, href, onWishlist, inWishlist }: Props) {
+  const { t } = useLanguage()
   return (
     <div className="group relative product-card">
       {/* Wishlist button — fades in on hover (Figma style) */}
@@ -27,7 +29,6 @@ export default function CatalogueCard({ item, href, onWishlist, inWishlist }: Pr
           onClick={e => { e.preventDefault(); onWishlist(item.id) }}
           className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center
             shadow-md transition-all duration-200
-            sm:opacity-0 sm:group-hover:opacity-100
             ${inWishlist
               ? 'bg-rose-500 text-white scale-110'
               : 'bg-card/85 backdrop-blur-sm text-muted-foreground hover:scale-110'
@@ -52,7 +53,7 @@ export default function CatalogueCard({ item, href, onWishlist, inWishlist }: Pr
             : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-muted-foreground">
                 <Sparkles size={22} className="text-primary/25" />
-                <span className="text-xs">No image</span>
+                <span className="text-xs">{t('common.noImage')}</span>
               </div>
             )
           }
@@ -60,14 +61,14 @@ export default function CatalogueCard({ item, href, onWishlist, inWishlist }: Pr
           {/* Sold out pill badge */}
           {item.stock_quantity === 0 && (
             <div className="absolute top-2.5 left-2.5 product-tag">
-              Sold out
+              {t('common.soldOut')}
             </div>
           )}
 
           {/* "Add to Bag" bar — slides up on hover */}
           <div className="absolute bottom-0 inset-x-0 px-3 pb-3 translate-y-full group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
             <div className="w-full py-2.5 bg-primary text-primary-foreground text-xs font-semibold rounded-xl text-center shadow-lg">
-              View Details
+              {t('common.viewDetails')}
             </div>
           </div>
         </div>

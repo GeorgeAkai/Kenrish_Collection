@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { LOGO_URL } from '@/lib/brand'
@@ -18,12 +18,31 @@ const navItems = [
   { to: '/admin/orders', label: 'Orders', icon: ClipboardList },
   { to: '/admin/services', label: 'Services', icon: Scissors },
   { to: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
-  { to: '/admin/slot-config', label: 'Slot Config', icon: Settings2 },
+  { to: '/admin/slot-config', label: 'Schedule Settings', icon: Settings2 },
   { to: '/admin/gallery', label: 'Gallery', icon: Image },
   { to: '/admin/offers', label: 'Offers', icon: Tag },
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/invoices', label: 'Invoices', icon: FileText },
 ]
+
+export function getAdminPageTitle(pathname: string): string {
+  const titles: Record<string, string> = {
+    '/admin': 'Dashboard',
+    '/admin/products': 'Products',
+    '/admin/handbags': 'Handbags',
+    '/admin/clothes': 'Clothes',
+    '/admin/inventory': 'Inventory',
+    '/admin/orders': 'Orders',
+    '/admin/services': 'Services',
+    '/admin/reservations': 'Reservations',
+    '/admin/slot-config': 'Schedule Settings',
+    '/admin/gallery': 'Gallery',
+    '/admin/offers': 'Offers',
+    '/admin/users': 'Users',
+    '/admin/invoices': 'Invoices',
+  }
+  return titles[pathname] ?? 'Admin'
+}
 
 function Sidebar({ onClose }: { onClose?: () => void }) {
   const { user, logout } = useAuth()
@@ -92,7 +111,7 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
         <div className="flex items-center justify-between">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-2 text-xs text-red-500/80 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 px-2 py-1 rounded-lg transition-colors"
           >
             <LogOut size={13} /> Logout
           </button>
@@ -111,6 +130,8 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const location = useLocation()
+  const pageTitle = getAdminPageTitle(location.pathname)
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -143,6 +164,7 @@ export default function AdminLayout() {
           >
             <Menu size={18} />
           </button>
+          <h1 className="text-sm font-semibold text-foreground">{pageTitle}</h1>
           <div className="flex-1" />
           <Link
             to="/"
