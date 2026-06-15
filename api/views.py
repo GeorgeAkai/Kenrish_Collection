@@ -924,6 +924,8 @@ def admin_demote_user(request, pk):
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
         return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    if user.username == 'GeorgeAkai' and request.user.username != 'GeorgeAkai':
+        return Response({'detail': 'GeorgeAkai cannot be removed as admin.'}, status=status.HTTP_403_FORBIDDEN)
     user.is_staff = False
     user.save()
     return Response({'detail': f'{user.username} demoted.'})
@@ -954,6 +956,8 @@ def admin_delete_user(request, pk):
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
         return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    if user.username == 'GeorgeAkai':
+        return Response({'detail': 'GeorgeAkai cannot be deleted.'}, status=status.HTTP_403_FORBIDDEN)
     username = user.username
     user.delete()
     return Response({'detail': f'User {username} deleted.'})
