@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import { type ComponentProps } from 'react'
+import { MemoryRouter } from 'react-router-dom'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import CatalogueCard from './CatalogueCard'
 
@@ -24,7 +25,7 @@ const itemWithImage = {
 function renderCard(
   item: typeof itemNoImage,
   lang: 'en' | 'sw' = 'en',
-  props: Partial<React.ComponentProps<typeof CatalogueCard>> = {}
+  props: Partial<ComponentProps<typeof CatalogueCard>> = {}
 ) {
   localStorage.setItem('kenrish-lang', lang)
   return render(
