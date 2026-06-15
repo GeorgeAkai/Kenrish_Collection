@@ -243,7 +243,7 @@ export default function HomePage() {
               {heroImages.length >= 2 ? (
                 <>
                   {/* Left col — tall */}
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-3 hero-float">
                     <div className="rounded-2xl overflow-hidden flex-1 bg-muted">
                       {heroImages[0] && (
                         <img src={heroImages[0]} alt="" className="w-full h-full object-cover" />
@@ -255,8 +255,8 @@ export default function HomePage() {
                       </div>
                     )}
                   </div>
-                  {/* Right col — offset */}
-                  <div className="flex flex-col gap-3 pt-8">
+                  {/* Right col — offset, delayed float */}
+                  <div className="flex flex-col gap-3 pt-8 hero-float-delay">
                     {heroImages[1] && (
                       <div className="rounded-2xl overflow-hidden h-44 bg-muted shrink-0">
                         <img src={heroImages[1]} alt="" className="w-full h-full object-cover" />
@@ -279,6 +279,9 @@ export default function HomePage() {
 
           </div>
         </div>
+
+        {/* Gradient fade from hero into the section below */}
+        <div className="absolute bottom-0 inset-x-0 h-28 pointer-events-none hero-fade-bottom" />
       </section>
 
       {/* ═══ PROMO STRIP ═══════════════════════════════════════════════════ */}

@@ -98,7 +98,7 @@
   --secondary: rgba(255, 255, 255, 0.07);
   --secondary-foreground: #F2EEF8;
   --muted: rgba(255, 255, 255, 0.04);
-  --muted-foreground: #9A82A8;
+  --muted-foreground: #C4B0D8;
   --accent: #A06090;
   --accent-foreground: #FFFFFF;
   --destructive: #c0392b;
@@ -144,10 +144,25 @@
   }
   .dark .gradient-hero {
     background:
+      radial-gradient(ellipse 65% 55% at 62% 8%,  rgba(42,  28,  51, 0.92) 0%, transparent 68%),
       radial-gradient(ellipse 75% 55% at 8% 65%,  rgba(212, 142, 192, 0.22) 0%, transparent 58%),
-      radial-gradient(ellipse 58% 72% at 92% 12%, rgba(124,  48,  96, 0.18) 0%, transparent 54%),
+      radial-gradient(ellipse 58% 72% at 92% 12%, rgba(124,  48,  96, 0.20) 0%, transparent 54%),
       radial-gradient(ellipse 48% 48% at 68% 88%, rgba(192, 125, 176, 0.13) 0%, transparent 50%),
       linear-gradient(145deg, #0F091C 0%, #08060E 50%, #120919 100%);
+  }
+
+  /* Hero bottom fade — transitions the hero into the section below */
+  .hero-fade-bottom {
+    background: linear-gradient(to bottom, transparent 0%, var(--background) 100%);
+  }
+
+  /* Floating animation for hero image tiles */
+  .hero-float {
+    animation: heroFloat 7s ease-in-out infinite;
+  }
+  .hero-float-delay {
+    animation: heroFloat 7s ease-in-out infinite;
+    animation-delay: -3.5s;
   }
 
   /* frosted-glass sheen sitting above the gradient */
@@ -263,4 +278,9 @@ main {
 
 .marquee-track:hover {
   animation-play-state: paused;
+}
+
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0px);    }
+  50%       { transform: translateY(-10px); }
 }

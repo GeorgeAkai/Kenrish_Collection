@@ -78,7 +78,7 @@ export default function PublicLayout() {
                   `px-3 py-1.5 rounded-full text-sm transition-colors ${
                     isActive
                       ? 'text-primary font-medium bg-primary/10'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                      : 'text-muted-foreground hover:text-primary hover:bg-primary/8 transition-colors duration-200'
                   }`
                 }
               >
@@ -245,7 +245,7 @@ export default function PublicLayout() {
                   { to: '/offers', label: 'Current Offers' },
                 ].map(({ to, label }) => (
                   <li key={to}>
-                    <Link to={to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <Link to={to} className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200">
                       {label}
                     </Link>
                   </li>
@@ -264,7 +264,7 @@ export default function PublicLayout() {
                   { to: '/services', label: 'Beauty Consult' },
                 ].map(({ to, label }, i) => (
                   <li key={i}>
-                    <Link to={to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <Link to={to} className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200">
                       {label}
                     </Link>
                   </li>
@@ -283,7 +283,7 @@ export default function PublicLayout() {
                   { to: '/terms-of-service', label: 'Terms of Service' },
                 ].map(({ to, label }) => (
                   <li key={to}>
-                    <Link to={to} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <Link to={to} className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200">
                       {label}
                     </Link>
                   </li>
@@ -296,8 +296,8 @@ export default function PublicLayout() {
           <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Kenrish Collection. All rights reserved.</p>
             <div className="flex gap-5">
-              <Link to="/privacy-policy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy</Link>
-              <Link to="/terms-of-service" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms</Link>
+              <Link to="/privacy-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors duration-200">Privacy</Link>
+              <Link to="/terms-of-service" className="text-xs text-muted-foreground hover:text-primary transition-colors duration-200">Terms</Link>
             </div>
           </div>
         </div>

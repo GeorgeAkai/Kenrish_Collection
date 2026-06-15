@@ -167,7 +167,7 @@
 .dark {
   --mc-background: #08060E;
   --mc-foreground: #F2EEF8;
-  --mc-card: rgba(255, 255, 255, 0.04);
+  --mc-card: #251b2d;
   --mc-border: rgba(255, 255, 255, 0.1);
   --mc-muted: rgba(255, 255, 255, 0.06);
   --mc-primary: #D48EC0;
@@ -176,8 +176,8 @@
 }
 
 .dark .product-card {
-  background: rgba(255, 255, 255, 0.04);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  background: #251b2d;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
 }
 
 .dark .product-card:hover {
