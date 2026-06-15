@@ -6,6 +6,7 @@ import {
 import type { PieLabelRenderProps } from 'recharts'
 import api from '@/lib/axios'
 import { formatKES } from '@/lib/utils'
+import type { GalleryImage } from '@/lib/types'
 
 type Period = 'today' | 'week' | 'month'
 
@@ -35,9 +36,13 @@ export default function AdminDashboardPage() {
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [stockValue, setStockValue] = useState<number | null>(null)
   const [expenses, setExpenses] = useState<ExpenseRow[]>([])
-  const [wishlistStats, setWishlistStats] = useState<WishlistStat[]>([])
   const [loading, setLoading] = useState(true)
 
+  const [wishlistStats, setWishlistStats] = useState<WishlistStat[]>([])
+  const [topLiked, setTopLiked] = useState<GalleryImage[]>([])
+  const [engagementLoading, setEngagementLoading] = useState(true)
+
+  // Main analytics — period-dependent
   useEffect(() => {
     setLoading(true)
     const p = `?period=${period}`
@@ -48,8 +53,7 @@ export default function AdminDashboardPage() {
       api.get('/admin/analytics/inventory-alerts/'),
       api.get('/admin/analytics/stock-value/'),
       api.get(`/admin/analytics/expenses-breakdown/${p}`),
-      api.get('/admin/wishlist-stats/'),
-    ]).then(([s, t, ts, a, sv, e, ws]) => {
+    ]).then(([s, t, ts, a, sv, e]) => {
       setSummary(s.data)
       setTrend(t.data)
       const flat: TopSeller[] = [
@@ -61,9 +65,24 @@ export default function AdminDashboardPage() {
       setAlerts(a.data)
       setStockValue(sv.data.total_value)
       setExpenses(e.data)
-      setWishlistStats(ws.data)
     }).catch(console.error).finally(() => setLoading(false))
   }, [period])
+
+  // Engagement data — period-independent, fetched once
+  useEffect(() => {
+    setEngagementLoading(true)
+    Promise.all([
+      api.get('/admin/wishlist-stats/').catch(() => ({ data: [] })),
+      api.get('/gallery/').catch(() => ({ data: [] })),
+    ]).then(([ws, gl]) => {
+      setWishlistStats(ws.data ?? [])
+      const sorted: GalleryImage[] = [...(gl.data ?? [])]
+        .sort((a, b) => (b.like_count ?? 0) - (a.like_count ?? 0))
+        .filter(img => (img.like_count ?? 0) > 0)
+        .slice(0, 10)
+      setTopLiked(sorted)
+    }).finally(() => setEngagementLoading(false))
+  }, [])
 
   const periods: { key: Period; label: string }[] = [
     { key: 'today', label: 'Today' },
@@ -139,13 +158,8 @@ export default function AdminDashboardPage() {
               {expenses.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
-                    <Pie
-                      data={expenses}
-                      dataKey="total"
-                      nameKey="category"
-                      outerRadius={80}
-                      label={(props: PieLabelRenderProps) => `${props.name} ${((props.percent ?? 0) * 100).toFixed(0)}%`}
-                    >
+                    <Pie data={expenses} dataKey="total" nameKey="category" outerRadius={80}
+                      label={(props: PieLabelRenderProps) => `${props.name} ${((props.percent ?? 0) * 100).toFixed(0)}%`}>
                       {expenses.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
                     <Legend />
@@ -210,42 +224,73 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {/* Most Wishlisted */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="border rounded-xl p-5">
-              <h3 className="font-semibold mb-4">Most Wishlisted Products</h3>
-              {wishlistStats.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8 text-sm">No wishlist data yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {wishlistStats.map((s, i) => (
-                    <div key={i} className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <span className="text-sm font-medium truncate block">{s.name}</span>
-                        <span className="text-xs text-muted-foreground capitalize">{s.type}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <Heart size={12} className="text-primary" fill="currentColor" />
-                        <span className="text-sm font-semibold">{s.wish_count}</span>
-                      </div>
+          {/* Engagement — Most Wishlisted & Most Liked */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Customer Engagement</h3>
+            {engagementLoading ? (
+              <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">Loading engagement data…</div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Most Wishlisted */}
+                <div className="border rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Heart size={16} className="text-primary" fill="currentColor" />
+                    <h4 className="font-semibold">Most Wishlisted Products</h4>
+                  </div>
+                  {wishlistStats.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8 text-sm">No wishlist activity yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {wishlistStats.map((s, i) => (
+                        <div key={i} className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate">{s.name}</p>
+                            <p className="text-xs text-muted-foreground capitalize">{s.type}</p>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <Heart size={11} className="text-primary" fill="currentColor" />
+                            <span className="text-sm font-semibold">{s.wish_count}</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Most Liked (top-rated) */}
-            <div className="border rounded-xl p-5">
-              <h3 className="font-semibold mb-4">Most Liked (Top Rated)</h3>
-              {topSellers.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8 text-sm">No rating data yet.</p>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  See the Top Sellers section above — products with the highest units sold reflect customer preference.
-                  Ratings are shown on individual product pages.
-                </p>
-              )}
-            </div>
+                {/* Most Liked Gallery */}
+                <div className="border rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Heart size={16} className="text-rose-500" fill="currentColor" />
+                    <h4 className="font-semibold">Most Liked Gallery Posts</h4>
+                  </div>
+                  {topLiked.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8 text-sm">No gallery likes yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {topLiked.map((img, i) => (
+                        <div key={img.id} className="flex items-center gap-3">
+                          <span className="text-xs text-muted-foreground w-4 shrink-0">{i + 1}</span>
+                          {!img.is_video && img.file && (
+                            <img src={img.file} alt=""
+                              className="w-10 h-10 rounded-lg object-cover shrink-0 bg-muted" />
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">
+                              {img.description || (img.is_video ? 'Video' : 'Gallery image')}
+                            </p>
+                            <p className="text-xs text-muted-foreground capitalize">{img.service ?? 'general'}</p>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Heart size={11} className="text-rose-500" fill="currentColor" />
+                            <span className="text-sm font-semibold">{img.like_count}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

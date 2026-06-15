@@ -966,11 +966,11 @@ def admin_delete_user(request, pk):
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def admin_wishlist_stats(request):
-    products = (Product.objects.annotate(wish_count=Count('wishlisted_by'))
+    products = (Product.objects.annotate(wish_count=Count('wishlisted_by', distinct=True))
                 .filter(wish_count__gt=0).order_by('-wish_count')[:10])
-    handbags = (Handbag.objects.annotate(wish_count=Count('wishlisted_by'))
+    handbags = (Handbag.objects.annotate(wish_count=Count('wishlisted_by', distinct=True))
                 .filter(wish_count__gt=0).order_by('-wish_count')[:10])
-    clothes_qs = (Clothes.objects.annotate(wish_count=Count('wishlisted_by'))
+    clothes_qs = (Clothes.objects.annotate(wish_count=Count('wishlisted_by', distinct=True))
                   .filter(wish_count__gt=0).order_by('-wish_count')[:10])
     items = (
         [{'name': p.name, 'type': 'product', 'wish_count': p.wish_count} for p in products] +
