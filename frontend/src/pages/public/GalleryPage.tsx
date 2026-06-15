@@ -2,27 +2,29 @@ import { useEffect, useState } from 'react'
 import { Heart, Play } from 'lucide-react'
 import api from '@/lib/axios'
 import { useAuth } from '@/contexts/AuthContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { isVideoUrl } from '@/lib/utils'
 import type { GalleryImage } from '@/lib/types'
 
 type GalleryTab = 'all' | 'hairdressing' | 'barber' | 'nails'
 
-const TABS: { key: GalleryTab; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'hairdressing', label: 'Hairdressing' },
-  { key: 'barber', label: 'Cuts' },
-  { key: 'nails', label: 'Nails' },
-]
-
 const NAILS_SERVICES = ['nails', 'manicure', 'pedicure']
 
 export default function GalleryPage() {
   const { isAuthenticated } = useAuth()
+  const { t } = useLanguage()
   const [images, setImages] = useState<GalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [liking, setLiking] = useState<number | null>(null)
   const [lightbox, setLightbox] = useState<GalleryImage | null>(null)
   const [activeTab, setActiveTab] = useState<GalleryTab>('all')
+
+  const TABS: { key: GalleryTab; labelKey: string; noItemsKey: string }[] = [
+    { key: 'all',          labelKey: 'gallery.tabAll',          noItemsKey: 'gallery.noAll' },
+    { key: 'hairdressing', labelKey: 'gallery.tabHairdressing', noItemsKey: 'gallery.noHairdressing' },
+    { key: 'barber',       labelKey: 'gallery.tabCuts',         noItemsKey: 'gallery.noCuts' },
+    { key: 'nails',        labelKey: 'gallery.tabNails',        noItemsKey: 'gallery.noNails' },
+  ]
 
   useEffect(() => {
     api.get('/gallery/').then(r => setImages(r.data)).catch(console.error).finally(() => setLoading(false))
@@ -51,20 +53,22 @@ export default function GalleryPage() {
       ? images.filter(img => NAILS_SERVICES.includes(img.service ?? ''))
       : images.filter(img => img.service === activeTab)
 
+  const activeTabMeta = TABS.find(tab => tab.key === activeTab)
+
   return (
     <div>
       {/* Page hero */}
       <section className="py-14 px-5 text-center bg-secondary/40">
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">Visual Stories</p>
+          <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">{t('gallery.label')}</p>
           <h1
             className="text-4xl font-bold mb-3"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            Gallery
+            {t('gallery.title')}
           </h1>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Our work &amp; collection, beautifully captured
+            {t('gallery.subtitle')}
           </p>
         </div>
       </section>
@@ -83,7 +87,7 @@ export default function GalleryPage() {
                   : 'border hover:bg-muted text-muted-foreground'
               }`}
             >
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           ))}
         </div>
@@ -95,7 +99,9 @@ export default function GalleryPage() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <p className="text-center text-muted-foreground py-20">No {activeTab === 'all' ? 'gallery' : TABS.find(t => t.key === activeTab)?.label.toLowerCase()} items yet.</p>
+          <p className="text-center text-muted-foreground py-20">
+            {t(activeTabMeta?.noItemsKey ?? 'gallery.noAll')}
+          </p>
         ) : (
           <div className="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-3">
             {filtered.map(item => (
@@ -122,7 +128,7 @@ export default function GalleryPage() {
                 ) : (
                   <img
                     src={item.file}
-                    alt={item.description || 'Gallery image'}
+                    alt={item.description || t('gallery.title')}
                     className="w-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                   />

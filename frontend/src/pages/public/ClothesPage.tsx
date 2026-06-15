@@ -4,8 +4,10 @@ import api from '@/lib/axios'
 import CatalogueCard from '@/components/CatalogueCard'
 import { useWishlist } from '@/hooks/useWishlist'
 import type { Clothes, PaginatedResponse } from '@/lib/types'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function ClothesPage() {
+  const { t } = useLanguage()
   const [params, setParams] = useSearchParams()
   const page = parseInt(params.get('page') || '1')
   const [data, setData] = useState<PaginatedResponse<Clothes> | null>(null)
@@ -23,17 +25,17 @@ export default function ClothesPage() {
       {/* Page hero */}
       <section className="py-14 px-5 text-center bg-secondary/40">
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">New This Season</p>
+          <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">{t('clothes.label')}</p>
           <h1
             className="text-4xl font-bold mb-3"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            Clothing
+            {t('clothes.title')}
           </h1>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Elevated basics, statement pieces &amp; everything in between — styled for real life.
+            {t('clothes.subtitle')}
           </p>
-          {data && <p className="text-xs text-muted-foreground mt-3">{data.count} items available</p>}
+          {data && <p className="text-xs text-muted-foreground mt-3">{data.count} {t('clothes.available')}</p>}
         </div>
       </section>
 
@@ -64,7 +66,7 @@ export default function ClothesPage() {
               ))}
             </div>
             {data?.count === 0 && (
-              <p className="text-center text-muted-foreground py-20">No clothes available yet.</p>
+              <p className="text-center text-muted-foreground py-20">{t('clothes.noItems')}</p>
             )}
             {data && (data.next || data.previous) && (
               <div className="flex justify-center items-center gap-3 mt-10">
@@ -73,15 +75,15 @@ export default function ClothesPage() {
                   onClick={() => setParams({ page: String(page - 1) })}
                   className="btn-modern btn-modern--secondary"
                 >
-                  ← Previous
+                  {t('common.previous')}
                 </button>
-                <span className="text-sm text-muted-foreground">Page {page}</span>
+                <span className="text-sm text-muted-foreground">{t('common.page')} {page}</span>
                 <button
                   disabled={!data.next}
                   onClick={() => setParams({ page: String(page + 1) })}
                   className="btn-modern btn-modern--primary"
                 >
-                  Next →
+                  {t('common.next')}
                 </button>
               </div>
             )}

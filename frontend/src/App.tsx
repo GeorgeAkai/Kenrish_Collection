@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { LanguageProvider } from '@/contexts/LanguageContext'
 import { ProtectedRoute, AdminRoute } from '@/components/RouteGuards'
 import PublicLayout from '@/layouts/PublicLayout'
 import AdminLayout from '@/layouts/AdminLayout'
@@ -52,6 +53,7 @@ const NotFound = () => (
 
 export default function App() {
   return (
+    <LanguageProvider>
     <ThemeProvider>
     <AuthProvider>
       <Routes>
@@ -102,5 +104,6 @@ export default function App() {
       <ChatbotWidget />
     </AuthProvider>
     </ThemeProvider>
+    </LanguageProvider>
   )
 }

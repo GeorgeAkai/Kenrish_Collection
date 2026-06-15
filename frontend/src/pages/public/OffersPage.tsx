@@ -3,8 +3,10 @@ import { Sparkles } from 'lucide-react'
 import api from '@/lib/axios'
 import { formatDate } from '@/lib/utils'
 import type { Offer } from '@/lib/types'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function OffersPage() {
+  const { t } = useLanguage()
   const [offers, setOffers] = useState<Offer[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -17,15 +19,15 @@ export default function OffersPage() {
       {/* Page hero */}
       <section className="py-14 px-5 text-center bg-secondary/40">
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">Limited Time</p>
+          <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">{t('offers.label')}</p>
           <h1
             className="text-4xl font-bold mb-3"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            Special Offers
+            {t('offers.title')}
           </h1>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Exclusive deals on beauty products, handbags, and fashion — while stocks last.
+            {t('offers.subtitle')}
           </p>
         </div>
       </section>
@@ -47,7 +49,7 @@ export default function OffersPage() {
         ) : offers.length === 0 ? (
           <div className="text-center py-20">
             <Sparkles size={40} className="text-primary/30 mx-auto mb-4" />
-            <p className="text-muted-foreground">No active offers at the moment. Check back soon!</p>
+            <p className="text-muted-foreground">{t('offers.noOffers')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -82,11 +84,13 @@ export default function OffersPage() {
                   <p className="text-sm text-muted-foreground">{offer.description}</p>
                   {offer.valid_until && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      Valid until {formatDate(offer.valid_until)}
+                      {t('offers.validUntil')} {formatDate(offer.valid_until)}
                     </p>
                   )}
                   <div className="mt-4 bg-primary/8 border border-primary/20 rounded-xl p-3 text-center">
-                    <p className="text-sm font-semibold text-primary">Save {offer.discount_percentage}% — Visit us in store</p>
+                    <p className="text-sm font-semibold text-primary">
+                      {t('offers.save')} {offer.discount_percentage}% — {t('offers.visitStore')}
+                    </p>
                     <a href="tel:+254708440390" className="text-xs text-muted-foreground hover:text-primary transition-colors mt-1 block">
                       📞 0708 440390
                     </a>

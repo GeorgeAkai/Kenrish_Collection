@@ -2,26 +2,28 @@ import { useState, useEffect } from 'react'
 import { Link, Outlet, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
-import { Menu, X, Sun, Moon, Heart, MapPin, Phone, Clock } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { Menu, X, Sun, Moon, Heart, MapPin, Phone, Clock, Globe } from 'lucide-react'
 import { LOGO_URL } from '@/lib/brand'
-
-const navLinks = [
-  { to: '/products', label: 'Products' },
-  { to: '/handbags', label: 'Handbags' },
-  { to: '/clothes', label: 'Clothes' },
-  { to: '/services', label: 'Services' },
-  { to: '/gallery', label: 'Gallery' },
-  { to: '/offers', label: 'Offers' },
-  { to: '/reservation', label: 'Reservations' },
-  { to: '/about', label: 'About' },
-]
 
 export default function PublicLayout() {
   const { isAuthenticated, user, logout } = useAuth()
   const { theme, toggle: toggleTheme } = useTheme()
+  const { lang, setLang, t } = useLanguage()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
+
+  const navLinks = [
+    { to: '/products', label: t('nav.products') },
+    { to: '/handbags', label: t('nav.handbags') },
+    { to: '/clothes', label: t('nav.clothes') },
+    { to: '/services', label: t('nav.services') },
+    { to: '/gallery', label: t('nav.gallery') },
+    { to: '/offers', label: t('nav.offers') },
+    { to: '/reservation', label: t('nav.reservations') },
+    { to: '/about', label: t('nav.about') },
+  ]
 
   useEffect(() => {
     setMobileOpen(false)
@@ -39,16 +41,16 @@ export default function PublicLayout() {
       <div className="bg-primary text-primary-foreground py-2.5 overflow-hidden select-none">
         <div className="marquee-track">
           {[
-            '✦ 500+ Curated Products',
-            '✦ Free Beauty Consultations',
-            '✦ Same-Day Service Bookings',
-            '✦ Mon–Sat 8AM–8PM · Shabaab, Nakuru',
-            '✦ Call 0708 440390',
-            '✦ 500+ Curated Products',
-            '✦ Free Beauty Consultations',
-            '✦ Same-Day Service Bookings',
-            '✦ Mon–Sat 8AM–8PM · Shabaab, Nakuru',
-            '✦ Call 0708 440390',
+            t('announce.products'),
+            t('announce.consultations'),
+            t('announce.bookings'),
+            t('announce.hours'),
+            t('announce.call'),
+            t('announce.products'),
+            t('announce.consultations'),
+            t('announce.bookings'),
+            t('announce.hours'),
+            t('announce.call'),
           ].map((text, i) => (
             <span key={i} className="text-xs font-medium px-10 whitespace-nowrap">{text}</span>
           ))}
@@ -89,6 +91,17 @@ export default function PublicLayout() {
 
           {/* Right actions */}
           <div className="flex items-center gap-1.5">
+            {/* Language toggle */}
+            <button
+              onClick={() => setLang(lang === 'en' ? 'sw' : 'en')}
+              className="flex items-center gap-1 px-2.5 h-9 rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition-all text-xs font-semibold text-muted-foreground"
+              aria-label={lang === 'en' ? 'Switch to Swahili' : 'Switch to English'}
+              title={lang === 'en' ? 'Switch to Swahili' : 'Switch to English'}
+            >
+              <Globe size={13} />
+              {t('nav.switchLang')}
+            </button>
+
             {/* Dark mode toggle */}
             <button
               onClick={toggleTheme}
@@ -105,7 +118,7 @@ export default function PublicLayout() {
                     to="/admin"
                     className="hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
                   >
-                    Admin
+                    {t('nav.admin')}
                   </Link>
                 )}
                 <Link
@@ -119,7 +132,7 @@ export default function PublicLayout() {
                   onClick={logout}
                   className="hidden sm:block text-xs px-4 py-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
-                  Logout
+                  {t('nav.logout')}
                 </button>
               </>
             ) : (
@@ -128,13 +141,13 @@ export default function PublicLayout() {
                   to="/login"
                   className="hidden sm:block text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5"
                 >
-                  Sign in
+                  {t('nav.signIn')}
                 </Link>
                 <Link
                   to="/signup"
                   className="hidden sm:block text-sm px-5 py-2 rounded-full bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all shadow-md"
                 >
-                  Join
+                  {t('nav.join')}
                 </Link>
               </>
             )}
@@ -170,31 +183,42 @@ export default function PublicLayout() {
                 </NavLink>
               ))}
               <div className="border-t border-border mt-2 pt-2 flex flex-col gap-0.5">
+                {/* Language toggle in mobile menu */}
+                <button
+                  onClick={() => setLang(lang === 'en' ? 'sw' : 'en')}
+                  className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors text-left flex items-center gap-2"
+                >
+                  <Globe size={14} />
+                  {t('nav.switchLang')}
+                </button>
+
                 {isAuthenticated ? (
                   <>
                     {user?.is_staff && (
                       <Link to="/admin" className="px-4 py-2.5 rounded-xl text-sm text-primary hover:bg-primary/10 transition-colors">
-                        Admin Panel
+                        {t('nav.adminPanel')}
                       </Link>
                     )}
                     <Link to="/wishlist" className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">
-                      ♡ My Wishlist
+                      {t('nav.wishlist')}
                     </Link>
                     <Link to="/orders" className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">
-                      📦 My Orders
+                      {t('nav.orders')}
                     </Link>
                     <Link to="/change-password" className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">
-                      🔑 Change Password
+                      {t('nav.changePassword')}
                     </Link>
                     <button onClick={logout} className="text-left px-4 py-2.5 rounded-xl text-sm text-muted-foreground hover:bg-muted transition-colors">
-                      Logout
+                      {t('nav.logout')}
                     </button>
                   </>
                 ) : (
                   <>
-                    <Link to="/login" className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">Sign in</Link>
+                    <Link to="/login" className="px-4 py-2.5 rounded-xl text-sm text-foreground/80 hover:bg-muted transition-colors">
+                      {t('nav.signIn')}
+                    </Link>
                     <Link to="/signup" className="px-4 py-2.5 rounded-xl text-sm text-center mt-1 bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all">
-                      Create account
+                      {t('nav.createAccount')}
                     </Link>
                   </>
                 )}
@@ -208,7 +232,7 @@ export default function PublicLayout() {
         <Outlet />
       </main>
 
-      {/* Footer — light background matching Figma */}
+      {/* Footer */}
       <footer className="border-t border-border bg-background mt-8">
         <div className="max-w-7xl mx-auto px-5 pt-14 pb-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10">
@@ -216,7 +240,7 @@ export default function PublicLayout() {
             <div className="sm:col-span-2 md:col-span-1">
               <img src={LOGO_URL} alt="Kenrish Collection" className="h-16 w-auto object-contain mb-3" />
               <p className="text-sm text-muted-foreground leading-relaxed mb-5 max-w-[220px]">
-                Premium fashion &amp; cosmetics boutique in the heart of Nakuru, Kenya.
+                {t('footer.tagline')}
               </p>
               <ul className="space-y-2 text-xs text-muted-foreground">
                 <li className="flex items-center gap-2">
@@ -225,7 +249,7 @@ export default function PublicLayout() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Clock size={12} className="text-primary shrink-0" />
-                  Mon–Sat 8AM–8PM
+                  {t('footer.hours')}
                 </li>
                 <li className="flex items-center gap-2">
                   <Phone size={12} className="text-primary shrink-0" />
@@ -236,13 +260,13 @@ export default function PublicLayout() {
 
             {/* Shop links */}
             <div>
-              <p className="font-semibold text-sm mb-4 text-foreground">Shop</p>
+              <p className="font-semibold text-sm mb-4 text-foreground">{t('footer.shop')}</p>
               <ul className="space-y-2.5">
                 {[
-                  { to: '/products', label: 'Beauty Products' },
-                  { to: '/handbags', label: 'Handbags' },
-                  { to: '/clothes', label: 'Clothing' },
-                  { to: '/offers', label: 'Current Offers' },
+                  { to: '/products', label: t('footer.beautyProducts') },
+                  { to: '/handbags', label: t('footer.handbags') },
+                  { to: '/clothes', label: t('footer.clothing') },
+                  { to: '/offers', label: t('footer.currentOffers') },
                 ].map(({ to, label }) => (
                   <li key={to}>
                     <Link to={to} className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200">
@@ -255,16 +279,16 @@ export default function PublicLayout() {
 
             {/* Services links */}
             <div>
-              <p className="font-semibold text-sm mb-4 text-foreground">Services</p>
+              <p className="font-semibold text-sm mb-4 text-foreground">{t('footer.services')}</p>
               <ul className="space-y-2.5">
                 {[
-                  { to: '/services', label: 'Hairdressing' },
-                  { to: '/services', label: 'Nail Care' },
-                  { to: '/services', label: 'Barbershop' },
-                  { to: '/services', label: 'Beauty Consult' },
-                ].map(({ to, label }, i) => (
+                  t('footer.hairdressing'),
+                  t('footer.nailCare'),
+                  t('footer.barbershop'),
+                  t('footer.beautyConsult'),
+                ].map((label, i) => (
                   <li key={i}>
-                    <Link to={to} className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200">
+                    <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200">
                       {label}
                     </Link>
                   </li>
@@ -274,13 +298,13 @@ export default function PublicLayout() {
 
             {/* Company links */}
             <div>
-              <p className="font-semibold text-sm mb-4 text-foreground">Company</p>
+              <p className="font-semibold text-sm mb-4 text-foreground">{t('footer.company')}</p>
               <ul className="space-y-2.5">
                 {[
-                  { to: '/about', label: 'About Us' },
-                  { to: '/gallery', label: 'Gallery' },
-                  { to: '/privacy-policy', label: 'Privacy Policy' },
-                  { to: '/terms-of-service', label: 'Terms of Service' },
+                  { to: '/about', label: t('footer.aboutUs') },
+                  { to: '/gallery', label: t('footer.gallery') },
+                  { to: '/privacy-policy', label: t('footer.privacy') },
+                  { to: '/terms-of-service', label: t('footer.terms') },
                 ].map(({ to, label }) => (
                   <li key={to}>
                     <Link to={to} className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200">
@@ -294,10 +318,16 @@ export default function PublicLayout() {
 
           {/* Bottom bar */}
           <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Kenrish Collection. All rights reserved.</p>
+            <p className="text-xs text-muted-foreground">
+              {t('footer.copyright', { year: new Date().getFullYear() })}
+            </p>
             <div className="flex gap-5">
-              <Link to="/privacy-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors duration-200">Privacy</Link>
-              <Link to="/terms-of-service" className="text-xs text-muted-foreground hover:text-primary transition-colors duration-200">Terms</Link>
+              <Link to="/privacy-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors duration-200">
+                {t('footer.privacyShort')}
+              </Link>
+              <Link to="/terms-of-service" className="text-xs text-muted-foreground hover:text-primary transition-colors duration-200">
+                {t('footer.termsShort')}
+              </Link>
             </div>
           </div>
         </div>

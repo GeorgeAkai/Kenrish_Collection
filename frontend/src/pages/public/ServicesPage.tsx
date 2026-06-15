@@ -4,8 +4,10 @@ import api from '@/lib/axios'
 import { formatKES } from '@/lib/utils'
 import { Sparkles, ChevronRight, CalendarDays } from 'lucide-react'
 import type { Service } from '@/lib/types'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function ServicesPage() {
+  const { t } = useLanguage()
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -26,15 +28,15 @@ export default function ServicesPage() {
       {/* Page header */}
       <section className="py-16 px-5 text-center bg-secondary/40">
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">Expert Care</p>
+          <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">{t('services.label')}</p>
           <h1
             className="text-4xl font-bold mb-4"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            Beauty Services
+            {t('services.title')}
           </h1>
           <p className="text-muted-foreground leading-relaxed">
-            Professional beauty &amp; grooming services in Nakuru — available by appointment or walk-in.
+            {t('services.subtitle')}
           </p>
         </div>
       </section>
@@ -42,7 +44,7 @@ export default function ServicesPage() {
       {/* Services grid */}
       <section className="max-w-6xl mx-auto px-5 py-14">
         {services.length === 0 ? (
-          <p className="text-center text-muted-foreground py-20">No services listed yet.</p>
+          <p className="text-center text-muted-foreground py-20">{t('services.noServices')}</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map(s => (
@@ -50,7 +52,6 @@ export default function ServicesPage() {
                 key={s.id}
                 className="group rounded-2xl overflow-hidden border border-border bg-card transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1"
               >
-                {/* Service image with gradient overlay */}
                 {s.image ? (
                   <div className="relative h-52 overflow-hidden bg-muted">
                     <img
@@ -62,7 +63,7 @@ export default function ServicesPage() {
                     <div className="absolute bottom-4 left-4">
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/15 backdrop-blur-md text-white border border-white/25">
                         <Sparkles size={10} />
-                        Professional Service
+                        {t('common.professionalService')}
                       </span>
                     </div>
                   </div>
@@ -72,7 +73,6 @@ export default function ServicesPage() {
                   </div>
                 )}
 
-                {/* Service body */}
                 <div className="p-6">
                   <h2
                     className="text-xl font-semibold mb-1"
@@ -84,7 +84,7 @@ export default function ServicesPage() {
                   {s.full_description && s.full_description !== s.short_description && (
                     <details className="mb-4">
                       <summary className="text-xs text-primary cursor-pointer hover:underline underline-offset-2 flex items-center gap-1">
-                        Read more <ChevronRight size={11} />
+                        {t('common.readMore')} <ChevronRight size={11} />
                       </summary>
                       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.full_description}</p>
                     </details>
@@ -96,7 +96,7 @@ export default function ServicesPage() {
                       className="inline-flex items-center gap-1.5 text-xs bg-primary text-primary-foreground px-4 py-2 rounded-full font-semibold hover:opacity-90 transition-opacity shadow-md"
                     >
                       <CalendarDays size={11} />
-                      Book Now
+                      {t('common.bookNow')}
                     </Link>
                   </div>
                 </div>
@@ -117,16 +117,16 @@ export default function ServicesPage() {
             className="text-2xl font-bold mb-3 text-white"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            Book an Appointment
+            {t('services.ctaTitle')}
           </h2>
           <p className="text-white/75 mb-8 text-sm leading-relaxed">
-            Visit us Mon–Sat, 8AM–8PM at Shabaab, Nakuru. Walk-ins welcome.
+            {t('services.ctaDesc')}
           </p>
           <a
             href="tel:+254708440390"
             className="inline-flex items-center gap-2 bg-white text-primary px-8 py-3.5 rounded-full font-semibold text-sm hover:opacity-90 transition-opacity shadow-xl"
           >
-            📞 Call 0708 440390
+            📞 0708 440390
           </a>
         </div>
       </section>

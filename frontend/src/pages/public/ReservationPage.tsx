@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useNavigate } from 'react-router-dom'
@@ -9,34 +9,8 @@ import {
 } from 'lucide-react'
 import api from '@/lib/axios'
 import { useAuth } from '@/contexts/AuthContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 import type { Reservation, Service } from '@/lib/types'
-
-// ─── constants ───────────────────────────────────────────────────────────────
-
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const MONTHS = [
-  'January','February','March','April','May','June',
-  'July','August','September','October','November','December',
-]
-
-// ─── types ───────────────────────────────────────────────────────────────────
-
-interface PublicSlot {
-  time: string
-  available: boolean
-  booked: boolean
-  past: boolean
-  available_spots?: number
-  total_capacity?: number
-}
-
-interface FormSlot {
-  time: string
-  available: boolean
-  capacity?: number
-  booked?: number
-  remaining?: number
-}
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -56,14 +30,24 @@ function formatSlotTime(t: string) {
   return `${h12}:${m.toString().padStart(2, '0')} ${suffix}`
 }
 
-const STATUS_META: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  PENDING:   { label: 'Pending',   color: 'bg-amber-400',  icon: <AlertCircle size={13} /> },
-  APPROVED:  { label: 'Confirmed', color: 'bg-green-500',  icon: <CheckCircle size={13} /> },
-  REJECTED:  { label: 'Rejected',  color: 'bg-red-500',    icon: <XCircle size={13} /> },
-  CANCELLED: { label: 'Cancelled', color: 'bg-gray-400',   icon: <MinusCircle size={13} /> },
+// ─── DaySchedule ─────────────────────────────────────────────────────────────
+
+interface PublicSlot {
+  time: string
+  available: boolean
+  booked: boolean
+  past: boolean
+  available_spots?: number
+  total_capacity?: number
 }
 
-// ─── DaySchedule ─────────────────────────────────────────────────────────────
+interface FormSlot {
+  time: string
+  available: boolean
+  capacity?: number
+  booked?: number
+  remaining?: number
+}
 
 function DaySchedule({
   date,
@@ -78,6 +62,7 @@ function DaySchedule({
   onSlotClick: (time: string) => void
   isAuthenticated: boolean
 }) {
+  const { t } = useLanguage()
   const dateObj = new Date(date + 'T00:00:00')
   const dayName = dateObj.toLocaleDateString(undefined, { weekday: 'long' })
   const dateFmt = dateObj.toLocaleDateString(undefined, { month: 'long', day: 'numeric' })
@@ -97,11 +82,11 @@ function DaySchedule({
           <div className="flex items-center gap-3 mt-1.5">
             <span className="flex items-center gap-1 text-[11px] text-green-600 dark:text-green-400">
               <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-              {availableCount} open
+              {availableCount} {t('res.open')}
             </span>
             <span className="flex items-center gap-1 text-[11px] text-primary">
               <span className="w-2 h-2 rounded-full bg-primary inline-block" />
-              {bookedCount} booked
+              {bookedCount} {t('res.legendBooked').toLowerCase()}
             </span>
           </div>
         )}
@@ -112,12 +97,12 @@ function DaySchedule({
         {loading ? (
           <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
             <Sparkles size={22} className="mb-2 animate-pulse text-primary/40" />
-            <p className="text-xs">Loading schedule…</p>
+            <p className="text-xs">{t('res.loadingSchedule')}</p>
           </div>
         ) : slots.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
             <CalendarOff size={28} className="mb-2 opacity-30" />
-            <p className="text-xs">Closed — we don't take bookings on Sundays.</p>
+            <p className="text-xs">{t('res.closedSunday')}</p>
           </div>
         ) : (
           slots.map(slot => {
@@ -148,13 +133,12 @@ function DaySchedule({
                   </span>
                   <div className="flex items-center gap-1 shrink-0">
                     <Ban size={11} className="text-primary/70" />
-                    <span className="text-[11px] text-primary/70 font-medium">Full</span>
+                    <span className="text-[11px] text-primary/70 font-medium">{t('res.slotFull')}</span>
                   </div>
                 </div>
               )
             }
 
-            // Available
             const spots = slot.available_spots
             return (
               <button
@@ -171,11 +155,11 @@ function DaySchedule({
                 <span className="flex-1 h-2 rounded-full bg-green-100 dark:bg-green-900/30 group-hover:bg-green-200 dark:group-hover:bg-green-800/40 transition-colors" />
                 <div className="flex items-center gap-1 shrink-0">
                   {spots !== undefined && spots > 0 && (
-                    <span className="text-[10px] text-green-600 dark:text-green-400 font-medium">{spots} open</span>
+                    <span className="text-[10px] text-green-600 dark:text-green-400 font-medium">{spots} {t('res.slotOpen')}</span>
                   )}
                   <CheckCircle2 size={11} className="text-green-600 dark:text-green-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                   <span className="text-[11px] text-green-600 dark:text-green-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                    {isAuthenticated ? 'Book' : 'Sign in'}
+                    {isAuthenticated ? t('res.bookSlot') : t('res.signInShort')}
                   </span>
                 </div>
               </button>
@@ -188,9 +172,7 @@ function DaySchedule({
       {!loading && slots.length > 0 && availableCount > 0 && (
         <div className="px-4 py-3 border-t border-border">
           <p className="text-[11px] text-muted-foreground text-center">
-            {isAuthenticated
-              ? 'Click any green slot to book that time'
-              : 'Sign in to book a slot'}
+            {isAuthenticated ? t('res.clickToBook') : t('res.signInSlot')}
           </p>
         </div>
       )}
@@ -202,6 +184,7 @@ function DaySchedule({
 
 export default function ReservationPage() {
   const { isAuthenticated } = useAuth()
+  const { t, days: DAYS, months: MONTHS } = useLanguage()
   const navigate = useNavigate()
 
   const today = new Date()
@@ -234,18 +217,22 @@ export default function ReservationPage() {
     notes: '',
   })
 
-  // Per-service available slots shown inside the booking form
   const [formSlots, setFormSlots] = useState<FormSlot[]>([])
   const [formSlotsLoading, setFormSlotsLoading] = useState(false)
 
-  // Date → reservations map for calendar dots
+  const STATUS_META: Record<string, { label: string; color: string; icon: ReactNode }> = {
+    PENDING:   { label: t('res.statusPending'),   color: 'bg-amber-400',  icon: <AlertCircle size={13} /> },
+    APPROVED:  { label: t('res.statusApproved'),  color: 'bg-green-500',  icon: <CheckCircle size={13} /> },
+    REJECTED:  { label: t('res.statusRejected'),  color: 'bg-red-500',    icon: <XCircle size={13} /> },
+    CANCELLED: { label: t('res.statusCancelled'), color: 'bg-gray-400',   icon: <MinusCircle size={13} /> },
+  }
+
   const eventMap = new Map<string, Reservation[]>()
   reservations.forEach(r => {
     if (!eventMap.has(r.reservation_date)) eventMap.set(r.reservation_date, [])
     eventMap.get(r.reservation_date)!.push(r)
   })
 
-  // Initial data fetch
   useEffect(() => {
     setLoading(true)
     const fetches: Promise<unknown>[] = [
@@ -260,7 +247,6 @@ export default function ReservationPage() {
     Promise.all(fetches).finally(() => setLoading(false))
   }, [isAuthenticated])
 
-  // Fetch public day schedule when a date is selected
   useEffect(() => {
     if (!selectedDate) { setDaySlots([]); return }
     setDaySlotsLoading(true)
@@ -270,7 +256,6 @@ export default function ReservationPage() {
       .finally(() => setDaySlotsLoading(false))
   }, [selectedDate])
 
-  // Fetch per-service slots for the booking form
   useEffect(() => {
     if (!showForm || !form.reservation_date) { setFormSlots([]); return }
     setFormSlotsLoading(true)
@@ -282,7 +267,6 @@ export default function ReservationPage() {
       .finally(() => setFormSlotsLoading(false))
   }, [showForm, form.service, form.reservation_date])
 
-  // Scroll schedule into view on mobile when a date is selected
   useEffect(() => {
     if (!selectedDate || !scheduleRef.current) return
     if (window.matchMedia('(min-width: 1024px)').matches) return
@@ -308,11 +292,11 @@ export default function ReservationPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!form.reservation_time) { setError('Please select a time slot.'); return }
+    if (!form.reservation_time) { setError(t('res.selectTimeError')); return }
     setSaving(true); setError('')
     try {
       await api.post('/reservations/', form)
-      setSuccess("Reservation submitted! We'll confirm shortly.")
+      setSuccess(t('res.successMsg'))
       setShowForm(false)
       const [calRes, myRes] = await Promise.all([
         api.get<Reservation[]>('/reservations/'),
@@ -320,13 +304,12 @@ export default function ReservationPage() {
       ])
       setReservations(calRes.data)
       setMyReservations(myRes.data)
-      // Refresh day slots for selected date
       if (selectedDate) {
         api.get<PublicSlot[]>(`/reservations/public-slots/?date=${selectedDate}`)
           .then(r => setDaySlots(r.data)).catch(() => {})
       }
     } catch {
-      setError('Failed to submit. Please try again.')
+      setError(t('res.failMsg'))
     } finally {
       setSaving(false)
     }
@@ -355,24 +338,24 @@ export default function ReservationPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 sm:py-10">
 
-      {/* ── Header ─────────────────────────────────────────────────────── */}
+      {/* ── Header ────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6 sm:mb-8">
         <div>
           <h1
             className="text-2xl sm:text-3xl font-bold"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
-            Reservations
+            {t('res.title')}
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            Browse availability and book an appointment at Kenrish Collection
+            {t('res.subtitle')}
           </p>
         </div>
         <button
           onClick={() => openRequest(selectedDate ?? '')}
           className="flex items-center justify-center gap-2 w-full sm:w-auto bg-primary text-primary-foreground px-5 py-2.5 rounded-full font-semibold text-sm hover:opacity-90 transition-all shadow-md"
         >
-          <CalendarDays size={16} /> Book an Appointment
+          <CalendarDays size={16} /> {t('res.bookBtn')}
         </button>
       </div>
 
@@ -386,10 +369,10 @@ export default function ReservationPage() {
       {/* ── Legend ─────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mb-5 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-green-500" /> Available slot
+          <span className="w-2.5 h-2.5 rounded-full bg-green-500" /> {t('res.legendAvailable')}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-primary" /> Booked
+          <span className="w-2.5 h-2.5 rounded-full bg-primary" /> {t('res.legendBooked')}
         </span>
         {Object.entries(STATUS_META).map(([k, v]) => (
           <span key={k} className="hidden sm:flex items-center gap-1.5">
@@ -432,7 +415,7 @@ export default function ReservationPage() {
 
             {/* Day cells */}
             {loading ? (
-              <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">Loading…</div>
+              <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">{t('res.loadingCal')}</div>
             ) : (
               <div className="grid grid-cols-7 gap-0.5">
                 {cells.map((day, idx) => {
@@ -486,7 +469,7 @@ export default function ReservationPage() {
           {isAuthenticated && myReservations.length > 0 && (
             <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
               <h3 className="font-semibold text-sm mb-4 flex items-center gap-2">
-                <Clock size={14} className="text-primary" /> My Reservations
+                <Clock size={14} className="text-primary" /> {t('res.myReservations')}
               </h3>
               <ul className="space-y-2">
                 {myReservations.map(r => {
@@ -497,7 +480,7 @@ export default function ReservationPage() {
                         {meta?.icon}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{r.service_name ?? 'Appointment'}</p>
+                        <p className="text-sm font-medium truncate">{r.service_name ?? t('res.appointment')}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
                           <CalendarDays size={10} />
                           {new Date(r.reservation_date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
@@ -515,13 +498,13 @@ export default function ReservationPage() {
                         </span>
                         {r.status === 'PENDING' && (
                           confirmCancel.isAsking(r.id) ? (
-                            <InlineConfirm label="Cancel" onConfirm={() => handleCancel(r.id)} onCancel={confirmCancel.cancel} />
+                            <InlineConfirm label={t('res.cancelReservation')} onConfirm={() => handleCancel(r.id)} onCancel={confirmCancel.cancel} />
                           ) : (
                           <button
                             onClick={() => confirmCancel.ask(r.id)}
                             className="text-[10px] text-red-500 hover:underline"
                           >
-                            Cancel
+                            {t('res.cancelReservation')}
                           </button>
                           )
                         )}
@@ -537,28 +520,27 @@ export default function ReservationPage() {
           {!isAuthenticated && (
             <div className="bg-card border border-border rounded-2xl p-6 shadow-sm text-center">
               <CalendarDays size={32} className="mx-auto mb-3 text-primary/40" />
-              <p className="text-sm font-medium mb-1">Track your appointments</p>
-              <p className="text-xs text-muted-foreground mb-4">Sign in to book and manage your reservations</p>
+              <p className="text-sm font-medium mb-1">{t('res.trackTitle')}</p>
+              <p className="text-xs text-muted-foreground mb-4">{t('res.trackDesc')}</p>
               <button
                 onClick={() => navigate('/login')}
                 className="w-full max-w-xs bg-primary text-primary-foreground rounded-full py-2.5 text-sm font-semibold hover:opacity-90 transition-all"
               >
-                Sign In to Book
+                {t('res.signInToBook')}
               </button>
             </div>
           )}
         </div>
 
-        {/* Right — day schedule (only when date selected) */}
+        {/* Right — day schedule */}
         {selectedDate && (
           <div ref={scheduleRef} className="flex flex-col gap-4 scroll-mt-4">
-            {/* Quick book button at top */}
             <button
               onClick={() => openRequest(selectedDate)}
               className="flex items-center justify-center gap-2 w-full bg-primary text-primary-foreground rounded-xl py-2.5 text-sm font-semibold hover:opacity-90 transition-all shadow-sm"
             >
               <CalendarDays size={14} />
-              Book on {new Date(selectedDate + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              {t('res.bookOnPrefix')} {new Date(selectedDate + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
             </button>
 
             <DaySchedule
@@ -572,13 +554,13 @@ export default function ReservationPage() {
         )}
       </div>
 
-      {/* ── Booking modal ──────────────────────────────────────────────── */}
+      {/* ── Booking modal ─────────────────────────────────────────────── */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-background rounded-2xl shadow-2xl w-full max-w-md max-h-[92vh] flex flex-col">
             <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
               <div>
-                <h3 className="text-base font-semibold">Request an Appointment</h3>
+                <h3 className="text-base font-semibold">{t('res.modalTitle')}</h3>
                 {form.reservation_date && (
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {new Date(form.reservation_date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
@@ -598,20 +580,20 @@ export default function ReservationPage() {
 
               {/* Service */}
               <div>
-                <label className="block text-sm font-medium mb-1">Service</label>
+                <label className="block text-sm font-medium mb-1">{t('res.serviceLabel')}</label>
                 <select
                   className="w-full border border-border rounded-xl px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                   value={form.service}
                   onChange={e => setForm(f => ({ ...f, service: e.target.value, reservation_time: '' }))}
                 >
-                  <option value="">— Any / General Appointment —</option>
+                  <option value="">{t('res.serviceAny')}</option>
                   {services.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>
 
               {/* Date */}
               <div>
-                <label className="block text-sm font-medium mb-1">Date</label>
+                <label className="block text-sm font-medium mb-1">{t('res.dateLabel')}</label>
                 <input
                   type="date"
                   required
@@ -625,7 +607,7 @@ export default function ReservationPage() {
               {/* Time slot grid */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Select a Time
+                  {t('res.timeLabel')}
                   {form.service && services.find(s => String(s.id) === form.service) && (
                     <span className="ml-1.5 font-normal text-muted-foreground text-xs">
                       · {services.find(s => String(s.id) === form.service)?.name}
@@ -634,11 +616,11 @@ export default function ReservationPage() {
                 </label>
 
                 {!form.reservation_date ? (
-                  <p className="text-sm text-muted-foreground py-2">Select a date first.</p>
+                  <p className="text-sm text-muted-foreground py-2">{t('res.selectDateFirst')}</p>
                 ) : formSlotsLoading ? (
-                  <p className="text-sm text-muted-foreground py-2">Loading times…</p>
+                  <p className="text-sm text-muted-foreground py-2">{t('res.loadingTimes')}</p>
                 ) : formSlots.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-2">No slots available for this date.</p>
+                  <p className="text-sm text-muted-foreground py-2">{t('res.noSlots')}</p>
                 ) : (
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
                     {formSlots.map(slot => {
@@ -659,7 +641,7 @@ export default function ReservationPage() {
                         >
                           <span>{slot.time}</span>
                           {slot.remaining !== undefined && slot.available && !isSelected && (
-                            <span className="text-[9px] opacity-70">{slot.remaining} left</span>
+                            <span className="text-[9px] opacity-70">{slot.remaining} {t('res.remaining')}</span>
                           )}
                         </button>
                       )
@@ -668,18 +650,18 @@ export default function ReservationPage() {
                 )}
                 <input type="hidden" required value={form.reservation_time} onChange={() => {}} />
                 {form.reservation_date && !form.reservation_time && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5">Please select a time slot.</p>
+                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5">{t('res.selectTimeError')}</p>
                 )}
               </div>
 
               {/* Notes */}
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Notes <span className="font-normal text-muted-foreground">(optional)</span>
+                  {t('res.notesLabel')} <span className="font-normal text-muted-foreground">{t('res.notesOptional')}</span>
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Any special requests or preferences…"
+                  placeholder={t('res.notesPlaceholder')}
                   className="w-full border border-border rounded-xl px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
                   value={form.notes}
                   onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
@@ -694,14 +676,14 @@ export default function ReservationPage() {
                   disabled={saving}
                   className="flex-1 bg-primary text-primary-foreground rounded-full py-2.5 text-sm font-semibold hover:opacity-90 disabled:opacity-60 transition-all shadow-md shadow-primary/20"
                 >
-                  {saving ? 'Submitting…' : 'Submit Request'}
+                  {saving ? t('res.submitting') : t('res.submitBtn')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
                   className="flex-1 border border-border rounded-full py-2.5 text-sm hover:bg-muted transition-colors"
                 >
-                  Cancel
+                  {t('res.cancelBtn')}
                 </button>
               </div>
             </form>

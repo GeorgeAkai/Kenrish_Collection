@@ -4,6 +4,7 @@ import api from '@/lib/axios'
 import { formatKES, formatDate } from '@/lib/utils'
 import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Ban } from 'lucide-react'
 import type { Product, Handbag, Clothes, Offer, Service } from '@/lib/types'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface PublicSlot { time: string; available: boolean; booked: boolean; past: boolean }
 
@@ -21,37 +22,8 @@ interface HomeData {
 
 type Tab = 'products' | 'handbags' | 'clothes'
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: 'products', label: 'Beauty' },
-  { key: 'handbags', label: 'Handbags' },
-  { key: 'clothes', label: 'Clothing' },
-]
-
-const TESTIMONIALS = [
-  {
-    name: 'Sarah M.',
-    role: 'Regular Client since 2022',
-    text: 'Kenrish Collection completely transformed my wardrobe. The handbag selection is incredible and the team is so helpful — I always leave feeling like the best version of myself.',
-    initials: 'SM',
-    color: 'bg-fuchsia-400',
-  },
-  {
-    name: 'Grace K.',
-    role: 'Beauty Enthusiast',
-    text: 'The best beauty boutique in Nakuru! Clean environment, skilled professionals, and the product range is unlike anywhere else in the city.',
-    initials: 'GK',
-    color: 'bg-violet-500',
-  },
-  {
-    name: 'Mary W.',
-    role: 'Loyal Customer',
-    text: 'Amazing hairdressing services and gorgeous clothes. I love that I can shop and get pampered all in one place. Highly recommended!',
-    initials: 'MW',
-    color: 'bg-pink-400',
-  },
-]
-
 function ItemCard({ item, href }: { item: Product | Handbag | Clothes; href: string }) {
+  const { t } = useLanguage()
   return (
     <Link to={href} className="group block product-card">
       <div className="product-image">
@@ -60,16 +32,16 @@ function ItemCard({ item, href }: { item: Product | Handbag | Clothes; href: str
           : (
             <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2 bg-muted">
               <Sparkles size={24} className="text-primary/30" />
-              <span className="text-xs">No image</span>
+              <span className="text-xs">{t('common.noImage')}</span>
             </div>
           )
         }
         {item.stock_quantity === 0 && (
-          <div className="absolute top-2.5 left-2.5 product-tag">Sold out</div>
+          <div className="absolute top-2.5 left-2.5 product-tag">{t('common.soldOut')}</div>
         )}
         <div className="absolute bottom-0 inset-x-0 px-3 pb-3 translate-y-full group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
           <div className="w-full py-2.5 bg-primary text-primary-foreground text-xs font-semibold rounded-xl text-center shadow-lg">
-            View Details
+            {t('common.viewDetails')}
           </div>
         </div>
       </div>
@@ -101,8 +73,8 @@ function ServiceDesc({ text }: { text: string }) {
   return <p className="text-sm text-muted-foreground leading-relaxed mb-5">{clean}</p>
 }
 
-function SectionHeader({ title, label: sectionLabel, href, cta = 'View all' }: {
-  title: string; label?: string; href: string; cta?: string
+function SectionHeader({ title, label: sectionLabel, href, cta }: {
+  title: string; label?: string; href: string; cta: string
 }) {
   return (
     <div className="flex items-end justify-between mb-10">
@@ -125,6 +97,7 @@ function SectionHeader({ title, label: sectionLabel, href, cta = 'View all' }: {
 }
 
 export default function HomePage() {
+  const { t } = useLanguage()
   const [data, setData] = useState<HomeData | null>(null)
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
@@ -133,6 +106,18 @@ export default function HomePage() {
 
   const todayKey = new Date().toISOString().split('T')[0]
   const todayLabel = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
+
+  const TABS: { key: Tab; labelKey: string }[] = [
+    { key: 'products', labelKey: 'home.tabBeauty' },
+    { key: 'handbags', labelKey: 'home.tabHandbags' },
+    { key: 'clothes', labelKey: 'home.tabClothing' },
+  ]
+
+  const TESTIMONIALS = [
+    { nameKey: 'home.t1Name', roleKey: 'home.t1Role', textKey: 'home.t1Text', initials: 'SM', color: 'bg-fuchsia-400' },
+    { nameKey: 'home.t2Name', roleKey: 'home.t2Role', textKey: 'home.t2Text', initials: 'GK', color: 'bg-violet-500' },
+    { nameKey: 'home.t3Name', roleKey: 'home.t3Role', textKey: 'home.t3Text', initials: 'MW', color: 'bg-pink-400' },
+  ]
 
   useEffect(() => {
     Promise.all([
@@ -151,13 +136,12 @@ export default function HomePage() {
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
           <Sparkles size={24} className="text-primary animate-pulse" />
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     )
   }
 
-  // Collect up to 4 product images for the hero mosaic
   const heroImages: string[] = (data?.featured_products ?? [])
     .map(p => p.image)
     .filter((x): x is string => !!x)
@@ -179,10 +163,17 @@ export default function HomePage() {
     clothes: '/clothes',
   }
 
+  const features = [
+    { icon: '✦', titleKey: 'home.feature1Title', descKey: 'home.feature1Desc' },
+    { icon: '✦', titleKey: 'home.feature2Title', descKey: 'home.feature2Desc' },
+    { icon: '✦', titleKey: 'home.feature3Title', descKey: 'home.feature3Desc' },
+    { icon: '✦', titleKey: 'home.feature4Title', descKey: 'home.feature4Desc' },
+  ]
+
   return (
     <div className="overflow-hidden">
 
-      {/* ═══ HERO — split layout (left text / right image mosaic) ═════════ */}
+      {/* ═══ HERO ════════════════════════════════════════════════════════ */}
       <section className="relative min-h-[90vh] flex items-center gradient-hero overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-5 py-16 sm:py-24 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -191,19 +182,19 @@ export default function HomePage() {
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/25 rounded-full px-4 py-1.5 text-xs mb-8 text-primary font-medium">
                 <Sparkles size={11} />
-                New Collection — Premium Fashion &amp; Beauty
+                {t('home.badge')}
               </div>
 
               <h1
                 className="text-5xl lg:text-[3.75rem] font-semibold leading-[1.07] mb-6 text-foreground"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                Beauty,<br />
-                <em className="not-italic text-gradient-plum">Redefined.</em>
+                {t('home.heroTitle')}<br />
+                <em className="not-italic text-gradient-plum">{t('home.heroAccent')}</em>
               </h1>
 
               <p className="text-lg text-muted-foreground mb-10 leading-relaxed">
-                Curated cosmetics, designer handbags, elevated fashion &amp; world-class grooming — all in one boutique at Shabaab, Nakuru.
+                {t('home.heroSubtitle')}
               </p>
 
               <div className="flex flex-wrap gap-4 mb-14">
@@ -211,19 +202,23 @@ export default function HomePage() {
                   to="/products"
                   className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-all"
                 >
-                  Shop Now <ChevronRight size={15} />
+                  {t('home.shopNow')} <ChevronRight size={15} />
                 </Link>
                 <Link
                   to="/services"
                   className="inline-flex items-center gap-2 px-8 py-3.5 border-2 border-primary/30 text-primary rounded-full font-medium hover:bg-secondary transition-all"
                 >
-                  Book a Service
+                  {t('home.bookService')}
                 </Link>
               </div>
 
               {/* Stats row */}
               <div className="flex items-center gap-10">
-                {[['500+', 'Products'], ['1000+', 'Happy Clients'], ['15+', 'Services']].map(([val, label]) => (
+                {[
+                  ['500+', t('home.statsProducts')],
+                  ['1000+', t('home.statsClients')],
+                  ['15+', t('home.statsServices')],
+                ].map(([val, label]) => (
                   <div key={label}>
                     <div
                       className="text-2xl font-semibold text-foreground"
@@ -241,7 +236,6 @@ export default function HomePage() {
             <div className="hidden lg:grid grid-cols-2 gap-3 h-[560px]">
               {heroImages.length >= 2 ? (
                 <>
-                  {/* Left col — tall */}
                   <div className="flex flex-col gap-3 hero-float">
                     <div className="rounded-2xl overflow-hidden flex-1 bg-muted">
                       {heroImages[0] && (
@@ -254,7 +248,6 @@ export default function HomePage() {
                       </div>
                     )}
                   </div>
-                  {/* Right col — offset, delayed float */}
                   <div className="flex flex-col gap-3 pt-8 hero-float-delay">
                     {heroImages[1] && (
                       <div className="rounded-2xl overflow-hidden h-44 bg-muted shrink-0">
@@ -269,7 +262,6 @@ export default function HomePage() {
                   </div>
                 </>
               ) : (
-                /* Fallback decorative panel */
                 <div className="col-span-2 rounded-3xl bg-primary/8 border border-primary/15 flex items-center justify-center">
                   <Sparkles size={64} className="text-primary/20" />
                 </div>
@@ -279,39 +271,38 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Gradient fade from hero into the section below */}
         <div className="absolute bottom-0 inset-x-0 h-28 pointer-events-none hero-fade-bottom" />
       </section>
 
-      {/* ═══ PROMO STRIP ═══════════════════════════════════════════════════ */}
+      {/* ═══ PROMO STRIP ════════════════════════════════════════════════ */}
       <div className="bg-primary text-primary-foreground py-3 px-5 overflow-hidden">
         <div className="flex items-center justify-center gap-8 text-sm font-medium flex-wrap">
-          <span>✦ 500+ Curated Products</span>
-          <span className="hidden sm:block">✦ Free beauty consultations</span>
-          <span className="hidden md:block">✦ Same-day service bookings</span>
-          <span>✦ Mon–Sat 8AM–8PM · Nakuru</span>
+          <span>{t('home.promoProducts')}</span>
+          <span className="hidden sm:block">{t('home.promoConsultations')}</span>
+          <span className="hidden md:block">{t('home.promoBookings')}</span>
+          <span>{t('home.promoHours')}</span>
         </div>
       </div>
 
-      {/* ═══ COLLECTIONS — tabbed ══════════════════════════════════════════ */}
+      {/* ═══ COLLECTIONS — tabbed ══════════════════════════════════════ */}
       {(data?.featured_products?.length || data?.featured_handbags?.length || data?.featured_clothes?.length) ? (
         <section className="py-20 max-w-7xl mx-auto px-5">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
             <div>
               <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">
-                Curated For You
+                {t('home.curatedForYou')}
               </p>
               <h2
                 className="text-3xl lg:text-4xl font-semibold text-foreground leading-tight"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                Our Collections
+                {t('home.ourCollections')}
               </h2>
             </div>
 
             {/* Category tabs */}
             <div className="flex gap-2 flex-wrap">
-              {TABS.map(({ key, label }) => (
+              {TABS.map(({ key, labelKey }) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
@@ -321,7 +312,7 @@ export default function HomePage() {
                       : 'bg-secondary text-muted-foreground hover:bg-muted'
                   }`}
                 >
-                  {label}
+                  {t(labelKey)}
                 </button>
               ))}
             </div>
@@ -334,7 +325,7 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-16">No items available yet.</p>
+            <p className="text-center text-muted-foreground py-16">{t('home.noItems')}</p>
           )}
 
           <div className="text-center mt-10">
@@ -342,18 +333,17 @@ export default function HomePage() {
               to={tabViewAll[activeTab]}
               className="inline-flex items-center gap-2 px-7 py-3 border border-border rounded-full text-sm font-medium hover:bg-secondary transition-colors"
             >
-              View All {TABS.find(t => t.key === activeTab)?.label}
+              {t('home.viewAllBtn')} {t(TABS.find(tab => tab.key === activeTab)?.labelKey ?? '')}
               <ChevronRight size={14} />
             </Link>
           </div>
         </section>
       ) : null}
 
-      {/* ═══ CLOTHING ══════════════════════════════════════════════════════ */}
+      {/* ═══ CLOTHING BANNER ════════════════════════════════════════════ */}
       {data?.featured_clothes && data.featured_clothes.length > 0 && (
         <section className="py-24 max-w-7xl mx-auto px-6">
           <div className="relative rounded-3xl overflow-hidden min-h-[380px] flex items-center">
-            {/* base background — dark on both modes so text is always white */}
             <div className="absolute inset-0 bg-[#1A1220] dark:bg-[#08060E]" />
             <div className="absolute inset-0 hidden dark:block bg-gradient-to-br from-[#110A1C] via-[#08060E] to-[#180A16]" />
             <img
@@ -366,47 +356,42 @@ export default function HomePage() {
 
             <div className="relative px-10 md:px-16 py-16 max-w-lg">
               <p className="text-xs font-semibold text-primary mb-3 tracking-[0.18em] uppercase">
-                New This Season
+                {t('home.newThisSeason')}
               </p>
               <h2
                 className="text-4xl lg:text-5xl font-semibold text-white leading-tight mb-5"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                The Art of Getting Dressed
+                {t('home.clothingTitle')}
               </h2>
               <p className="text-white/70 text-sm leading-relaxed mb-8">
-                Our clothing styles — elevated basics, statement pieces, and everything in between. Styled for real life, designed to last.
+                {t('home.clothingDesc')}
               </p>
               <Link
                 to="/clothes"
                 className="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-foreground dark:bg-primary dark:text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity shadow-xl"
               >
-                Explore Clothing <ChevronRight size={14} />
+                {t('home.exploreClothing')} <ChevronRight size={14} />
               </Link>
             </div>
           </div>
         </section>
       )}
 
-      {/* ═══ FEATURE STRIP ═════════════════════════════════════════════════ */}
+      {/* ═══ FEATURE STRIP ══════════════════════════════════════════════ */}
       <section className="py-12 border-y border-border">
         <div className="max-w-7xl mx-auto px-5 grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { icon: '✦', title: 'Authentic Products', desc: 'Every item is 100% genuine, sourced directly from trusted suppliers.' },
-            { icon: '✦', title: 'Expert Stylists', desc: 'Our team has years of luxury beauty and fashion experience.' },
-            { icon: '✦', title: 'Same-Day Booking', desc: 'Book beauty and grooming appointments and walk in the same day.' },
-            { icon: '✦', title: 'Personal Service', desc: 'Personalised recommendations from our in-store beauty experts.' },
-          ].map(f => (
-            <div key={f.title} className="flex flex-col gap-2">
+          {features.map(f => (
+            <div key={f.titleKey} className="flex flex-col gap-2">
               <span className="text-primary text-base font-bold">{f.icon}</span>
-              <h4 className="font-semibold text-sm text-foreground">{f.title}</h4>
-              <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+              <h4 className="font-semibold text-sm text-foreground">{t(f.titleKey)}</h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">{t(f.descKey)}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ═══ SERVICES PREVIEW ══════════════════════════════════════════════ */}
+      {/* ═══ SERVICES PREVIEW ══════════════════════════════════════════ */}
       {services.length > 0 && (
         <section className="py-20 relative overflow-hidden">
           <div className="absolute inset-0 bg-secondary/40 dark:hidden" />
@@ -414,15 +399,17 @@ export default function HomePage() {
 
           <div className="relative max-w-7xl mx-auto px-5">
             <div className="text-center mb-14">
-              <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">Expert Care</p>
+              <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">
+                {t('home.expertCare')}
+              </p>
               <h2
                 className="text-3xl lg:text-4xl font-semibold mb-4"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
               >
-                Beauty Services
+                {t('home.beautyServices')}
               </h2>
               <p className="text-muted-foreground max-w-xs mx-auto text-sm leading-relaxed">
-                Award-winning stylists — available by appointment or walk-in.
+                {t('home.servicesSubtitle')}
               </p>
             </div>
 
@@ -443,7 +430,7 @@ export default function HomePage() {
                       <div className="absolute bottom-4 left-5">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white/15 backdrop-blur-md text-white border border-white/20">
                           <Scissors size={10} />
-                          Professional
+                          {t('common.professional')}
                         </span>
                       </div>
                     </div>
@@ -467,7 +454,7 @@ export default function HomePage() {
                         to="/services"
                         className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline underline-offset-2"
                       >
-                        Learn more <ChevronRight size={12} />
+                        {t('common.learnMore')} <ChevronRight size={12} />
                       </Link>
                     </div>
                   </div>
@@ -480,18 +467,23 @@ export default function HomePage() {
                 to="/services"
                 className="inline-flex items-center gap-2 px-7 py-3 border border-border rounded-full text-sm font-medium hover:bg-secondary transition-colors"
               >
-                View All Services <ChevronRight size={14} />
+                {t('home.viewAllServices')} <ChevronRight size={14} />
               </Link>
             </div>
           </div>
         </section>
       )}
 
-      {/* ═══ ACTIVE OFFERS ═════════════════════════════════════════════════ */}
+      {/* ═══ ACTIVE OFFERS ══════════════════════════════════════════════ */}
       {data?.offers && data.offers.length > 0 && (
         <section className="py-20 px-5 bg-background">
           <div className="max-w-7xl mx-auto">
-            <SectionHeader title="Current Offers" label="Limited Time" href="/offers" cta="All offers" />
+            <SectionHeader
+              title={t('home.currentOffers')}
+              label={t('home.limitedTime')}
+              href="/offers"
+              cta={t('home.allOffers')}
+            />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {data.offers.slice(0, 3).map(offer => (
                 <div key={offer.id} className="group relative overflow-hidden rounded-2xl border border-border bg-card card-hover">
@@ -511,7 +503,9 @@ export default function HomePage() {
                     <h3 className="font-semibold text-foreground">{offer.title}</h3>
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{offer.description}</p>
                     {offer.valid_until && (
-                      <p className="text-xs text-muted-foreground mt-2">Valid until {formatDate(offer.valid_until)}</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {t('home.validUntil')} {formatDate(offer.valid_until)}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -521,24 +515,26 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ═══ TESTIMONIALS ══════════════════════════════════════════════════ */}
+      {/* ═══ TESTIMONIALS ═══════════════════════════════════════════════ */}
       <section className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-muted/30 dark:bg-transparent" />
         <div className="relative max-w-7xl mx-auto px-5">
           <div className="text-center mb-14">
-            <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">Client Love</p>
+            <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">
+              {t('home.clientLove')}
+            </p>
             <h2
               className="text-3xl lg:text-4xl font-semibold"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
             >
-              What They Say
+              {t('home.whatTheySay')}
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map(t => (
+            {TESTIMONIALS.map(testimonial => (
               <div
-                key={t.name}
+                key={testimonial.nameKey}
                 className="rounded-2xl p-7 border border-border bg-card hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="flex gap-1 mb-5">
@@ -547,15 +543,15 @@ export default function HomePage() {
                   ))}
                 </div>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-6 italic">
-                  &ldquo;{t.text}&rdquo;
+                  &ldquo;{t(testimonial.textKey)}&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full ${t.color} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
-                    {t.initials}
+                  <div className={`w-10 h-10 rounded-full ${testimonial.color} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
+                    {testimonial.initials}
                   </div>
                   <div>
-                    <div className="font-semibold text-foreground text-sm">{t.name}</div>
-                    <div className="text-xs text-muted-foreground">{t.role}</div>
+                    <div className="font-semibold text-foreground text-sm">{t(testimonial.nameKey)}</div>
+                    <div className="text-xs text-muted-foreground">{t(testimonial.roleKey)}</div>
                   </div>
                 </div>
               </div>
@@ -564,7 +560,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══ BOOK YOUR SPOT NOW ════════════════════════════════════════════ */}
+      {/* ═══ BOOK YOUR SPOT ═════════════════════════════════════════════ */}
       <section className="py-20 px-5">
         <div className="max-w-7xl mx-auto">
           <div className="rounded-3xl overflow-hidden border border-border grid grid-cols-1 lg:grid-cols-2 shadow-2xl shadow-primary/10">
@@ -574,30 +570,28 @@ export default function HomePage() {
               className="relative p-10 lg:p-14 overflow-hidden"
               style={{ background: 'linear-gradient(135deg, #7C3060 0%, #9B3D78 50%, #A85090 100%)' }}
             >
-              {/* decorative circles */}
               <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/5 pointer-events-none" />
               <div className="absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
 
               <div className="relative">
                 <p className="text-xs font-semibold text-white/60 mb-3 tracking-[0.18em] uppercase">
-                  Appointments
+                  {t('home.appointments')}
                 </p>
                 <h2
                   className="text-3xl lg:text-4xl font-semibold text-white mb-5 leading-tight"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
-                  Book Your<br />Spot Now
+                  {t('home.bookSpotL1')}<br />{t('home.bookSpotL2')}
                 </h2>
                 <p className="text-white/75 text-sm leading-relaxed mb-8 max-w-sm">
-                  See real-time availability and lock in your preferred time. Hair, nails, barber &amp; more —
-                  Mon–Sat, 8 AM to 8 PM.
+                  {t('home.bookingDesc')}
                 </p>
 
                 <ul className="space-y-3 mb-10">
                   {[
-                    '30-minute time blocks — pick the exact slot',
-                    'Walk-in or pre-book online instantly',
-                    'Hair, nails, barber, manicure & more',
+                    t('home.booking30min'),
+                    t('home.bookingWalkIn'),
+                    t('home.bookingServices'),
                   ].map(item => (
                     <li key={item} className="flex items-center gap-2.5 text-sm text-white/90">
                       <CheckCircle2 size={14} className="text-white/60 shrink-0" />
@@ -612,60 +606,57 @@ export default function HomePage() {
                     className="inline-flex items-center gap-2.5 bg-white text-primary px-7 py-3 rounded-full font-semibold text-sm hover:opacity-90 transition-opacity shadow-xl"
                   >
                     <CalendarDays size={14} />
-                    View Full Calendar
+                    {t('home.viewFullCalendar')}
                   </Link>
                   <a
                     href="tel:+254708440390"
                     className="inline-flex items-center gap-2.5 border border-white/30 text-white px-7 py-3 rounded-full font-semibold text-sm hover:bg-white/10 transition-colors"
                   >
                     <Phone size={14} />
-                    Call Us
+                    {t('common.callUs')}
                   </a>
                 </div>
               </div>
             </div>
 
-            {/* Right — live today's schedule preview */}
+            {/* Right — live today's schedule */}
             <div className="bg-card p-8 lg:p-10 flex flex-col">
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h3 className="font-semibold text-sm">Today's Schedule</h3>
+                  <h3 className="font-semibold text-sm">{t('home.todaySchedule')}</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">{todayLabel}</p>
                 </div>
                 <span className="flex items-center gap-1.5 text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 px-2.5 py-1 rounded-full border border-green-200 dark:border-green-800">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block" />
-                  Live
+                  {t('home.live')}
                 </span>
               </div>
 
               {todaySlots.length === 0 ? (
-                /* Sunday or no data */
                 <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
                   <CalendarDays size={36} className="text-muted-foreground/30 mb-3" />
-                  <p className="text-sm text-muted-foreground">We're closed today (Sunday).</p>
-                  <p className="text-xs text-muted-foreground mt-1">Check back Monday–Saturday.</p>
+                  <p className="text-sm text-muted-foreground">{t('home.closedSunday')}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t('home.checkBackDays')}</p>
                   <Link
                     to="/reservation"
                     className="mt-5 inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
                   >
-                    Browse future dates <ChevronRight size={12} />
+                    {t('home.browseFuture')} <ChevronRight size={12} />
                   </Link>
                 </div>
               ) : (
                 <>
-                  {/* Summary pills */}
                   <div className="flex gap-3 mb-5">
                     <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-xs font-medium text-green-700 dark:text-green-400">
                       <span className="w-2 h-2 rounded-full bg-green-500" />
-                      {todaySlots.filter(s => s.available).length} open slots
+                      {todaySlots.filter(s => s.available).length} {t('home.openSlots')}
                     </span>
                     <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/20 text-xs font-medium text-primary">
                       <span className="w-2 h-2 rounded-full bg-primary" />
-                      {todaySlots.filter(s => s.booked).length} booked
+                      {todaySlots.filter(s => s.booked).length} {t('home.bookedSlots')}
                     </span>
                   </div>
 
-                  {/* Time blocks — show next ~10 upcoming (skip far-past) */}
                   <div className="space-y-1.5 flex-1 overflow-hidden">
                     {todaySlots.filter(s => !s.past || s.booked).slice(0, 10).map(slot => (
                       <div
@@ -686,12 +677,12 @@ export default function HomePage() {
                           {slot.booked ? (
                             <>
                               <Ban size={10} className="text-primary/60" />
-                              <span className="text-primary/70 font-medium">Booked</span>
+                              <span className="text-primary/70 font-medium">{t('home.slotBooked')}</span>
                             </>
                           ) : (
                             <>
                               <CheckCircle2 size={10} className="text-green-500" />
-                              <span className="text-green-600 dark:text-green-400 font-medium">Free</span>
+                              <span className="text-green-600 dark:text-green-400 font-medium">{t('home.slotFree')}</span>
                             </>
                           )}
                         </div>
@@ -703,7 +694,7 @@ export default function HomePage() {
                     to="/reservation"
                     className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors"
                   >
-                    See full schedule <ChevronRight size={14} />
+                    {t('home.seeFullSchedule')} <ChevronRight size={14} />
                   </Link>
                 </>
               )}
