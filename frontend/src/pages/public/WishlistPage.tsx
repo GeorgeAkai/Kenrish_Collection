@@ -125,64 +125,69 @@ export default function WishlistPage() {
 
           {/* Items */}
           <div className="space-y-3">
-            {lineItems.map(li => (
-              <div key={`${li.type}-${li.id}`} className="flex items-center gap-4 p-4 border border-border rounded-2xl bg-card">
-                {/* Image placeholder / link */}
-                <Link to={`/${li.type}/${li.id}`} className="shrink-0 w-16 h-16 rounded-xl bg-muted overflow-hidden">
-                  {(() => {
-                    const item = [
-                      ...(wishlist?.products ?? []),
-                      ...(wishlist?.handbags ?? []),
-                      ...(wishlist?.clothes ?? []),
-                    ].find(x => x.id === li.id)
-                    return item?.image
-                      ? <img src={item.image} alt={li.name} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No img</div>
-                  })()}
-                </Link>
+            {lineItems.map(li => {
+              const item = [
+                ...(wishlist?.products ?? []),
+                ...(wishlist?.handbags ?? []),
+                ...(wishlist?.clothes ?? []),
+              ].find(x => x.id === li.id)
 
-                {/* Name + price */}
-                <div className="flex-1 min-w-0">
-                  <Link to={`/${li.type}/${li.id}`} className="font-medium text-sm truncate hover:text-primary transition-colors block">{li.name}</Link>
-                  <p className="text-xs text-muted-foreground capitalize mt-0.5">{li.type.slice(0, -1)}</p>
-                  <p className="text-sm font-semibold text-primary mt-1">{formatKES(li.price)}</p>
-                  {li.stock === 0 && <p className="text-xs text-red-500 mt-0.5">Out of stock</p>}
-                  {li.stock > 0 && li.stock <= 5 && <p className="text-xs text-amber-600 mt-0.5">Only {li.stock} left</p>}
+              return (
+                <div key={`${li.type}-${li.id}`} className="p-4 border border-border rounded-2xl bg-card">
+                  {/* Row 1: image + name/price + remove */}
+                  <div className="flex items-start gap-3">
+                    <Link to={`/${li.type}/${li.id}`} className="shrink-0 w-16 h-16 rounded-xl bg-muted overflow-hidden">
+                      {item?.image
+                        ? <img src={item.image} alt={li.name} className="w-full h-full object-cover" />
+                        : <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No img</div>
+                      }
+                    </Link>
+
+                    <div className="flex-1 min-w-0">
+                      <Link to={`/${li.type}/${li.id}`} className="font-medium text-sm hover:text-primary transition-colors block leading-snug line-clamp-2">
+                        {li.name}
+                      </Link>
+                      <p className="text-xs text-muted-foreground capitalize mt-0.5">{li.type.slice(0, -1)}</p>
+                      <p className="text-sm font-semibold text-primary mt-1">{formatKES(li.price)}</p>
+                      {li.stock === 0 && <p className="text-xs text-red-500 mt-0.5">Out of stock</p>}
+                      {li.stock > 0 && li.stock <= 5 && <p className="text-xs text-amber-600 mt-0.5">Only {li.stock} left</p>}
+                    </div>
+
+                    <button
+                      onClick={() => remove(li.type, li.id)}
+                      disabled={removing === `${li.type}-${li.id}`}
+                      className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-40"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+
+                  {/* Row 2: qty controls + subtotal */}
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/60">
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setQty(li.type, li.id, qty(li.type, li.id) - 1)}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-border hover:bg-muted transition-colors"
+                      >
+                        <Minus size={12} />
+                      </button>
+                      <span className="w-8 text-center text-sm font-medium">{qty(li.type, li.id)}</span>
+                      <button
+                        onClick={() => setQty(li.type, li.id, qty(li.type, li.id) + 1)}
+                        disabled={qty(li.type, li.id) >= li.stock}
+                        className="w-7 h-7 flex items-center justify-center rounded-lg border border-border hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <Plus size={12} />
+                      </button>
+                    </div>
+
+                    <p className="text-sm font-semibold">
+                      {formatKES((qty(li.type, li.id) * parseFloat(li.price)).toFixed(2))}
+                    </p>
+                  </div>
                 </div>
-
-                {/* Qty controls */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    onClick={() => setQty(li.type, li.id, qty(li.type, li.id) - 1)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-border hover:bg-muted transition-colors"
-                  >
-                    <Minus size={12} />
-                  </button>
-                  <span className="w-8 text-center text-sm font-medium">{qty(li.type, li.id)}</span>
-                  <button
-                    onClick={() => setQty(li.type, li.id, qty(li.type, li.id) + 1)}
-                    disabled={qty(li.type, li.id) >= li.stock}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg border border-border hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    <Plus size={12} />
-                  </button>
-                </div>
-
-                {/* Subtotal */}
-                <p className="w-20 text-right text-sm font-semibold shrink-0">
-                  {formatKES((qty(li.type, li.id) * parseFloat(li.price)).toFixed(2))}
-                </p>
-
-                {/* Remove */}
-                <button
-                  onClick={() => remove(li.type, li.id)}
-                  disabled={removing === `${li.type}-${li.id}`}
-                  className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-40"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
           {/* Order summary */}
