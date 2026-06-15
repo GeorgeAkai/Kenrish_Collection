@@ -12,7 +12,6 @@ db.sqlite3
 
 # Django generated dirs
 staticfiles/
-media/
 
 # Node — stage 1 installs its own
 node_modules/
