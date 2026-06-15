@@ -1109,9 +1109,9 @@ def chatbot_stream(request):
     # Fallback chain: if primary model is unavailable, try these in order
     fallback_models = [
         model,
-        'openai/gpt-oss-20b:free',
-        'openai/gpt-oss-120b:free',
+        'meta-llama/llama-3.3-70b-instruct:free',
         'meta-llama/llama-3.2-3b-instruct:free',
+        'google/gemma-3-12b-it:free',
     ]
 
     if not api_key:
@@ -1151,6 +1151,8 @@ def chatbot_stream(request):
                     headers=or_headers,
                     timeout=60.0,
                 ) as resp:
+                    if resp.status_code >= 400:
+                        continue  # try next model
                     for line in resp.iter_lines():
                         if not line.startswith('data: '):
                             continue
@@ -1159,13 +1161,10 @@ def chatbot_stream(request):
                             yield 'data: [DONE]\n\n'
                             got_content = True
                             break
-                        # Check if OpenRouter returned an error in the stream
                         try:
                             parsed = json.loads(chunk)
                             if 'error' in parsed:
-                                err_msg = parsed['error'].get('message', '')
-                                if 'No endpoints' in err_msg or 'Provider returned error' in err_msg:
-                                    break  # try next model
+                                break  # any error from this model → try next
                         except Exception:
                             pass
                         got_content = True
