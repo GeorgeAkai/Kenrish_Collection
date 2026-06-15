@@ -945,6 +945,38 @@ def admin_all_wishlists(request):
     return Response(data)
 
 
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def admin_delete_user(request, pk):
+    if request.user.pk == pk:
+        return Response({'detail': 'Cannot delete your own account.'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    username = user.username
+    user.delete()
+    return Response({'detail': f'User {username} deleted.'})
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_wishlist_stats(request):
+    products = (Product.objects.annotate(wish_count=Count('wishlisted_by'))
+                .filter(wish_count__gt=0).order_by('-wish_count')[:10])
+    handbags = (Handbag.objects.annotate(wish_count=Count('wishlisted_by'))
+                .filter(wish_count__gt=0).order_by('-wish_count')[:10])
+    clothes_qs = (Clothes.objects.annotate(wish_count=Count('wishlisted_by'))
+                  .filter(wish_count__gt=0).order_by('-wish_count')[:10])
+    items = (
+        [{'name': p.name, 'type': 'product', 'wish_count': p.wish_count} for p in products] +
+        [{'name': h.name, 'type': 'handbag', 'wish_count': h.wish_count} for h in handbags] +
+        [{'name': c.name, 'type': 'clothes', 'wish_count': c.wish_count} for c in clothes_qs]
+    )
+    items.sort(key=lambda x: x['wish_count'], reverse=True)
+    return Response(items[:10])
+
+
 # ---------------------------------------------------------------------------
 # 12. Invoices
 # ---------------------------------------------------------------------------

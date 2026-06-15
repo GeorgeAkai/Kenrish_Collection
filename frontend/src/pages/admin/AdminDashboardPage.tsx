@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Heart } from 'lucide-react'
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from 'recharts'
@@ -13,6 +14,7 @@ interface TrendPoint { date: string; revenue: number }
 interface TopSeller { name: string; type: string; units_sold: number }
 interface Alert { id: number; name: string; type: string; stock_quantity: number; reorder_level: number }
 interface ExpenseRow { category: string; total: number }
+interface WishlistStat { name: string; type: string; wish_count: number }
 
 function StatCard({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
@@ -33,6 +35,7 @@ export default function AdminDashboardPage() {
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [stockValue, setStockValue] = useState<number | null>(null)
   const [expenses, setExpenses] = useState<ExpenseRow[]>([])
+  const [wishlistStats, setWishlistStats] = useState<WishlistStat[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -45,10 +48,10 @@ export default function AdminDashboardPage() {
       api.get('/admin/analytics/inventory-alerts/'),
       api.get('/admin/analytics/stock-value/'),
       api.get(`/admin/analytics/expenses-breakdown/${p}`),
-    ]).then(([s, t, ts, a, sv, e]) => {
+      api.get('/admin/wishlist-stats/'),
+    ]).then(([s, t, ts, a, sv, e, ws]) => {
       setSummary(s.data)
       setTrend(t.data)
-      // top sellers comes as {products, handbags, clothes} — flatten
       const flat: TopSeller[] = [
         ...(ts.data.products ?? []),
         ...(ts.data.handbags ?? []),
@@ -58,6 +61,7 @@ export default function AdminDashboardPage() {
       setAlerts(a.data)
       setStockValue(sv.data.total_value)
       setExpenses(e.data)
+      setWishlistStats(ws.data)
     }).catch(console.error).finally(() => setLoading(false))
   }, [period])
 
@@ -205,6 +209,44 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           )}
+
+          {/* Most Wishlisted */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="border rounded-xl p-5">
+              <h3 className="font-semibold mb-4">Most Wishlisted Products</h3>
+              {wishlistStats.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8 text-sm">No wishlist data yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {wishlistStats.map((s, i) => (
+                    <div key={i} className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <span className="text-sm font-medium truncate block">{s.name}</span>
+                        <span className="text-xs text-muted-foreground capitalize">{s.type}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <Heart size={12} className="text-primary" fill="currentColor" />
+                        <span className="text-sm font-semibold">{s.wish_count}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Most Liked (top-rated) */}
+            <div className="border rounded-xl p-5">
+              <h3 className="font-semibold mb-4">Most Liked (Top Rated)</h3>
+              {topSellers.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8 text-sm">No rating data yet.</p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  See the Top Sellers section above — products with the highest units sold reflect customer preference.
+                  Ratings are shown on individual product pages.
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

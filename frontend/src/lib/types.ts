@@ -53,7 +53,7 @@ export interface Service {
 
 export interface GalleryImage {
   id: number
-  service: number | null
+  service: string | null
   file: string
   description: string
   uploaded_at: string

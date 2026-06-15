@@ -74,7 +74,9 @@ urlpatterns = [
     path('admin/users/<int:pk>/wishlist/', views.admin_user_wishlist, name='api-admin-user-wishlist'),
     path('admin/users/<int:pk>/promote/', views.admin_promote_user, name='api-admin-promote-user'),
     path('admin/users/<int:pk>/demote/', views.admin_demote_user, name='api-admin-demote-user'),
+    path('admin/users/<int:pk>/delete/', views.admin_delete_user, name='api-admin-delete-user'),
     path('admin/wishlists/', views.admin_all_wishlists, name='api-admin-wishlists'),
+    path('admin/wishlist-stats/', views.admin_wishlist_stats, name='api-admin-wishlist-stats'),
 
     # --- 12. Invoices ---
     path('admin/invoices/', views.admin_invoice_list, name='api-admin-invoice-list'),

@@ -210,7 +210,7 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-4 mb-14">
                 <Link
                   to="/products"
-                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-all shadow-xl shadow-primary/30"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-all"
                 >
                   Shop Now <ChevronRight size={15} />
                 </Link>
@@ -246,12 +246,12 @@ export default function HomePage() {
                   <div className="flex flex-col gap-3 hero-float">
                     <div className="rounded-2xl overflow-hidden flex-1 bg-muted">
                       {heroImages[0] && (
-                        <img src={heroImages[0]} alt="" className="w-full h-full object-cover" />
+                        <img src={heroImages[0]} alt="" className="w-full h-full object-contain" />
                       )}
                     </div>
                     {heroImages[2] && (
                       <div className="rounded-2xl overflow-hidden h-40 bg-muted shrink-0">
-                        <img src={heroImages[2]} alt="" className="w-full h-full object-cover" />
+                        <img src={heroImages[2]} alt="" className="w-full h-full object-contain" />
                       </div>
                     )}
                   </div>
@@ -259,12 +259,12 @@ export default function HomePage() {
                   <div className="flex flex-col gap-3 pt-8 hero-float-delay">
                     {heroImages[1] && (
                       <div className="rounded-2xl overflow-hidden h-44 bg-muted shrink-0">
-                        <img src={heroImages[1]} alt="" className="w-full h-full object-cover" />
+                        <img src={heroImages[1]} alt="" className="w-full h-full object-contain" />
                       </div>
                     )}
                     <div className="rounded-2xl overflow-hidden flex-1 bg-muted">
                       {heroImages[3] && (
-                        <img src={heroImages[3]} alt="" className="w-full h-full object-cover" />
+                        <img src={heroImages[3]} alt="" className="w-full h-full object-contain" />
                       )}
                     </div>
                   </div>
