@@ -11,6 +11,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.ImageField(upload_to="product_images/")
     average_rating = models.FloatField(default=0.0)  # ✅ stored field
+    is_featured = models.BooleanField(default=False)
 
     # Inventory fields
     stock_quantity = models.PositiveIntegerField(default=0)
