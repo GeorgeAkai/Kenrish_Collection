@@ -21,7 +21,7 @@ COPY . .
 # Overwrite with freshly built frontend (takes precedence over any local dist)
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-RUN chmod +x docker_run_server.sh
+RUN cp -r /app/media /app/media_seed && chmod +x docker_run_server.sh
 
 EXPOSE 10000
 
