@@ -57,7 +57,7 @@ export default function ServicesPage() {
                     <img
                       src={s.image}
                       alt={s.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      className="w-full h-full object-contain"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-primary/20 to-transparent" />
                     <div className="absolute bottom-4 left-4">
