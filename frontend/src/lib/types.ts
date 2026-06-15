@@ -120,6 +120,7 @@ export interface AdminUser {
   last_login: string | null
   login_count: number
   added_by: string | null
+  has_wishlist: boolean
 }
 
 export interface InvoiceItem {

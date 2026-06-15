@@ -99,10 +99,12 @@ export default function AdminUsersPage() {
               />
             ) : (
               <div className="flex flex-wrap gap-2">
-                <button onClick={() => openWishlist(u.id, u.username)}
-                  className="text-xs px-3 py-2 border rounded-lg hover:bg-muted transition-colors">
-                  Wishlist
-                </button>
+                {u.has_wishlist && (
+                  <button onClick={() => openWishlist(u.id, u.username)}
+                    className="text-xs px-3 py-2 border rounded-lg hover:bg-muted transition-colors">
+                    Wishlist
+                  </button>
+                )}
                 {u.is_staff ? (
                   <button onClick={() => setConfirming({ id: u.id, type: 'revoke' })} disabled={actionId === u.id}
                     className="text-xs px-3 py-2 border rounded-lg text-orange-600 hover:bg-orange-50 disabled:opacity-50 transition-colors">
@@ -163,10 +165,12 @@ export default function AdminUsersPage() {
                     />
                   ) : (
                     <div className="flex items-center gap-1.5 justify-end">
-                      <button onClick={() => openWishlist(u.id, u.username)}
-                        className="text-xs px-2.5 py-1.5 border rounded hover:bg-muted transition-colors">
-                        Wishlist
-                      </button>
+                      {u.has_wishlist && (
+                        <button onClick={() => openWishlist(u.id, u.username)}
+                          className="text-xs px-2.5 py-1.5 border rounded hover:bg-muted transition-colors">
+                          Wishlist
+                        </button>
+                      )}
                       {u.is_staff ? (
                         <button onClick={() => setConfirming({ id: u.id, type: 'revoke' })} disabled={actionId === u.id}
                           className="text-xs px-2.5 py-1.5 border rounded text-orange-600 hover:bg-orange-50 disabled:opacity-50">

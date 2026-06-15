@@ -157,12 +157,11 @@ export default function HomePage() {
     )
   }
 
-  // Collect up to 4 images for the hero mosaic
-  const heroImages: string[] = [
-    ...(data?.featured_handbags?.slice(0, 2).map(h => h.image).filter(Boolean) ?? []),
-    ...(data?.featured_products?.slice(0, 2).map(p => p.image).filter(Boolean) ?? []),
-    ...(data?.featured_clothes?.slice(0, 2).map(c => c.image).filter(Boolean) ?? []),
-  ].filter((x): x is string => !!x).slice(0, 4)
+  // Collect up to 4 product images for the hero mosaic
+  const heroImages: string[] = (data?.featured_products ?? [])
+    .map(p => p.image)
+    .filter((x): x is string => !!x)
+    .slice(0, 4)
 
   const tabItems: Record<Tab, (Product | Handbag | Clothes)[]> = {
     products: data?.featured_products ?? [],
@@ -246,12 +245,12 @@ export default function HomePage() {
                   <div className="flex flex-col gap-3 hero-float">
                     <div className="rounded-2xl overflow-hidden flex-1 bg-muted">
                       {heroImages[0] && (
-                        <img src={heroImages[0]} alt="" className="w-full h-full object-contain" />
+                        <img src={heroImages[0]} alt="" className="w-full h-full object-cover" />
                       )}
                     </div>
                     {heroImages[2] && (
                       <div className="rounded-2xl overflow-hidden h-40 bg-muted shrink-0">
-                        <img src={heroImages[2]} alt="" className="w-full h-full object-contain" />
+                        <img src={heroImages[2]} alt="" className="w-full h-full object-cover" />
                       </div>
                     )}
                   </div>
@@ -259,12 +258,12 @@ export default function HomePage() {
                   <div className="flex flex-col gap-3 pt-8 hero-float-delay">
                     {heroImages[1] && (
                       <div className="rounded-2xl overflow-hidden h-44 bg-muted shrink-0">
-                        <img src={heroImages[1]} alt="" className="w-full h-full object-contain" />
+                        <img src={heroImages[1]} alt="" className="w-full h-full object-cover" />
                       </div>
                     )}
                     <div className="rounded-2xl overflow-hidden flex-1 bg-muted">
                       {heroImages[3] && (
-                        <img src={heroImages[3]} alt="" className="w-full h-full object-contain" />
+                        <img src={heroImages[3]} alt="" className="w-full h-full object-cover" />
                       )}
                     </div>
                   </div>

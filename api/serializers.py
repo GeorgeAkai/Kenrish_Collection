@@ -323,10 +323,11 @@ class ExpenseSerializer(serializers.ModelSerializer):
 class AdminUserSerializer(serializers.ModelSerializer):
     login_count = serializers.SerializerMethodField()
     added_by = serializers.SerializerMethodField()
+    has_wishlist = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'is_staff', 'date_joined', 'last_login', 'login_count', 'added_by']
+        fields = ['id', 'username', 'email', 'is_staff', 'date_joined', 'last_login', 'login_count', 'added_by', 'has_wishlist']
 
     def get_login_count(self, obj):
         try:
@@ -340,6 +341,13 @@ class AdminUserSerializer(serializers.ModelSerializer):
             return added.username if added else None
         except Exception:
             return None
+
+    def get_has_wishlist(self, obj):
+        try:
+            wl = obj.wishlist
+            return wl.products.exists() or wl.handbags.exists() or wl.clothes.exists()
+        except Exception:
+            return False
 
 
 # ---------------------------------------------------------------------------

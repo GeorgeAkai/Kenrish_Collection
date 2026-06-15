@@ -257,7 +257,7 @@ def clothes_detail(request, pk):
 @permission_classes([AllowAny])
 def home_view(request):
     ctx = {'request': request}
-    featured_products = Product.objects.order_by('-average_rating', '-id')[:5]
+    featured_products = Product.objects.order_by('-average_rating', '-id')[:8]
     featured_handbags = Handbag.objects.order_by('-average_rating', '-id')[:5]
     featured_clothes = Clothes.objects.order_by('-average_rating', '-id')[:5]
     offers = Offer.objects.all().order_by('-created_at')
