@@ -424,14 +424,6 @@ export default function AdminInventoryPage() {
     { key: 'scan-receipt', label: 'Scan Receipt' },
   ]
 
-  const itemTypeSelect = (value: string, onChange: (v: string) => void) => (
-    <select value={value} onChange={e => onChange(e.target.value)}
-      className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring">
-      <option value="product">Product</option>
-      <option value="handbag">Handbag</option>
-      <option value="clothes">Clothes</option>
-    </select>
-  )
 
   return (
     <div>
