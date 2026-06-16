@@ -195,13 +195,13 @@ class GalleryImage(models.Model):
         ('manicure', 'Manicure'),
         ('pedicure', 'Pedicure'),
     ]
-    service = models.CharField(max_length=20, choices=SERVICE_CHOICES)
+    service = models.CharField(max_length=20, choices=SERVICE_CHOICES, blank=True, null=True)
     file = models.FileField(upload_to='gallery/', null=True, blank=True)
     description = models.CharField(max_length=255, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def is_image(self):
-        return self.file and self.file.name and self.file.name.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp'))
+        return self.file and self.file.name and self.file.name.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.heic', '.heif'))
 
     def is_video(self):
         return self.file and self.file.name and self.file.name.lower().endswith(('.mp4', '.mov', '.avi', '.webm', '.mkv'))

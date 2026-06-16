@@ -13,7 +13,7 @@ interface Props {
   currentUrl?: string | null
 }
 
-export default function FileDropZone({ file, onFileChange, accept = 'image/*', currentUrl }: Props) {
+export default function FileDropZone({ file, onFileChange, accept = 'image/*,.heic,.heif', currentUrl }: Props) {
   const [dragging, setDragging] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)

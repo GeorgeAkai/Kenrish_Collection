@@ -182,7 +182,7 @@ export default function AdminGalleryPage() {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*,video/*"
+                    accept="image/*,.heic,.heif,video/*"
                     className="hidden"
                     onChange={e => { const f = e.target.files?.[0]; if (f) selectFile(f) }}
                   />

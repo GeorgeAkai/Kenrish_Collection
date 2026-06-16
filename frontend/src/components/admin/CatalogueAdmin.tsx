@@ -111,12 +111,15 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
       setShowForm(false)
       fetch()
     } catch (err: unknown) {
-      const response = (err as { response?: { data?: Record<string, string[]> } }).response
-      if (response?.data) {
-        const msgs = Object.entries(response.data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v[0] : v}`).join('; ')
+      const response = (err as { response?: { data?: unknown } }).response
+      const data = response?.data
+      if (data && typeof data === 'object' && !Array.isArray(data)) {
+        const msgs = Object.entries(data as Record<string, unknown>)
+          .map(([k, v]) => `${k}: ${Array.isArray(v) ? v[0] : v}`)
+          .join('; ')
         setError(msgs)
       } else {
-        setError('Save failed.')
+        setError('Save failed. Please try again.')
       }
     } finally {
       setSaving(false)

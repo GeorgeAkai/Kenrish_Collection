@@ -103,7 +103,7 @@ function DraftCard({
           <input
             ref={fileRef}
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             className="hidden"
             onChange={e => { const f = e.target.files?.[0]; if (f) pickImage(f) }}
           />

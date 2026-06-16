@@ -287,7 +287,7 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept="image/*,.heic,.heif"
           className="hidden"
           onChange={e => {
             const f = e.target.files?.[0]
@@ -343,6 +343,10 @@ export default function AdminInventoryPage() {
   const [saleForm, setSaleForm] = useState({ item_type: 'product', item_id: '', quantity: '1', unit_price: '', customer_name: '', customer_phone: '' })
   const [saleSaving, setSaleSaving] = useState(false)
   const [saleMsg, setSaleMsg] = useState('')
+  const [saleSearch, setSaleSearch] = useState('')
+  const [saleSelected, setSaleSelected] = useState<InventoryItem | null>(null)
+  const [showSaleDropdown, setShowSaleDropdown] = useState(false)
+  const saleSearchRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (tab === 'inventory') {
@@ -351,8 +355,9 @@ export default function AdminInventoryPage() {
     } else if (tab === 'sales') {
       setLoading(true)
       api.get('/admin/inventory/sales/').then(r => setSales(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
-    } else if (tab === 'scan-receipt') {
-      api.get('/admin/inventory/').then(r => setInventory(r.data.results ?? r.data)).catch(console.error)
+    } else if (tab === 'scan-receipt' || tab === 'record-sale' || tab === 'add-stock') {
+      if (inventory.length === 0)
+        api.get('/admin/inventory/').then(r => setInventory(r.data.results ?? r.data)).catch(console.error)
     }
   }, [tab])
 
@@ -380,12 +385,13 @@ export default function AdminInventoryPage() {
 
   async function handleRecordSale(e: FormEvent) {
     e.preventDefault()
+    if (!saleSelected) { setSaleMsg('Please select an item from the list.'); return }
     setSaleSaving(true)
     setSaleMsg('')
     try {
       await api.post('/admin/inventory/record-sale/', {
-        item_type: saleForm.item_type,
-        item_id: parseInt(saleForm.item_id),
+        item_type: saleSelected.item_type,
+        item_id: saleSelected.id,
         quantity: parseInt(saleForm.quantity),
         unit_price: parseFloat(saleForm.unit_price),
         customer_name: saleForm.customer_name,
@@ -393,6 +399,8 @@ export default function AdminInventoryPage() {
       })
       setSaleMsg('Sale recorded successfully!')
       setSaleForm({ item_type: 'product', item_id: '', quantity: '1', unit_price: '', customer_name: '', customer_phone: '' })
+      setSaleSearch('')
+      setSaleSelected(null)
     } catch (err: unknown) {
       const response = (err as { response?: { data?: Record<string, string[]> } }).response
       setSaleMsg(response?.data ? JSON.stringify(response.data) : 'Failed to record sale.')
@@ -533,14 +541,52 @@ export default function AdminInventoryPage() {
       {tab === 'record-sale' && (
         <div className="max-w-md">
           <form onSubmit={handleRecordSale} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Item Type</label>
-              {itemTypeSelect(saleForm.item_type, v => setSaleForm(f => ({ ...f, item_type: v })))}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Item ID</label>
-              <input type="number" required className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                value={saleForm.item_id} onChange={e => setSaleForm(f => ({ ...f, item_id: e.target.value }))} />
+            <div ref={saleSearchRef} className="relative">
+              <label className="block text-sm font-medium mb-1">Item Name</label>
+              <input
+                type="text"
+                className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="Search by name…"
+                value={saleSearch}
+                autoComplete="off"
+                onChange={e => {
+                  setSaleSearch(e.target.value)
+                  setSaleSelected(null)
+                  setShowSaleDropdown(true)
+                }}
+                onFocus={() => setShowSaleDropdown(true)}
+                onBlur={() => setTimeout(() => setShowSaleDropdown(false), 150)}
+              />
+              {showSaleDropdown && saleSearch.length > 0 && (() => {
+                const q = saleSearch.toLowerCase()
+                const hits = inventory.filter(i => i.name.toLowerCase().includes(q)).slice(0, 8)
+                return hits.length > 0 ? (
+                  <ul className="absolute z-20 left-0 right-0 mt-1 bg-background border rounded-md shadow-lg max-h-52 overflow-y-auto">
+                    {hits.map(item => (
+                      <li
+                        key={`${item.item_type}-${item.id}`}
+                        className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-muted text-sm"
+                        onMouseDown={() => {
+                          setSaleSelected(item)
+                          setSaleSearch(item.name)
+                          setSaleForm(f => ({ ...f, unit_price: item.price ?? '' }))
+                          setShowSaleDropdown(false)
+                        }}
+                      >
+                        <span className="font-medium truncate">{item.name}</span>
+                        <span className="ml-2 shrink-0 text-xs text-muted-foreground capitalize px-1.5 py-0.5 bg-muted rounded">{item.item_type}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="absolute z-20 left-0 right-0 mt-1 bg-background border rounded-md shadow px-3 py-2 text-sm text-muted-foreground">No items found</div>
+                )
+              })()}
+              {saleSelected && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {saleSelected.item_type} · {saleSelected.stock_quantity} in stock · selling at {formatKES(saleSelected.price)}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Quantity</label>
