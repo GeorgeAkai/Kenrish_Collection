@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-from . import views
+from . import views, receipt_views
 
 urlpatterns = [
     # --- Auth ---
@@ -109,6 +109,10 @@ urlpatterns = [
     # --- Slot Configurations ---
     path('admin/slot-configs/', views.admin_slot_config_list, name='api-admin-slot-config-list'),
     path('admin/slot-configs/<int:pk>/', views.admin_slot_config_detail, name='api-admin-slot-config-detail'),
+
+    # --- 16. Receipt scanning ---
+    path('admin/receipt/parse/', receipt_views.receipt_parse, name='api-admin-receipt-parse'),
+    path('admin/receipt/confirm/', receipt_views.receipt_confirm, name='api-admin-receipt-confirm'),
 
     # --- Orders ---
     path('orders/', views.create_order, name='api-order-create'),
