@@ -16,6 +16,7 @@ interface Item {
   reorder_level: number
   image: string | null
   average_rating?: number
+  is_published?: boolean
   [key: string]: unknown
 }
 
@@ -41,16 +42,31 @@ const baseFields: Field[] = [
   { name: 'reorder_level', label: 'Reorder Level', type: 'number' },
 ]
 
+function StatusBadge({ published }: { published: boolean }) {
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+      published
+        ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+        : 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
+    }`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${published ? 'bg-green-500' : 'bg-amber-500'}`} />
+      {published ? 'Published' : 'Draft'}
+    </span>
+  )
+}
+
 export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Props) {
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<Item | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<Record<string, string>>({})
+  const [isPublished, setIsPublished] = useState(true)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [togglingId, setTogglingId] = useState<number | null>(null)
   const del = useConfirm<number>()
 
   const allFields = [...baseFields, ...extraFields]
@@ -66,6 +82,7 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
   function openCreate() {
     setEditing(null)
     setForm({})
+    setIsPublished(true)
     setImageFile(null)
     setError('')
     setShowForm(true)
@@ -76,6 +93,7 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
     const f: Record<string, string> = {}
     allFields.forEach(field => { f[field.name] = String(item[field.name] ?? '') })
     setForm(f)
+    setIsPublished(item.is_published !== false)
     setImageFile(null)
     setError('')
     setShowForm(true)
@@ -94,6 +112,19 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
     }
   }
 
+  async function handleTogglePublished(item: Item) {
+    const newVal = !item.is_published
+    setTogglingId(item.id)
+    try {
+      await api.patch(`${endpoint}/${item.id}/`, { is_published: newVal })
+      setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_published: newVal } : i))
+    } catch {
+      // silently ignore
+    } finally {
+      setTogglingId(null)
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setSaving(true)
@@ -101,6 +132,7 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
     try {
       const fd = new FormData()
       allFields.forEach(f => { if (form[f.name]) fd.append(f.name, form[f.name]) })
+      fd.append('is_published', String(isPublished))
       if (imageFile) fd.append('image', imageFile)
       const headers = { 'Content-Type': 'multipart/form-data' }
       if (editing) {
@@ -164,6 +196,7 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
                   <th className="text-left px-4 py-3 font-medium">Price</th>
                   <th className="text-left px-4 py-3 font-medium">Stock</th>
                   <th className="text-left px-4 py-3 font-medium">Rating</th>
+                  <th className="text-left px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -193,6 +226,16 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
                       ) : '—'}
                     </td>
                     <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleTogglePublished(item)}
+                        disabled={togglingId === item.id}
+                        className="disabled:opacity-50 transition-opacity"
+                        title={item.is_published !== false ? 'Click to unpublish' : 'Click to publish'}
+                      >
+                        <StatusBadge published={item.is_published !== false} />
+                      </button>
+                    </td>
+                    <td className="px-4 py-3">
                       <div className="flex justify-end items-center gap-2">
                         <button onClick={() => openEdit(item)}
                           className="w-8 h-8 flex items-center justify-center rounded-lg border hover:bg-muted transition-colors">
@@ -211,7 +254,7 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
                   </tr>
                 ))}
                 {items.length === 0 && (
-                  <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No items yet. Add your first one!</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No items yet. Add your first one!</td></tr>
                 )}
               </tbody>
             </table>
@@ -226,16 +269,17 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
                   <div className="flex-1 min-w-0">
                     <p className="product-title font-semibold truncate">{item.name}</p>
                     <p className="product-price font-medium text-sm mt-0.5">{formatKES(item.price)}</p>
-                    <div className="flex items-center gap-2 mt-1.5">
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${stockClass(item)}`}>
                         {item.stock_quantity} in stock
                       </span>
-                      {(item.average_rating ?? 0) > 0 && (
-                        <div className="flex items-center gap-0.5">
-                          <Star size={11} className="text-gold" fill="currentColor" />
-                          <span className="text-xs text-muted-foreground">{(item.average_rating as number).toFixed(1)}</span>
-                        </div>
-                      )}
+                      <button
+                        onClick={() => handleTogglePublished(item)}
+                        disabled={togglingId === item.id}
+                        className="disabled:opacity-50"
+                      >
+                        <StatusBadge published={item.is_published !== false} />
+                      </button>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1.5 shrink-0 items-end">
@@ -303,6 +347,24 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
                   currentUrl={editing?.image ?? null}
                 />
               </div>
+
+              {/* Published toggle */}
+              <div className="flex items-center justify-between rounded-xl border px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium">Published</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {isPublished ? 'Visible to customers' : 'Hidden — saved as draft'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsPublished(p => !p)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none ${isPublished ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${isPublished ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+
               {error && (
                 <div className="bg-destructive/10 border border-destructive/20 rounded-xl px-4 py-3 text-sm text-destructive">
                   {error}
