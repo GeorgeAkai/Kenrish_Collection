@@ -90,7 +90,18 @@ export default function ServicesPage() {
                     </details>
                   )}
                   <div className="flex items-center justify-between">
-                    <p className="product-price font-bold text-base">{formatKES(s.price)}</p>
+                    <div>
+                      {s.price_from ? (
+                        <p className="product-price font-bold text-base">
+                          {s.price_to
+                            ? <>{formatKES(s.price_from)} <span className="text-muted-foreground font-normal text-sm">–</span> {formatKES(s.price_to)}</>
+                            : <>From {formatKES(s.price_from)}</>}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground italic">Price on request</p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-0.5">Price range — varies by complexity</p>
+                    </div>
                     <Link
                       to="/reservation"
                       className="inline-flex items-center gap-1.5 text-xs bg-primary text-primary-foreground px-4 py-2 rounded-full font-semibold hover:opacity-90 transition-opacity shadow-md"

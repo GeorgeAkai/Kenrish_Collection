@@ -172,7 +172,9 @@ class Service(models.Model):
     name = models.CharField(max_length=255)
     short_description = models.TextField()
     full_description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    price_from = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    price_to = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     image = models.ImageField(upload_to='services/', null=True, blank=True)
     average_rating = models.FloatField(default=0.0)
 

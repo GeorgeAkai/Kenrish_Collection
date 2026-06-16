@@ -47,7 +47,9 @@ export interface Service {
   name: string
   short_description: string
   full_description: string
-  price: string
+  price: string | null
+  price_from: string | null
+  price_to: string | null
   image: string | null
 }
 

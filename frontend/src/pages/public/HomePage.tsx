@@ -431,7 +431,13 @@ export default function HomePage() {
                     </h3>
                     <ServiceDesc text={svc.short_description} />
                     <div className="flex items-center justify-between">
-                      <span className="product-price font-bold text-base">{formatKES(svc.price)}</span>
+                      <span className="product-price font-bold text-base">
+                        {svc.price_from
+                          ? svc.price_to
+                            ? `${formatKES(svc.price_from)} – ${formatKES(svc.price_to)}`
+                            : `From ${formatKES(svc.price_from)}`
+                          : svc.price ? formatKES(svc.price) : ''}
+                      </span>
                       <Link
                         to="/services"
                         className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline underline-offset-2"
