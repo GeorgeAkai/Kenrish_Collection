@@ -8,6 +8,6 @@ boto3==1.43.19
 django-storages==1.14.6
 openai==2.6.1
 httpx==0.28.1
-requests==2.31.0
+requests==2.32.3
 gunicorn==23.0.0
 whitenoise==6.9.0
