@@ -25,7 +25,7 @@ RECEIPT_PROMPT = (
     "- Return ONLY the JSON object, no markdown fences, no explanation"
 )
 
-_DEFAULT_MODEL = 'google/gemini-flash-1.5'
+_DEFAULT_MODEL = 'google/gemini-1.5-flash'
 _MODEL_MAP = {'product': Product, 'handbag': Handbag, 'clothes': Clothes}
 
 
