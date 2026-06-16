@@ -338,6 +338,10 @@ export default function AdminInventoryPage() {
   const [stockForm, setStockForm] = useState({ item_type: 'product', item_id: '', quantity: '', cost_price: '', price: '' })
   const [stockSaving, setStockSaving] = useState(false)
   const [stockMsg, setStockMsg] = useState('')
+  const [stockSearch, setStockSearch] = useState('')
+  const [stockSelected, setStockSelected] = useState<InventoryItem | null>(null)
+  const [showStockDropdown, setShowStockDropdown] = useState(false)
+  const stockSearchRef = useRef<HTMLDivElement>(null)
 
   // Record sale form
   const [saleForm, setSaleForm] = useState({ item_type: 'product', item_id: '', quantity: '1', unit_price: '', customer_name: '', customer_phone: '' })
@@ -363,18 +367,21 @@ export default function AdminInventoryPage() {
 
   async function handleAddStock(e: FormEvent) {
     e.preventDefault()
+    if (!stockSelected) { setStockMsg('Please select an item from the list.'); return }
     setStockSaving(true)
     setStockMsg('')
     try {
       await api.post('/admin/inventory/add-stock/', {
-        item_type: stockForm.item_type,
-        item_id: parseInt(stockForm.item_id),
+        item_type: stockSelected.item_type,
+        item_id: stockSelected.id,
         quantity: parseInt(stockForm.quantity),
         unit_cost: parseFloat(stockForm.cost_price),
         ...(stockForm.price ? { new_price: parseFloat(stockForm.price) } : {}),
       })
       setStockMsg('Stock added successfully!')
       setStockForm({ item_type: 'product', item_id: '', quantity: '', cost_price: '', price: '' })
+      setStockSearch('')
+      setStockSelected(null)
     } catch (err: unknown) {
       const response = (err as { response?: { data?: Record<string, string[]> } }).response
       setStockMsg(response?.data ? JSON.stringify(response.data) : 'Failed to add stock.')
@@ -506,14 +513,51 @@ export default function AdminInventoryPage() {
       {tab === 'add-stock' && (
         <div className="max-w-md">
           <form onSubmit={handleAddStock} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Item Type</label>
-              {itemTypeSelect(stockForm.item_type, v => setStockForm(f => ({ ...f, item_type: v })))}
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Item ID</label>
-              <input type="number" required className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                value={stockForm.item_id} onChange={e => setStockForm(f => ({ ...f, item_id: e.target.value }))} placeholder="Enter item ID" />
+            <div ref={stockSearchRef} className="relative">
+              <label className="block text-sm font-medium mb-1">Item Name</label>
+              <input
+                type="text"
+                className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="Search by name…"
+                value={stockSearch}
+                autoComplete="off"
+                onChange={e => {
+                  setStockSearch(e.target.value)
+                  setStockSelected(null)
+                  setShowStockDropdown(true)
+                }}
+                onFocus={() => setShowStockDropdown(true)}
+                onBlur={() => setTimeout(() => setShowStockDropdown(false), 150)}
+              />
+              {showStockDropdown && stockSearch.length > 0 && (() => {
+                const q = stockSearch.toLowerCase()
+                const hits = inventory.filter(i => i.name.toLowerCase().includes(q)).slice(0, 8)
+                return hits.length > 0 ? (
+                  <ul className="absolute z-20 left-0 right-0 mt-1 bg-background border rounded-md shadow-lg max-h-52 overflow-y-auto">
+                    {hits.map(item => (
+                      <li
+                        key={`${item.item_type}-${item.id}`}
+                        className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-muted text-sm"
+                        onMouseDown={() => {
+                          setStockSelected(item)
+                          setStockSearch(item.name)
+                          setShowStockDropdown(false)
+                        }}
+                      >
+                        <span className="font-medium truncate">{item.name}</span>
+                        <span className="ml-2 shrink-0 text-xs text-muted-foreground capitalize px-1.5 py-0.5 bg-muted rounded">{item.item_type}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="absolute z-20 left-0 right-0 mt-1 bg-background border rounded-md shadow px-3 py-2 text-sm text-muted-foreground">No items found</div>
+                )
+              })()}
+              {stockSelected && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {stockSelected.item_type} · {stockSelected.stock_quantity} in stock
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Quantity</label>
