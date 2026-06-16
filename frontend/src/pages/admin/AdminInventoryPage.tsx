@@ -335,7 +335,7 @@ export default function AdminInventoryPage() {
   const [loading, setLoading] = useState(true)
 
   // Add stock form
-  const [stockForm, setStockForm] = useState({ item_type: 'product', item_id: '', quantity: '', cost_price: '', price: '' })
+  const [stockForm, setStockForm] = useState({ item_type: 'product', item_id: '', quantity: '', cost_price: '' })
   const [stockSaving, setStockSaving] = useState(false)
   const [stockMsg, setStockMsg] = useState('')
   const [stockSearch, setStockSearch] = useState('')
@@ -376,10 +376,9 @@ export default function AdminInventoryPage() {
         item_id: stockSelected.id,
         quantity: parseInt(stockForm.quantity),
         unit_cost: parseFloat(stockForm.cost_price),
-        ...(stockForm.price ? { new_price: parseFloat(stockForm.price) } : {}),
       })
       setStockMsg('Stock added successfully!')
-      setStockForm({ item_type: 'product', item_id: '', quantity: '', cost_price: '', price: '' })
+      setStockForm({ item_type: 'product', item_id: '', quantity: '', cost_price: '' })
       setStockSearch('')
       setStockSelected(null)
     } catch (err: unknown) {
@@ -560,11 +559,6 @@ export default function AdminInventoryPage() {
               <label className="block text-sm font-medium mb-1">Buying Price per Unit (KES)</label>
               <input type="number" required step="any" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                 value={stockForm.cost_price} onChange={e => setStockForm(f => ({ ...f, cost_price: e.target.value }))} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Selling Price per Unit (KES) <span className="text-muted-foreground font-normal">— optional, updates the listed price</span></label>
-              <input type="number" step="any" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                value={stockForm.price} onChange={e => setStockForm(f => ({ ...f, price: e.target.value }))} placeholder="Leave blank to keep current price" />
             </div>
             {stockMsg && <p className={`text-sm ${stockMsg.includes('success') ? 'text-green-600' : 'text-red-600'}`}>{stockMsg}</p>}
             <button type="submit" disabled={stockSaving} className="btn-modern btn-modern--primary">
