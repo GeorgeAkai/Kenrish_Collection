@@ -98,7 +98,13 @@ def receipt_parse(request):
     if not image:
         return Response({'error': 'No image provided'}, status=status.HTTP_400_BAD_REQUEST)
 
-    mime_type = getattr(image, 'content_type', None) or 'image/jpeg'
+    if image.size > 5 * 1024 * 1024:
+        return Response({'error': 'Image must be under 5 MB'}, status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
+
+    mime_type = getattr(image, 'content_type', None) or ''
+    if mime_type not in {'image/jpeg', 'image/png', 'image/webp', 'image/gif'}:
+        return Response({'error': 'Unsupported image type'}, status=status.HTTP_400_BAD_REQUEST)
+
     image_data = image.read()
 
     try:

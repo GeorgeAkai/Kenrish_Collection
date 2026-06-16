@@ -23,6 +23,9 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 RUN if [ -d /app/media ]; then cp -r /app/media /app/media_seed; else mkdir -p /app/media_seed; fi && chmod +x docker_run_server.sh
 
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
 EXPOSE 10000
 
 ENTRYPOINT ["./docker_run_server.sh"]

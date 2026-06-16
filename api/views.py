@@ -13,12 +13,23 @@ from django.http import StreamingHttpResponse
 from django.utils import timezone
 
 from rest_framework import status
-from rest_framework.decorators import api_view, authentication_classes, permission_classes, parser_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes, parser_classes, throttle_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
+
+
+class AuthRateThrottle(AnonRateThrottle):
+    rate = '5/min'
+    scope = 'auth'
+
+
+class ChatbotRateThrottle(AnonRateThrottle):
+    rate = '20/min'
+    scope = 'chatbot'
 
 from app1.models import (
     Product, Handbag, Clothes,
@@ -83,6 +94,7 @@ def _period_filter(qs, period, date_field='created_at'):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([AuthRateThrottle])
 def login_view(request):
     user = authenticate(
         request,
@@ -97,6 +109,7 @@ def login_view(request):
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([AuthRateThrottle])
 def register_view(request):
     serializer = RegisterSerializer(data=request.data)
     if not serializer.is_valid():
@@ -759,6 +772,11 @@ def admin_add_stock(request):
     except (ValueError, TypeError):
         return Response({'detail': 'Invalid quantity or unit_cost.'}, status=status.HTTP_400_BAD_REQUEST)
 
+    if quantity <= 0 or quantity > 100000:
+        return Response({'detail': 'Quantity must be between 1 and 100,000.'}, status=status.HTTP_400_BAD_REQUEST)
+    if unit_cost < 0:
+        return Response({'detail': 'Unit cost cannot be negative.'}, status=status.HTTP_400_BAD_REQUEST)
+
     if item_type == 'product':
         try:
             item = Product.objects.get(pk=item_id)
@@ -1197,6 +1215,7 @@ def analytics_reset(request):
 @api_view(['POST'])
 @authentication_classes([])
 @permission_classes([AllowAny])
+@throttle_classes([ChatbotRateThrottle])
 def chatbot_stream(request):
     messages_data = request.data.get('messages', [])
     if not messages_data:

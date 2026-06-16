@@ -39,6 +39,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://kenrishcollection.com',
     'https://www.kenrishcollection.com',
 ]
+if _render_host:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{_render_host}')
 
 
 # Application definition
@@ -123,12 +125,22 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '60/min',
+        'user': '200/min',
+        'auth': '5/min',
+        'chatbot': '20/min',
+    },
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': False,
+    'ROTATE_REFRESH_TOKENS': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
@@ -228,10 +240,14 @@ SESSION_COOKIE_AGE = 900  # 15 minutes in seconds
 SESSION_SAVE_EVERY_REQUEST = True  # Reset timer on each request
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Optional: expire when browser closes
 
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+_IS_PRODUCTION = bool(_DB_HOST)
+
+SESSION_COOKIE_SECURE = _IS_PRODUCTION
+CSRF_COOKIE_SECURE = _IS_PRODUCTION
+SECURE_SSL_REDIRECT = _IS_PRODUCTION
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 SECURE_HSTS_SECONDS = 31536000  # 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
