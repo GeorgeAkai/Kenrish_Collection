@@ -25,7 +25,7 @@ RECEIPT_PROMPT = (
     "- Return ONLY the JSON object, no markdown fences, no explanation"
 )
 
-_DEFAULT_MODEL = 'google/gemini-1.5-flash'
+_DEFAULT_MODEL = 'openai/gpt-4o-mini'
 _MODEL_MAP = {'product': Product, 'handbag': Handbag, 'clothes': Clothes}
 
 
@@ -58,7 +58,11 @@ def _call_vision_api(image_data: bytes, mime_type: str) -> list:
         },
         timeout=45,
     )
-    resp.raise_for_status()
+    try:
+        resp.raise_for_status()
+    except requests.HTTPError as exc:
+        body = exc.response.text[:500] if exc.response is not None else ''
+        raise requests.RequestException(f"{exc} — {body}") from exc
 
     content = resp.json()['choices'][0]['message']['content'].strip()
     if content.startswith('```'):
