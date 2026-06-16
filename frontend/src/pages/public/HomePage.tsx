@@ -5,6 +5,7 @@ import { formatKES, formatDate } from '@/lib/utils'
 import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Ban, Truck, ShieldCheck, Headphones } from 'lucide-react'
 import type { Product, Handbag, Clothes, Offer, Service } from '@/lib/types'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { LOGO_URL } from '@/lib/brand'
 
 interface PublicSlot { time: string; available: boolean; booked: boolean; past: boolean }
 
@@ -180,10 +181,7 @@ export default function HomePage() {
 
             {/* Left — copy */}
             <div className="max-w-xl">
-              <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/25 rounded-full px-4 py-1.5 text-xs mb-8 text-primary font-medium">
-                <Sparkles size={11} />
-                {t('home.badge')}
-              </div>
+              <img src={LOGO_URL} alt="Kenrish Collection" className="h-40 w-auto object-contain mb-6" />
 
               <h1
                 className="text-5xl lg:text-[3.75rem] font-semibold leading-[1.07] mb-6 text-foreground"
