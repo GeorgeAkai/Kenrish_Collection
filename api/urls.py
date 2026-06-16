@@ -114,6 +114,11 @@ urlpatterns = [
     path('admin/receipt/parse/', receipt_views.receipt_parse, name='api-admin-receipt-parse'),
     path('admin/receipt/confirm/', receipt_views.receipt_confirm, name='api-admin-receipt-confirm'),
 
+    # --- 17. Staging (draft products) ---
+    path('admin/staging/', views.admin_staging_list, name='api-admin-staging-list'),
+    path('admin/staging/<str:item_type>/<int:pk>/publish/', views.admin_staging_publish, name='api-admin-staging-publish'),
+    path('admin/staging/<str:item_type>/<int:pk>/discard/', views.admin_staging_discard, name='api-admin-staging-discard'),
+
     # --- Orders ---
     path('orders/', views.create_order, name='api-order-create'),
     path('orders/my/', views.my_orders, name='api-my-orders'),

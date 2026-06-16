@@ -43,6 +43,7 @@ import AdminInvoicesPage from '@/pages/admin/AdminInvoicesPage'
 import AdminReservationsPage from '@/pages/admin/AdminReservationsPage'
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage'
 import AdminSlotConfigPage from '@/pages/admin/AdminSlotConfigPage'
+import AdminStagingPage from '@/pages/admin/AdminStagingPage'
 
 const NotFound = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
@@ -98,6 +99,7 @@ export default function App() {
             <Route path="/admin/reservations" element={<AdminReservationsPage />} />
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
             <Route path="/admin/slot-config" element={<AdminSlotConfigPage />} />
+            <Route path="/admin/staging" element={<AdminStagingPage />} />
           </Route>
         </Route>
 

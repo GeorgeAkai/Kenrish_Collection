@@ -9,9 +9,10 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.ImageField(upload_to="product_images/")
+    image = models.ImageField(upload_to="product_images/", null=True, blank=True)
     average_rating = models.FloatField(default=0.0)  # ✅ stored field
     is_featured = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=True)
 
     # Inventory fields
     stock_quantity = models.PositiveIntegerField(default=0)
@@ -35,7 +36,8 @@ class Clothes(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.ImageField(upload_to="clothes_images/")
+    image = models.ImageField(upload_to="clothes_images/", null=True, blank=True)
+    is_published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -129,7 +131,8 @@ class Handbag(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.ImageField(upload_to="handbag_images/")
+    image = models.ImageField(upload_to="handbag_images/", null=True, blank=True)
+    is_published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     average_rating = models.FloatField(default=0.0)
 

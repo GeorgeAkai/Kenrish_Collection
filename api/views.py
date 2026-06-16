@@ -217,7 +217,7 @@ def delete_account(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def product_list(request):
-    qs = Product.objects.all().order_by('-id')
+    qs = Product.objects.filter(is_published=True).order_by('-id')
     paginator = StandardPagination()
     page = paginator.paginate_queryset(qs, request)
     serializer = ProductListSerializer(page, many=True, context={'request': request})
@@ -237,7 +237,7 @@ def product_detail(request, pk):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def handbag_list(request):
-    qs = Handbag.objects.all().order_by('-id')
+    qs = Handbag.objects.filter(is_published=True).order_by('-id')
     paginator = StandardPagination()
     page = paginator.paginate_queryset(qs, request)
     serializer = HandbagListSerializer(page, many=True, context={'request': request})
@@ -257,7 +257,7 @@ def handbag_detail(request, pk):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def clothes_list(request):
-    qs = Clothes.objects.all().order_by('-id')
+    qs = Clothes.objects.filter(is_published=True).order_by('-id')
     paginator = StandardPagination()
     page = paginator.paginate_queryset(qs, request)
     serializer = ClothesListSerializer(page, many=True, context={'request': request})
@@ -282,9 +282,9 @@ def clothes_detail(request, pk):
 @permission_classes([AllowAny])
 def home_view(request):
     ctx = {'request': request}
-    featured_products = Product.objects.order_by('-is_featured', '-average_rating', '-id')[:8]
-    featured_handbags = Handbag.objects.order_by('-average_rating', '-id')[:5]
-    featured_clothes = Clothes.objects.order_by('-average_rating', '-id')[:5]
+    featured_products = Product.objects.filter(is_published=True).order_by('-is_featured', '-average_rating', '-id')[:8]
+    featured_handbags = Handbag.objects.filter(is_published=True).order_by('-average_rating', '-id')[:5]
+    featured_clothes = Clothes.objects.filter(is_published=True).order_by('-average_rating', '-id')[:5]
     offers = Offer.objects.all().order_by('-created_at')
     return Response({
         'featured_products': ProductListSerializer(featured_products, many=True, context=ctx).data,
@@ -1770,3 +1770,68 @@ def admin_order_detail(request, pk):
     order.admin_notes = admin_notes
     order.save()
     return Response(OrderSerializer(order).data)
+
+
+# ---------------------------------------------------------------------------
+# 17. Staging (draft products from receipt scan)
+# ---------------------------------------------------------------------------
+
+_STAGING_MODEL_MAP = {'product': Product, 'handbag': Handbag, 'clothes': Clothes}
+_STAGING_SERIALIZER_MAP = {
+    'product': ProductDetailSerializer,
+    'handbag': HandbagDetailSerializer,
+    'clothes': ClothesDetailSerializer,
+}
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def admin_staging_list(request):
+    if not request.user.is_staff:
+        return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
+
+    ctx = {'request': request}
+    result = []
+    for item_type, ModelClass in _STAGING_MODEL_MAP.items():
+        qs = ModelClass.objects.filter(is_published=False).order_by('-id')
+        serializer = _STAGING_SERIALIZER_MAP[item_type](qs, many=True, context=ctx)
+        for item in serializer.data:
+            result.append({**item, 'item_type': item_type})
+    return Response(result)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def admin_staging_publish(request, item_type, pk):
+    if not request.user.is_staff:
+        return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
+
+    ModelClass = _STAGING_MODEL_MAP.get(item_type)
+    if not ModelClass:
+        return Response({'error': 'Invalid type'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        obj = ModelClass.objects.get(pk=pk, is_published=False)
+    except ModelClass.DoesNotExist:
+        return Response({'error': 'Draft not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    obj.is_published = True
+    obj.save()
+    return Response({'status': 'published'})
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def admin_staging_discard(request, item_type, pk):
+    if not request.user.is_staff:
+        return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
+
+    ModelClass = _STAGING_MODEL_MAP.get(item_type)
+    if not ModelClass:
+        return Response({'error': 'Invalid type'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        obj = ModelClass.objects.get(pk=pk, is_published=False)
+    except ModelClass.DoesNotExist:
+        return Response({'error': 'Draft not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    obj.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)

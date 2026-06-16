@@ -124,29 +124,53 @@ def receipt_confirm(request):
         return Response({'error': 'No items provided'}, status=status.HTTP_400_BAD_REQUEST)
 
     added = 0
+    created = 0
+    drafts = []
     errors = []
 
     for item in items:
         try:
+            action = item.get('action', 'link')
             item_type = item.get('item_type', 'product')
-            product_id = item.get('product_id')
             quantity = int(item.get('quantity', 1))
             unit_cost = float(item.get('unit_cost', 0))
             price = float(item.get('price', 0))
 
-            if not product_id or quantity <= 0:
+            if quantity <= 0:
                 continue
 
             ModelClass = _MODEL_MAP.get(item_type)
             if ModelClass is None:
-                errors.append({'product_id': product_id, 'error': f'Unknown item_type: {item_type}'})
+                errors.append({'name': item.get('name'), 'error': f'Unknown item_type: {item_type}'})
                 continue
 
-            obj = ModelClass.objects.get(pk=int(product_id))
-            obj.cost_price = unit_cost
-            if price > 0:
-                obj.price = price
-            obj.save()
+            if action == 'link':
+                product_id = item.get('product_id')
+                if not product_id:
+                    continue
+                obj = ModelClass.objects.get(pk=int(product_id))
+                obj.cost_price = unit_cost
+                if price > 0:
+                    obj.price = price
+                obj.save()
+                added += 1
+
+            elif action == 'create':
+                name = str(item.get('name', '')).strip()
+                if not name:
+                    continue
+                obj = ModelClass.objects.create(
+                    name=name,
+                    description='',
+                    price=price if price > 0 else unit_cost,
+                    cost_price=unit_cost,
+                    stock_quantity=0,
+                    is_published=False,
+                )
+                created += 1
+                drafts.append({'id': obj.id, 'item_type': item_type, 'name': obj.name})
+            else:
+                continue
 
             InventoryTransaction.objects.create(
                 **{item_type: obj},
@@ -156,9 +180,8 @@ def receipt_confirm(request):
                 notes='Receipt scan',
                 created_by=request.user,
             )
-            added += 1
 
         except Exception as exc:
-            errors.append({'product_id': item.get('product_id'), 'error': str(exc)})
+            errors.append({'name': item.get('name'), 'error': str(exc)})
 
-    return Response({'added': added, 'errors': errors})
+    return Response({'added': added, 'created': created, 'drafts': drafts, 'errors': errors})

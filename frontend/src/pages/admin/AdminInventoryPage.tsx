@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ScanLine } from 'lucide-react'
 import api from '@/lib/axios'
 import { formatKES, formatDateTime } from '@/lib/utils'
@@ -13,10 +14,12 @@ interface ScannedItem {
   unit_cost: number
   price: string
   linkedKey: string
+  newItemType: 'product' | 'handbag' | 'clothes'
   skip: boolean
 }
 
 function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
+  const navigate = useNavigate()
   const [stage, setStage] = useState<ScanStage>('upload')
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -25,6 +28,7 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
   const [error, setError] = useState('')
   const [items, setItems] = useState<ScannedItem[]>([])
   const [addedCount, setAddedCount] = useState(0)
+  const [createdCount, setCreatedCount] = useState(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   function pickFile(f: File) {
@@ -50,6 +54,7 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
           unit_cost: i.unit_cost,
           price: '',
           linkedKey: '',
+          newItemType: 'product' as const,
           skip: false,
         })
       )
@@ -68,27 +73,24 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
   }
 
   async function handleConfirm() {
-    const toSend = items
-      .filter(it => !it.skip && it.linkedKey)
-      .map(it => {
-        const [item_type, id] = it.linkedKey.split(':')
-        return {
-          item_type,
-          product_id: Number(id),
-          quantity: it.quantity,
-          unit_cost: it.unit_cost,
-          price: parseFloat(it.price) || 0,
-        }
-      })
-    if (toSend.length === 0) {
-      setError('Link at least one item to a product before confirming.')
+    const active = items.filter(it => !it.skip)
+    if (active.length === 0) {
+      setError('All items are skipped. Uncheck at least one.')
       return
     }
+    const toSend = active.map(it => {
+      if (it.linkedKey) {
+        const [item_type, id] = it.linkedKey.split(':')
+        return { action: 'link', item_type, product_id: Number(id), quantity: it.quantity, unit_cost: it.unit_cost, price: parseFloat(it.price) || 0 }
+      }
+      return { action: 'create', name: it.receiptName, item_type: it.newItemType, quantity: it.quantity, unit_cost: it.unit_cost, price: parseFloat(it.price) || 0 }
+    })
     setConfirming(true)
     setError('')
     try {
       const res = await api.post('/admin/receipt/confirm/', { items: toSend })
-      setAddedCount(res.data.added)
+      setAddedCount(res.data.added ?? 0)
+      setCreatedCount(res.data.created ?? 0)
       setStage('done')
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } }).response?.data?.error
@@ -105,21 +107,36 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
     setError('')
     setItems([])
     setAddedCount(0)
+    setCreatedCount(0)
   }
 
   if (stage === 'done') {
     return (
       <div className="space-y-4 max-w-lg">
-        <div className="rounded-xl border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-900 p-5">
-          <p className="font-semibold text-green-800 dark:text-green-300">Stock updated</p>
-          <p className="text-sm text-green-700 dark:text-green-400 mt-1">
-            {addedCount} product{addedCount !== 1 ? 's' : ''} restocked from receipt.
-          </p>
+        <div className="rounded-xl border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-900 p-5 space-y-1">
+          <p className="font-semibold text-green-800 dark:text-green-300">Receipt confirmed</p>
+          {addedCount > 0 && (
+            <p className="text-sm text-green-700 dark:text-green-400">
+              {addedCount} existing product{addedCount !== 1 ? 's' : ''} restocked.
+            </p>
+          )}
+          {createdCount > 0 && (
+            <p className="text-sm text-green-700 dark:text-green-400">
+              {createdCount} new draft product{createdCount !== 1 ? 's' : ''} created — complete their details before publishing.
+            </p>
+          )}
         </div>
-        <button onClick={reset} className="btn-modern btn-modern--primary flex items-center gap-2">
-          <ScanLine size={14} />
-          Scan Another Receipt
-        </button>
+        <div className="flex gap-3 flex-wrap">
+          {createdCount > 0 && (
+            <button onClick={() => navigate('/admin/staging')} className="btn-modern btn-modern--primary">
+              Complete Draft Products →
+            </button>
+          )}
+          <button onClick={reset} className="btn-modern flex items-center gap-2 border border-border px-4 py-2 rounded-lg text-sm hover:bg-muted transition-colors">
+            <ScanLine size={14} />
+            Scan Another
+          </button>
+        </div>
       </div>
     )
   }
@@ -150,7 +167,8 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
                 <th className="text-left px-3 py-2 font-medium">Qty</th>
                 <th className="text-left px-3 py-2 font-medium">Cost (KES)</th>
                 <th className="text-left px-3 py-2 font-medium">Selling (KES)</th>
-                <th className="text-left px-3 py-2 font-medium">Link to Product</th>
+                <th className="text-left px-3 py-2 font-medium">Link to Existing Product</th>
+                <th className="text-left px-3 py-2 font-medium">Type (if new)</th>
                 <th className="px-3 py-2 font-medium text-center">Skip</th>
               </tr>
             </thead>
@@ -192,7 +210,7 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
                       onChange={e => updateItem(i, 'linkedKey', e.target.value)}
                       className="w-full border rounded px-2 py-1 text-sm bg-background"
                     >
-                      <option value="">— skip —</option>
+                      <option value="">— create new draft —</option>
                       {inventory.map(inv => (
                         <option
                           key={`${inv.item_type}:${inv.id}`}
@@ -201,6 +219,18 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
                           [{inv.item_type}] {inv.name}
                         </option>
                       ))}
+                    </select>
+                  </td>
+                  <td className="px-3 py-2">
+                    <select
+                      value={it.linkedKey ? '' : it.newItemType}
+                      disabled={!!it.linkedKey}
+                      onChange={e => updateItem(i, 'newItemType', e.target.value as ScannedItem['newItemType'])}
+                      className="border rounded px-2 py-1 text-sm bg-background disabled:opacity-40 w-24"
+                    >
+                      <option value="product">Product</option>
+                      <option value="handbag">Handbag</option>
+                      <option value="clothes">Clothes</option>
                     </select>
                   </td>
                   <td className="px-3 py-2 text-center">
@@ -215,7 +245,7 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
               ))}
               {items.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">
                     No items extracted. Try rescanning with a clearer image.
                   </td>
                 </tr>
@@ -305,7 +335,7 @@ export default function AdminInventoryPage() {
   const [loading, setLoading] = useState(true)
 
   // Add stock form
-  const [stockForm, setStockForm] = useState({ item_type: 'product', item_id: '', quantity: '', cost_price: '' })
+  const [stockForm, setStockForm] = useState({ item_type: 'product', item_id: '', quantity: '', cost_price: '', price: '' })
   const [stockSaving, setStockSaving] = useState(false)
   const [stockMsg, setStockMsg] = useState('')
 
@@ -335,10 +365,11 @@ export default function AdminInventoryPage() {
         item_type: stockForm.item_type,
         item_id: parseInt(stockForm.item_id),
         quantity: parseInt(stockForm.quantity),
-        cost_price: parseFloat(stockForm.cost_price),
+        unit_cost: parseFloat(stockForm.cost_price),
+        ...(stockForm.price ? { new_price: parseFloat(stockForm.price) } : {}),
       })
       setStockMsg('Stock added successfully!')
-      setStockForm({ item_type: 'product', item_id: '', quantity: '', cost_price: '' })
+      setStockForm({ item_type: 'product', item_id: '', quantity: '', cost_price: '', price: '' })
     } catch (err: unknown) {
       const response = (err as { response?: { data?: Record<string, string[]> } }).response
       setStockMsg(response?.data ? JSON.stringify(response.data) : 'Failed to add stock.')
@@ -419,9 +450,9 @@ export default function AdminInventoryPage() {
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                    <span>Cost: {formatKES(item.cost_price)}</span>
-                    <span>Price: {formatKES(item.price)}</span>
-                    <span className="font-medium text-foreground">Value: {formatKES(item.inventory_value)}</span>
+                    <span>Buying: {formatKES(item.cost_price)}</span>
+                    <span>Selling: {formatKES(item.price)}</span>
+                    <span className="font-medium text-foreground" title="Stock Value = units in stock × buying price">Stock Value: {formatKES(item.inventory_value)}</span>
                   </div>
                 </div>
               ))}
@@ -434,9 +465,9 @@ export default function AdminInventoryPage() {
                     <th className="text-left px-4 py-3 font-medium">Name</th>
                     <th className="text-left px-4 py-3 font-medium">Type</th>
                     <th className="text-left px-4 py-3 font-medium">Stock</th>
-                    <th className="text-left px-4 py-3 font-medium">Cost</th>
-                    <th className="text-left px-4 py-3 font-medium">Price</th>
-                    <th className="text-left px-4 py-3 font-medium">Value</th>
+                    <th className="text-left px-4 py-3 font-medium">Buying Price</th>
+                    <th className="text-left px-4 py-3 font-medium">Selling Price</th>
+                    <th className="text-left px-4 py-3 font-medium" title="Stock Value = units in stock × buying price">Stock Value ⓘ</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -482,9 +513,14 @@ export default function AdminInventoryPage() {
                 value={stockForm.quantity} onChange={e => setStockForm(f => ({ ...f, quantity: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Cost Price per Unit (KES)</label>
+              <label className="block text-sm font-medium mb-1">Buying Price per Unit (KES)</label>
               <input type="number" required step="any" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                 value={stockForm.cost_price} onChange={e => setStockForm(f => ({ ...f, cost_price: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Selling Price per Unit (KES) <span className="text-muted-foreground font-normal">— optional, updates the listed price</span></label>
+              <input type="number" step="any" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                value={stockForm.price} onChange={e => setStockForm(f => ({ ...f, price: e.target.value }))} placeholder="Leave blank to keep current price" />
             </div>
             {stockMsg && <p className={`text-sm ${stockMsg.includes('success') ? 'text-green-600' : 'text-red-600'}`}>{stockMsg}</p>}
             <button type="submit" disabled={stockSaving} className="btn-modern btn-modern--primary">

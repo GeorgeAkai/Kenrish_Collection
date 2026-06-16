@@ -6,7 +6,7 @@ import { LOGO_URL } from '@/lib/brand'
 import {
   LayoutDashboard, Package, ShoppingBag, Shirt, Warehouse,
   Scissors, Image, Tag, Users, FileText, LogOut, Menu, X,
-  Sun, Moon, ChevronRight, CalendarCheck, ClipboardList, Settings2,
+  Sun, Moon, ChevronRight, CalendarCheck, ClipboardList, Settings2, PackagePlus,
 } from 'lucide-react'
 
 const navItems = [
@@ -15,6 +15,7 @@ const navItems = [
   { to: '/admin/handbags', label: 'Handbags', icon: ShoppingBag },
   { to: '/admin/clothes', label: 'Clothes', icon: Shirt },
   { to: '/admin/inventory', label: 'Inventory', icon: Warehouse },
+  { to: '/admin/staging', label: 'Draft Products', icon: PackagePlus },
   { to: '/admin/orders', label: 'Orders', icon: ClipboardList },
   { to: '/admin/services', label: 'Services', icon: Scissors },
   { to: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
@@ -32,6 +33,7 @@ export function getAdminPageTitle(pathname: string): string {
     '/admin/handbags': 'Handbags',
     '/admin/clothes': 'Clothes',
     '/admin/inventory': 'Inventory',
+    '/admin/staging': 'Draft Products',
     '/admin/orders': 'Orders',
     '/admin/services': 'Services',
     '/admin/reservations': 'Reservations',
