@@ -79,7 +79,7 @@ class KenrishAIService:
         message_lower = user_message.lower()
         
         if intent == 'greeting':
-            return "👋 Hello! Welcome to Kenrish Collection!\n\nI'm your personal beauty assistant.\n\n✨ What can I help you with today?\n• Beauty products and skincare\n• Professional salon services\n• Stylish handbags\n• Store location and hours\n• Pricing information\n\nFeel free to ask me anything! 😊"
+            return "👋 Hello! Welcome to Kenrish Collection!\n\nI'm Rexi, your personal beauty assistant.\n\n✨ What can I help you with today?\n• Beauty products and skincare\n• Professional salon services\n• Stylish handbags\n• Store location and hours\n• Pricing information\n\nFeel free to ask me anything! 😊"
 
         elif intent == 'contact':
             return "📞 Contact Kenrish Collection\n\n🏢 Phone: 0708440390\n📍 Address: Shabaab, Nakuru, Kenya\n\n🕒 Hours:\n• Monday - Saturday: 8:00 AM - 8:00 PM\n• Sunday: CLOSED\n\nCall us anytime during business hours!"
@@ -146,7 +146,7 @@ def build_system_prompt(products, handbags, clothes):
 
     catalogue = fmt(products, 'Products') + fmt(handbags, 'Handbags') + fmt(clothes, 'Clothes')
     return (
-        "You are a friendly and knowledgeable shop assistant for Kenrish Collection, "
+        "You are Rexi, a friendly and knowledgeable shop assistant for Kenrish Collection, "
         "a cosmetics and fashion boutique located in Nakuru, Kenya. "
         "You speak warmly and helpfully to customers. "
         "All prices are in Kenyan Shillings (KES). "
