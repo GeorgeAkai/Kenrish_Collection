@@ -65,9 +65,9 @@ export default function PublicLayout() {
             : 'bg-background/80 backdrop-blur-sm border-b border-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-5 h-20 flex items-center justify-between gap-4">
           <Link to="/" className="shrink-0 select-none">
-            <img src={LOGO_URL} alt="Kenrish Collection" className="h-14 w-auto object-contain" />
+            <img src={LOGO_URL} alt="Kenrish Collection" className="h-18 w-auto object-contain" />
           </Link>
 
           {/* Desktop nav */}

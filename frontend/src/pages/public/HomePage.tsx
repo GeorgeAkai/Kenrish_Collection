@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '@/lib/axios'
 import { formatKES, formatDate } from '@/lib/utils'
-import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Ban, Truck, ShieldCheck, Headphones } from 'lucide-react'
+import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Ban, Truck, ShieldCheck, Headphones, Search, X } from 'lucide-react'
 import type { Product, Handbag, Clothes, Offer, Service } from '@/lib/types'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { LOGO_URL } from '@/lib/brand'
@@ -103,6 +103,7 @@ export default function HomePage() {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<Tab>('products')
+  const [search, setSearch] = useState('')
   const [todaySlots, setTodaySlots] = useState<PublicSlot[]>([])
 
   const todayKey = new Date().toISOString().split('T')[0]
@@ -181,7 +182,7 @@ export default function HomePage() {
 
             {/* Left — copy */}
             <div className="max-w-xl">
-              <img src={LOGO_URL} alt="Kenrish Collection" className="h-40 w-auto object-contain mb-6" />
+              <img src={LOGO_URL} alt="Kenrish Collection" className="hidden lg:block h-40 w-auto object-contain mb-6" />
 
               <h1
                 className="text-5xl lg:text-[3.75rem] font-semibold leading-[1.07] mb-6 text-foreground"
@@ -267,7 +268,7 @@ export default function HomePage() {
       {/* ═══ COLLECTIONS — tabbed ══════════════════════════════════════ */}
       {(data?.featured_products?.length || data?.featured_handbags?.length || data?.featured_clothes?.length) ? (
         <section className="py-20 max-w-7xl mx-auto px-5">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
             <div>
               <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">
                 {t('home.curatedForYou')}
@@ -285,7 +286,7 @@ export default function HomePage() {
               {TABS.map(({ key, labelKey }) => (
                 <button
                   key={key}
-                  onClick={() => setActiveTab(key)}
+                  onClick={() => { setActiveTab(key); setSearch('') }}
                   className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
                     activeTab === key
                       ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
@@ -298,25 +299,59 @@ export default function HomePage() {
             </div>
           </div>
 
-          {tabItems[activeTab].length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {tabItems[activeTab].slice(0, 8).map(item => (
-                <ItemCard key={item.id} item={item} href={tabHrefs[activeTab](item.id)} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-muted-foreground py-16">{t('home.noItems')}</p>
-          )}
-
-          <div className="text-center mt-10">
-            <Link
-              to={tabViewAll[activeTab]}
-              className="inline-flex items-center gap-2 px-7 py-3 border border-border rounded-full text-sm font-medium hover:bg-secondary transition-colors"
-            >
-              {t('home.viewAllBtn')} {t(TABS.find(tab => tab.key === activeTab)?.labelKey ?? '')}
-              <ChevronRight size={14} />
-            </Link>
+          {/* Search bar */}
+          <div className="relative mb-8 max-w-md">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search by name or description…"
+              className="w-full pl-10 pr-9 py-2.5 rounded-full border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
+
+          {(() => {
+            const q = search.trim().toLowerCase()
+            const filtered = q
+              ? tabItems[activeTab].filter(i =>
+                  i.name.toLowerCase().includes(q) ||
+                  i.description?.toLowerCase().includes(q)
+                )
+              : tabItems[activeTab]
+            return filtered.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                  {(q ? filtered : filtered.slice(0, 8)).map(item => (
+                    <ItemCard key={item.id} item={item} href={tabHrefs[activeTab](item.id)} />
+                  ))}
+                </div>
+                {!q && (
+                  <div className="text-center mt-10">
+                    <Link
+                      to={tabViewAll[activeTab]}
+                      className="inline-flex items-center gap-2 px-7 py-3 border border-border rounded-full text-sm font-medium hover:bg-secondary transition-colors"
+                    >
+                      {t('home.viewAllBtn')} {t(TABS.find(tab => tab.key === activeTab)?.labelKey ?? '')}
+                      <ChevronRight size={14} />
+                    </Link>
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-center text-muted-foreground py-16">
+                {q ? `No results for "${search}"` : t('home.noItems')}
+              </p>
+            )
+          })()}
         </section>
       ) : null}
 
