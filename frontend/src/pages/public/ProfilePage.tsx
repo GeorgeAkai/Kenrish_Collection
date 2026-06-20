@@ -17,7 +17,7 @@ interface Profile {
 }
 
 export default function ProfilePage() {
-  const { logout } = useAuth()
+  const { logout, user: authUser } = useAuth()
   const { theme, toggle: toggleTheme } = useTheme()
   const navigate = useNavigate()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -206,47 +206,61 @@ export default function ProfilePage() {
       </div>
 
       {/* ── Delete Account ── */}
-      <div className="border border-red-200 dark:border-red-900/50 rounded-2xl p-5">
-        <h2 className="font-semibold text-red-600 dark:text-red-400 mb-1 flex items-center gap-2">
-          <Trash2 size={16} /> Delete Account
-        </h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Deactivate your account. Your data is preserved but you won't be able to sign in.
-        </p>
-        {!deleteConfirm ? (
-          <button
-            onClick={() => setDeleteConfirm(true)}
-            className="px-4 py-2 rounded-xl border-2 border-red-400 text-red-600 dark:text-red-400 text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
-          >
-            Delete my account
-          </button>
-        ) : (
-          <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
-            <div className="flex items-center gap-2 text-red-600 dark:text-red-400 mb-2">
-              <AlertTriangle size={16} />
-              <span className="text-sm font-semibold">Are you absolutely sure?</span>
+      {authUser?.is_staff ? (
+        <div className="border border-border rounded-2xl p-5 opacity-60">
+          <h2 className="font-semibold mb-1 flex items-center gap-2 text-muted-foreground">
+            <Trash2 size={16} /> Delete Account
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Admin accounts cannot be self-deleted. Contact a superuser via the Django admin panel.
+          </p>
+        </div>
+      ) : (
+        <div className="border border-red-200 dark:border-red-900/50 rounded-2xl p-5">
+          <h2 className="font-semibold text-red-600 dark:text-red-400 mb-1 flex items-center gap-2">
+            <Trash2 size={16} /> Delete Account
+          </h2>
+          <p className="text-sm text-muted-foreground mb-1">
+            Permanently erases your name, email, avatar, and contact details from our systems (Right to Be Forgotten).
+          </p>
+          <p className="text-xs text-muted-foreground mb-4">
+            Your order history figures are retained <strong>anonymously</strong> so our revenue records stay accurate — no personal data is linked to them.
+          </p>
+          {!deleteConfirm ? (
+            <button
+              onClick={() => setDeleteConfirm(true)}
+              className="px-4 py-2 rounded-xl border-2 border-red-400 text-red-600 dark:text-red-400 text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+            >
+              Delete my account
+            </button>
+          ) : (
+            <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
+              <div className="flex items-center gap-2 text-red-600 dark:text-red-400 mb-2">
+                <AlertTriangle size={16} />
+                <span className="text-sm font-semibold">This cannot be undone.</span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Your email, name, avatar, and phone will be permanently scrubbed. You will be signed out immediately.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleting}
+                  className="px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-60 transition-all"
+                >
+                  {deleting ? 'Erasing data…' : 'Yes, erase my data'}
+                </button>
+                <button
+                  onClick={() => setDeleteConfirm(false)}
+                  className="px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:bg-muted transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground mb-3">
-              This will deactivate your account immediately. You will be signed out.
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={handleDeleteAccount}
-                disabled={deleting}
-                className="px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-60 transition-all"
-              >
-                {deleting ? 'Deleting…' : 'Yes, delete it'}
-              </button>
-              <button
-                onClick={() => setDeleteConfirm(false)}
-                className="px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:bg-muted transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

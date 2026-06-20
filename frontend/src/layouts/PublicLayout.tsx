@@ -3,7 +3,7 @@ import { Link, Outlet, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { Menu, X, Sun, Moon, Heart, MapPin, Phone, Clock, Globe, UserCircle, LayoutDashboard } from 'lucide-react'
+import { Menu, X, Sun, Moon, Heart, MapPin, Phone, Clock, Globe, UserCircle, LayoutDashboard, ShieldCheck } from 'lucide-react'
 import { LOGO_URL } from '@/lib/brand'
 
 export default function PublicLayout() {
@@ -203,8 +203,8 @@ export default function PublicLayout() {
                 {isAuthenticated ? (
                   <>
                     {user?.is_staff && (
-                      <Link to="/admin" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all">
-                        <LayoutDashboard size={14} />
+                      <Link to="/admin" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-all shadow-sm">
+                        <ShieldCheck size={15} />
                         {t('nav.adminPanel')}
                       </Link>
                     )}

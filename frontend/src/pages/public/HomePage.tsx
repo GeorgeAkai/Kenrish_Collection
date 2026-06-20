@@ -178,7 +178,7 @@ export default function HomePage() {
       {/* ═══ HERO ════════════════════════════════════════════════════════ */}
       <section className="relative min-h-[90vh] flex items-center gradient-hero overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-5 py-16 sm:py-24 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
 
             {/* Left — copy */}
             <div className="max-w-xl">
@@ -213,8 +213,8 @@ export default function HomePage() {
 
             </div>
 
-            {/* Right — image mosaic (desktop only) */}
-            <div className="hidden lg:grid grid-cols-2 gap-3 h-[560px]">
+            {/* Right — image mosaic (tablet + desktop) */}
+            <div className="hidden md:grid grid-cols-2 gap-3 h-[440px] lg:h-[560px]">
               {heroImages.length >= 2 ? (
                 <>
                   <div className="flex flex-col gap-3 hero-float">
@@ -224,14 +224,14 @@ export default function HomePage() {
                       )}
                     </div>
                     {heroImages[2] && (
-                      <div className="rounded-2xl overflow-hidden h-40 bg-muted shrink-0">
+                      <div className="rounded-2xl overflow-hidden h-32 lg:h-40 bg-muted shrink-0">
                         <img src={heroImages[2]} alt="" className="w-full h-full object-cover" />
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-col gap-3 pt-8 hero-float-delay">
+                  <div className="flex flex-col gap-3 pt-6 lg:pt-8 hero-float-delay">
                     {heroImages[1] && (
-                      <div className="rounded-2xl overflow-hidden h-44 bg-muted shrink-0">
+                      <div className="rounded-2xl overflow-hidden h-36 lg:h-44 bg-muted shrink-0">
                         <img src={heroImages[1]} alt="" className="w-full h-full object-cover" />
                       </div>
                     )}
@@ -243,8 +243,22 @@ export default function HomePage() {
                   </div>
                 </>
               ) : (
-                <div className="col-span-2 rounded-3xl bg-primary/8 border border-primary/15 flex items-center justify-center">
-                  <Sparkles size={64} className="text-primary/20" />
+                /* Decorative fallback when no product images exist yet */
+                <div className="col-span-2 rounded-3xl overflow-hidden relative bg-gradient-to-br from-primary/15 via-accent/10 to-secondary border border-primary/20 flex flex-col items-center justify-center gap-5 p-8">
+                  <div className="absolute inset-0 opacity-20"
+                    style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 40%, rgba(212,142,192,0.5) 0%, transparent 70%)' }} />
+                  <Sparkles size={48} className="text-primary/60 relative z-10" />
+                  <div className="text-center relative z-10">
+                    <p className="text-sm font-semibold text-primary">New Collection</p>
+                    <p className="text-xs text-muted-foreground mt-1">Premium Fashion &amp; Beauty</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 w-full relative z-10">
+                    {['Beauty', 'Handbags', 'Clothing', 'Services'].map(label => (
+                      <div key={label} className="rounded-xl bg-primary/8 border border-primary/15 py-3 text-center">
+                        <span className="text-xs font-medium text-primary/70">{label}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

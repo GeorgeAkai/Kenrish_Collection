@@ -217,10 +217,60 @@ def profile_view(request):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_account(request):
+    """
+    Right-to-be-Forgotten pipeline:
+      - Scrubs all personal identity data from the User and UserProfile rows.
+      - Deletes personal activity (wishlist, ratings, likes).
+      - Preserves Orders, Reservations, and Sale records — the FK now points
+        to an anonymised User stub so revenue analytics remain intact.
+    Admin accounts are blocked from self-deleting via this endpoint.
+    """
     user = request.user
+    if user.is_staff:
+        return Response(
+            {'error': 'Admin accounts cannot be self-deleted. Contact a superuser.'},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    uid = user.id
+
+    # ── 1. Anonymise the User row ─────────────────────────────────────────
+    user.username = f'deleted_{uid}'
+    user.email = f'deleted_{uid}@kenrish.invalid'
+    user.first_name = ''
+    user.last_name = ''
     user.is_active = False
+    user.set_unusable_password()
     user.save()
-    return Response({'message': 'Account deactivated.'}, status=status.HTTP_200_OK)
+
+    # ── 2. Scrub profile PII ──────────────────────────────────────────────
+    try:
+        profile = user.userprofile
+        if profile.avatar:
+            profile.avatar.delete(save=False)  # remove file from storage
+        profile.avatar = None
+        profile.bio = ''
+        profile.phone = ''
+        profile.save()
+    except UserProfile.DoesNotExist:
+        pass
+
+    # ── 3. Delete personal activity data (no analytics impact) ───────────
+    Rating.objects.filter(user=user).delete()
+    HandbagRating.objects.filter(user=user).delete()
+    ClothesRating.objects.filter(user=user).delete()
+    GalleryLike.objects.filter(user=user).delete()
+    try:
+        user.wishlist.delete()
+    except Wishlist.DoesNotExist:
+        pass
+
+    # Orders, Reservations, and CashFlow rows are intentionally kept.
+    # Their `customer` / `created_by` FKs now reference the anonymised stub,
+    # so revenue totals and booking history remain available for analytics
+    # while all personal identity data has been erased.
+
+    return Response({'message': 'Your account has been anonymised and all personal data erased.'}, status=status.HTTP_200_OK)
 
 
 # ---------------------------------------------------------------------------
