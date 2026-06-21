@@ -217,15 +217,9 @@ export default function ProfilePage() {
         </div>
       ) : (
         <div className="border border-red-200 dark:border-red-900/50 rounded-2xl p-5">
-          <h2 className="font-semibold text-red-600 dark:text-red-400 mb-1 flex items-center gap-2">
+          <h2 className="font-semibold text-red-600 dark:text-red-400 mb-4 flex items-center gap-2">
             <Trash2 size={16} /> Delete Account
           </h2>
-          <p className="text-sm text-muted-foreground mb-1">
-            Permanently erases your name, email, avatar, and contact details from our systems (Right to Be Forgotten).
-          </p>
-          <p className="text-xs text-muted-foreground mb-4">
-            Your order history figures are retained <strong>anonymously</strong> so our revenue records stay accurate — no personal data is linked to them.
-          </p>
           {!deleteConfirm ? (
             <button
               onClick={() => setDeleteConfirm(true)}
