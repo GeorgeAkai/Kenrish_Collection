@@ -1593,8 +1593,8 @@ def reservation_list(request):
             return Response({'detail': 'This slot is fully booked. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
 
     reservation = serializer.save(customer=request.user, status=Reservation.STATUS_PENDING)
-    from api.notifications import send_reservation_sms
-    send_reservation_sms(reservation)
+    from api.notifications import send_reservation_email
+    send_reservation_email(reservation)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

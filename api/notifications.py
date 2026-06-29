@@ -1,48 +1,37 @@
 import logging
 import os
 
+from django.core.mail import send_mail
+
 logger = logging.getLogger(__name__)
 
-ADMIN_PHONE = os.environ.get('ADMIN_PHONE', '+254708440390')
+ADMIN_EMAIL = os.environ.get('ADMIN_NOTIFY_EMAIL', 'georgeakaing@gmail.com')
 
 
-def _normalise_phone(number: str) -> str:
-    """Convert 07XXXXXXXX → +2547XXXXXXXX."""
-    n = number.strip().replace(' ', '')
-    if n.startswith('0') and len(n) == 10:
-        return '+254' + n[1:]
-    return n
-
-
-def send_reservation_sms(reservation) -> None:
-    """Send an SMS to the admin when a new reservation is created."""
-    at_username = os.environ.get('AT_USERNAME')
-    at_api_key = os.environ.get('AT_API_KEY')
-
-    if not at_username or not at_api_key:
-        logger.warning('Africa\'s Talking credentials not configured — SMS skipped.')
-        return
-
+def send_reservation_email(reservation) -> None:
+    """Email the admin when a new reservation is created."""
     try:
-        import africastalking
-        africastalking.initialize(at_username, at_api_key)
-        sms = africastalking.SMS
-
-        customer_name = reservation.customer.username
+        customer = reservation.customer
         service_name = reservation.service.name if reservation.service else 'General'
         res_date = reservation.reservation_date.strftime('%d %b %Y')
         res_time = reservation.reservation_time.strftime('%I:%M %p')
+        customer_email = customer.email or 'N/A'
 
-        message = (
-            f"[Kenrish Collection] New Booking!\n"
-            f"Customer: {customer_name}\n"
-            f"Service: {service_name}\n"
-            f"Date: {res_date} at {res_time}"
+        subject = f'[Kenrish Collection] New Booking — {service_name} on {res_date}'
+        body = (
+            f'Hi Elizabeth,\n\n'
+            f'A new reservation has just been made.\n\n'
+            f'  Customer : {customer.username}\n'
+            f'  Email    : {customer_email}\n'
+            f'  Service  : {service_name}\n'
+            f'  Date     : {res_date}\n'
+            f'  Time     : {res_time}\n\n'
+            f'Log in to the admin panel to approve or manage the booking.\n\n'
+            f'— Kenrish Collection'
         )
 
-        recipient = _normalise_phone(ADMIN_PHONE)
-        sms.send(message, [recipient])
-        logger.info('Reservation SMS sent to %s', recipient)
+        send_mail(subject, body, None, [ADMIN_EMAIL], fail_silently=False)
+        logger.info('Reservation notification sent to %s', ADMIN_EMAIL)
 
     except Exception as exc:
-        logger.error('Failed to send reservation SMS: %s', exc)
+        logger.error('Failed to send reservation notification: %s', exc)

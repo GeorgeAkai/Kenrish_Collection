@@ -11,4 +11,3 @@ httpx==0.28.1
 requests==2.33.0
 gunicorn==23.0.0
 whitenoise==6.9.0
-africastalking==1.2.7
