@@ -5,7 +5,7 @@ from django.core.mail import EmailMultiAlternatives
 
 logger = logging.getLogger(__name__)
 
-ADMIN_EMAIL = os.environ.get('ADMIN_NOTIFY_EMAIL', 'georgeakaing@gmail.com')
+ADMIN_EMAIL = os.environ.get('ADMIN_NOTIFY_EMAIL', 'elizabethnguruka@gmail.com')
 
 LOGO_URL = 'https://fyejjrqtkivnscygihyx.supabase.co/storage/v1/object/public/kenrish-bucket/gallery/ChatGPT_Image_Jun_4_2025_03_18_38_PM.png'
 
