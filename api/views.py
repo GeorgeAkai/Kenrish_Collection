@@ -1407,7 +1407,9 @@ def reservation_list(request):
         if counts.get(res_time, 0) >= cfg.worker_count:
             return Response({'detail': 'This slot is fully booked. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer.save(customer=request.user, status=Reservation.STATUS_PENDING)
+    reservation = serializer.save(customer=request.user, status=Reservation.STATUS_PENDING)
+    from api.notifications import send_reservation_sms
+    send_reservation_sms(reservation)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
