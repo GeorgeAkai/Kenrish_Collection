@@ -1,5 +1,6 @@
 import logging
 import os
+import threading
 
 from django.core.mail import EmailMultiAlternatives
 
@@ -98,7 +99,11 @@ def _row(label, value, last=False):
 
 
 def send_reservation_email(reservation) -> None:
-    """Email the admin when a new reservation is created."""
+    """Email the admin when a new reservation is created (fires in a background thread)."""
+    threading.Thread(target=_send, args=(reservation,), daemon=True).start()
+
+
+def _send(reservation) -> None:
     try:
         customer = reservation.customer
         service_name = reservation.service.name if reservation.service else 'General'

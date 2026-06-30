@@ -2,6 +2,8 @@ import json
 import os
 import random
 import string
+
+from api.notifications import send_reservation_email
 from datetime import timedelta, date
 
 from django.contrib.auth import authenticate
@@ -1017,8 +1019,8 @@ def admin_demote_user(request, pk):
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
         return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
-    if user.username == 'GeorgeAkai' and request.user.username != 'GeorgeAkai':
-        return Response({'detail': 'GeorgeAkai cannot be removed as admin.'}, status=status.HTTP_403_FORBIDDEN)
+    if user.is_superuser and not request.user.is_superuser:
+        return Response({'detail': 'Superuser accounts cannot be demoted.'}, status=status.HTTP_403_FORBIDDEN)
     user.is_staff = False
     user.save()
     return Response({'detail': f'{user.username} demoted.'})
@@ -1049,8 +1051,8 @@ def admin_delete_user(request, pk):
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
         return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
-    if user.username == 'GeorgeAkai':
-        return Response({'detail': 'GeorgeAkai cannot be deleted.'}, status=status.HTTP_403_FORBIDDEN)
+    if user.is_superuser:
+        return Response({'detail': 'Superuser accounts cannot be deleted.'}, status=status.HTTP_403_FORBIDDEN)
     username = user.username
     user.delete()
     return Response({'detail': f'User {username} deleted.'})
@@ -1593,7 +1595,6 @@ def reservation_list(request):
             return Response({'detail': 'This slot is fully booked. Please choose another time.'}, status=status.HTTP_400_BAD_REQUEST)
 
     reservation = serializer.save(customer=request.user, status=Reservation.STATUS_PENDING)
-    from api.notifications import send_reservation_email
     send_reservation_email(reservation)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
