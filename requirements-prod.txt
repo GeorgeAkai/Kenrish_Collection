@@ -11,3 +11,9 @@ httpx==0.28.1
 requests==2.33.0
 gunicorn==23.0.0
 whitenoise==6.9.0
+# Explicit pins to avoid vulnerable transitive versions flagged by Docker Scout
+urllib3>=2.7.0
+sqlparse>=0.5.4
+idna>=3.15
+# CVE-2026-8643: pip path traversal via console_scripts/gui_scripts
+pip>=26.1.2
