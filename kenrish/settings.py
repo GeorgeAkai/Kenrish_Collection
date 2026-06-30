@@ -35,12 +35,18 @@ _render_host = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if _render_host:
     ALLOWED_HOSTS.append(_render_host)
 
+_gcp_host = os.environ.get('GCP_HOSTNAME')
+if _gcp_host:
+    ALLOWED_HOSTS.append(_gcp_host)
+
 CSRF_TRUSTED_ORIGINS = [
     'https://kenrishcollection.com',
     'https://www.kenrishcollection.com',
 ]
 if _render_host:
     CSRF_TRUSTED_ORIGINS.append(f'https://{_render_host}')
+if _gcp_host:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{_gcp_host}')
 
 
 # Application definition
@@ -245,6 +251,10 @@ _IS_PRODUCTION = bool(_DB_HOST)
 SESSION_COOKIE_SECURE = _IS_PRODUCTION
 CSRF_COOKIE_SECURE = _IS_PRODUCTION
 SECURE_SSL_REDIRECT = _IS_PRODUCTION
+# Cloud Run (and Render) terminate TLS at the load balancer and forward requests
+# to the container over plain HTTP with X-Forwarded-Proto: https.
+# Without this, Django sees HTTP and issues an infinite HTTPS redirect loop.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
