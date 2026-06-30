@@ -3,8 +3,7 @@ import api from '@/lib/axios'
 import { formatKES, formatDateTime, formatDate } from '@/lib/utils'
 import type { Invoice } from '@/lib/types'
 
-const LOGO_URL =
-  'https://fyejjrqtkivnscygihyx.supabase.co/storage/v1/object/public/kenrish-bucket/gallery/ChatGPT_Image_Jun_4_2025_03_18_38_PM.png'
+const LOGO_URL = '/static/kenrish.png'
 
 interface LineItem {
   item_type: 'product' | 'handbag' | 'clothes'
@@ -74,7 +73,7 @@ function PrintableInvoice({ invoice }: { invoice: Invoice }) {
 
       <div className="mt-8 text-center text-gray-500 text-xs border-t pt-4">
         <p>Thank you for shopping at Kenrish Collection!</p>
-        <p>Mon–Sat 8AM–8PM · Shabaab, Nakuru, Kenya</p>
+        <p>Mon–Sat 7:30AM–7PM · Shabaab, Nakuru, Kenya</p>
       </div>
     </div>
   )

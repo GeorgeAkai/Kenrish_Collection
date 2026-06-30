@@ -82,13 +82,13 @@ class KenrishAIService:
             return "👋 Hello! Welcome to Kenrish Collection!\n\nI'm Rexi, your personal beauty assistant.\n\n✨ What can I help you with today?\n• Beauty products and skincare\n• Professional salon services\n• Stylish handbags\n• Store location and hours\n• Pricing information\n\nFeel free to ask me anything! 😊"
 
         elif intent == 'contact':
-            return "📞 Contact Kenrish Collection\n\n🏢 Phone: 0708440390\n📍 Address: Shabaab, Nakuru, Kenya\n\n🕒 Hours:\n• Monday - Saturday: 8:00 AM - 8:00 PM\n• Sunday: CLOSED\n\nCall us anytime during business hours!"
+            return "📞 Contact Kenrish Collection\n\n🏢 Phone: 0708440390\n📍 Address: Shabaab, Nakuru, Kenya\n\n🕒 Hours:\n• Monday - Saturday: 7:30 AM - 7:00 PM\n• Sunday: CLOSED\n\nCall us anytime during business hours!"
 
         elif intent == 'location':
-            return "📍 Kenrish Collection Location\n\n🏢 Address: Shabaab, Nakuru, Kenya\n📞 Phone: 0708440390\n\n🕒 Hours:\n• Monday - Saturday: 8:00 AM - 8:00 PM\n• Sunday: CLOSED\n\nWe're conveniently located in Shabaab, Nakuru.\n🚗 Call us if you need directions!"
+            return "📍 Kenrish Collection Location\n\n🏢 Address: Shabaab, Nakuru, Kenya\n📞 Phone: 0708440390\n\n🕒 Hours:\n• Monday - Saturday: 7:30 AM - 7:00 PM\n• Sunday: CLOSED\n\nWe're conveniently located in Shabaab, Nakuru.\n🚗 Call us if you need directions!"
 
         elif intent == 'hours':
-            return "🕒 Business Hours\n\n• Monday - Saturday: 8:00 AM - 8:00 PM\n• Sunday: CLOSED\n\nWe're open six days a week to serve you!\n\n📞 Call ahead: 0708440390"
+            return "🕒 Business Hours\n\n• Monday - Saturday: 7:30 AM - 7:00 PM\n• Sunday: CLOSED\n\nWe're open six days a week to serve you!\n\n📞 Call ahead: 0708440390"
 
         elif intent == 'specific_product':
             # Find the specific product
