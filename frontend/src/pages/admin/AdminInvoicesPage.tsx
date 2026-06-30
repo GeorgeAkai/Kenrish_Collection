@@ -3,6 +3,9 @@ import api from '@/lib/axios'
 import { formatKES, formatDateTime, formatDate } from '@/lib/utils'
 import type { Invoice } from '@/lib/types'
 
+const LOGO_URL =
+  'https://fyejjrqtkivnscygihyx.supabase.co/storage/v1/object/public/kenrish-bucket/gallery/ChatGPT_Image_Jun_4_2025_03_18_38_PM.png'
+
 interface LineItem {
   item_type: 'product' | 'handbag' | 'clothes'
   item_id: string
@@ -10,11 +13,22 @@ interface LineItem {
   unit_price: string
 }
 
+interface CatalogItem {
+  id: number
+  name: string
+  price: string
+}
+
 function PrintableInvoice({ invoice }: { invoice: Invoice }) {
   return (
     <div className="p-8 font-sans text-sm">
       <div className="flex justify-between items-start mb-8">
         <div>
+          <img
+            src={LOGO_URL}
+            alt="Kenrish Collection"
+            style={{ width: '72px', height: 'auto', display: 'block', marginBottom: '8px' }}
+          />
           <h1 className="text-2xl font-bold">Kenrish Collection</h1>
           <p className="text-gray-600 mt-1">Shabaab, Nakuru, Kenya</p>
           <p className="text-gray-600">Tel: 0708 440390</p>
@@ -79,12 +93,24 @@ export default function AdminInvoicesPage() {
   const [lines, setLines] = useState<LineItem[]>([{ item_type: 'product', item_id: '', quantity: '1', unit_price: '' }])
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState('')
+  const [catalog, setCatalog] = useState<Record<string, CatalogItem[]>>({ product: [], handbag: [], clothes: [] })
 
-  const fetch = () => {
+  const fetchInvoices = () => {
     api.get('/admin/invoices/').then(r => setInvoices(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
   }
 
-  useEffect(() => { fetch() }, [])
+  useEffect(() => { fetchInvoices() }, [])
+
+  // Load product/handbag/clothes lists when the create modal opens
+  useEffect(() => {
+    if (!showCreate) return
+    const endpoints: Record<string, string> = { product: '/products/', handbag: '/handbags/', clothes: '/clothes/' }
+    Promise.all(
+      Object.entries(endpoints).map(([key, path]) =>
+        api.get(path).then(r => [key, r.data.results ?? r.data] as [string, CatalogItem[]])
+      )
+    ).then(entries => setCatalog(Object.fromEntries(entries))).catch(console.error)
+  }, [showCreate])
 
   async function viewDetail(id: number) {
     setLoadingDetail(true)
@@ -105,7 +131,19 @@ export default function AdminInvoicesPage() {
   }
 
   function updateLine(i: number, key: keyof LineItem, value: string) {
-    setLines(prev => prev.map((l, idx) => idx === i ? { ...l, [key]: value } : l))
+    setLines(prev => prev.map((l, idx) => {
+      if (idx !== i) return l
+      // Changing type resets the selected item and price
+      if (key === 'item_type') {
+        return { ...l, item_type: value as LineItem['item_type'], item_id: '', unit_price: '' }
+      }
+      // Selecting an item auto-fills its price
+      if (key === 'item_id') {
+        const found = catalog[l.item_type]?.find(p => String(p.id) === value)
+        return { ...l, item_id: value, unit_price: found ? found.price : l.unit_price }
+      }
+      return { ...l, [key]: value }
+    }))
   }
 
   async function handleCreate() {
@@ -131,7 +169,7 @@ export default function AdminInvoicesPage() {
       setShowCreate(false)
       setCustomer({ name: '', phone: '' })
       setLines([{ item_type: 'product', item_id: '', quantity: '1', unit_price: '' }])
-      fetch()
+      fetchInvoices()
     } catch (err: unknown) {
       const response = (err as { response?: { data?: Record<string, string[]> } }).response
       setCreateError(response?.data ? JSON.stringify(response.data) : 'Failed to create invoice.')
@@ -265,8 +303,9 @@ export default function AdminInvoicesPage() {
                 </div>
                 <div className="space-y-3">
                   {lines.map((line, i) => (
-                    <div key={i} className="grid grid-cols-2 gap-2 sm:grid-cols-12 sm:gap-2 items-center">
+                    <div key={i} className="grid grid-cols-2 gap-2 sm:grid-cols-12 sm:gap-2 items-end">
                       <div className="col-span-1 sm:col-span-3">
+                        <label className="block text-xs text-muted-foreground mb-1">Type</label>
                         <select value={line.item_type} onChange={e => updateLine(i, 'item_type', e.target.value as LineItem['item_type'])}
                           className="w-full border rounded-md px-2 py-1.5 text-xs bg-background focus:outline-none focus:ring-2 focus:ring-ring">
                           <option value="product">Product</option>
@@ -274,22 +313,29 @@ export default function AdminInvoicesPage() {
                           <option value="clothes">Clothes</option>
                         </select>
                       </div>
-                      <div className="col-span-1 sm:col-span-3">
-                        <input type="number" placeholder="Item ID" min="1"
-                          className="w-full border rounded-md px-2 py-1.5 text-xs bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                          value={line.item_id} onChange={e => updateLine(i, 'item_id', e.target.value)} />
+                      <div className="col-span-1 sm:col-span-4">
+                        <label className="block text-xs text-muted-foreground mb-1">Item Name</label>
+                        <select value={line.item_id} onChange={e => updateLine(i, 'item_id', e.target.value)}
+                          className="w-full border rounded-md px-2 py-1.5 text-xs bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+                          <option value="">Select {line.item_type}…</option>
+                          {catalog[line.item_type]?.map(item => (
+                            <option key={item.id} value={item.id}>{item.name}</option>
+                          ))}
+                        </select>
                       </div>
                       <div className="col-span-1 sm:col-span-2">
-                        <input type="number" placeholder="Qty" min="1"
+                        <label className="block text-xs text-muted-foreground mb-1">No. of Items</label>
+                        <input type="number" min="1"
                           className="w-full border rounded-md px-2 py-1.5 text-xs bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                           value={line.quantity} onChange={e => updateLine(i, 'quantity', e.target.value)} />
                       </div>
-                      <div className="col-span-1 sm:col-span-3">
-                        <input type="number" placeholder="Price (KES)" step="any"
+                      <div className="col-span-1 sm:col-span-2">
+                        <label className="block text-xs text-muted-foreground mb-1">Price (KES)</label>
+                        <input type="number" step="any"
                           className="w-full border rounded-md px-2 py-1.5 text-xs bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                           value={line.unit_price} onChange={e => updateLine(i, 'unit_price', e.target.value)} />
                       </div>
-                      <div className="col-span-2 sm:col-span-1 text-right">
+                      <div className="col-span-2 sm:col-span-1 flex items-end justify-end pb-0.5">
                         {lines.length > 1 && (
                           <button onClick={() => removeLine(i)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
                         )}
