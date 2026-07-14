@@ -1,24 +1,49 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { Search, X } from 'lucide-react'
 import api from '@/lib/axios'
 import CatalogueCard from '@/components/CatalogueCard'
 import { useWishlist } from '@/hooks/useWishlist'
+import { useToast } from '@/contexts/ToastContext'
 import type { Handbag, PaginatedResponse } from '@/lib/types'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function HandbagsPage() {
   const { t } = useLanguage()
+  const toast = useToast()
   const [params, setParams] = useSearchParams()
   const page = parseInt(params.get('page') || '1')
+  const search = params.get('search') || ''
+  const [searchInput, setSearchInput] = useState(search)
   const [data, setData] = useState<PaginatedResponse<Handbag> | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const { isInWishlist, toggle } = useWishlist()
 
   useEffect(() => {
     setLoading(true)
+    setError(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
-    api.get(`/handbags/?page=${page}`).then(r => setData(r.data)).catch(console.error).finally(() => setLoading(false))
-  }, [page])
+    const query = new URLSearchParams({ page: String(page) })
+    if (search) query.set('search', search)
+    api.get(`/handbags/?${query}`)
+      .then(r => setData(r.data))
+      .catch(() => {
+        setError(true)
+        toast.error("Couldn't load handbags. Check your connection and try again.")
+      })
+      .finally(() => setLoading(false))
+  }, [page, search])
+
+  function submitSearch(e: React.FormEvent) {
+    e.preventDefault()
+    setParams(searchInput ? { search: searchInput } : {})
+  }
+
+  function clearSearch() {
+    setSearchInput('')
+    setParams({})
+  }
 
   return (
     <div>
@@ -36,6 +61,22 @@ export default function HandbagsPage() {
             {t('handbags.subtitle')}
           </p>
           {data && <p className="text-xs text-muted-foreground mt-3">{data.count} {t('handbags.available')}</p>}
+
+          <form onSubmit={submitSearch} className="relative max-w-sm mx-auto mt-6">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              placeholder={t('common.searchHandbags')}
+              className="w-full pl-10 pr-9 py-2.5 rounded-full border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            {searchInput && (
+              <button type="button" onClick={clearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                <X size={14} />
+              </button>
+            )}
+          </form>
         </div>
       </section>
 
@@ -65,14 +106,19 @@ export default function HandbagsPage() {
                 />
               ))}
             </div>
-            {data?.count === 0 && (
-              <p className="text-center text-muted-foreground py-20">{t('handbags.noItems')}</p>
+            {error && (
+              <p className="text-center text-muted-foreground py-20">{t('common.loadError')}</p>
+            )}
+            {!error && data?.count === 0 && (
+              <p className="text-center text-muted-foreground py-20">
+                {search ? t('common.noSearchResults') : t('handbags.noItems')}
+              </p>
             )}
             {data && (data.next || data.previous) && (
               <div className="flex justify-center items-center gap-3 mt-10">
                 <button
                   disabled={!data.previous}
-                  onClick={() => setParams({ page: String(page - 1) })}
+                  onClick={() => setParams(search ? { page: String(page - 1), search } : { page: String(page - 1) })}
                   className="btn-modern btn-modern--secondary"
                 >
                   {t('common.previous')}
@@ -80,7 +126,7 @@ export default function HandbagsPage() {
                 <span className="text-sm text-muted-foreground">{t('common.page')} {page}</span>
                 <button
                   disabled={!data.next}
-                  onClick={() => setParams({ page: String(page + 1) })}
+                  onClick={() => setParams(search ? { page: String(page + 1), search } : { page: String(page + 1) })}
                   className="btn-modern btn-modern--primary"
                 >
                   {t('common.next')}

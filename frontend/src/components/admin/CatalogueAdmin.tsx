@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Plus, Pencil, Trash2, X, Star } from 'lucide-react'
+import { Plus, Pencil, Trash2, X, Star, FolderInput } from 'lucide-react'
 import api from '@/lib/axios'
 import { formatKES } from '@/lib/utils'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useConfirm } from '@/hooks/useConfirm'
 import FileDropZone from '@/components/admin/FileDropZone'
+import { useToast } from '@/contexts/ToastContext'
 
 interface Item {
   id: number
@@ -27,10 +28,20 @@ interface Field {
   required?: boolean
 }
 
+type CategoryType = 'product' | 'handbag' | 'clothes'
+
 interface Props {
   title: string
   endpoint: string
+  /** Category this admin page manages — enables moving items to other categories. */
+  itemType?: CategoryType
   extraFields?: Field[]
+}
+
+const CATEGORY_LABELS: Record<CategoryType, string> = {
+  product: 'Products',
+  handbag: 'Handbags',
+  clothes: 'Clothes',
 }
 
 const baseFields: Field[] = [
@@ -55,7 +66,7 @@ function StatusBadge({ published }: { published: boolean }) {
   )
 }
 
-export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Props) {
+export default function CatalogueAdmin({ title, endpoint, itemType, extraFields = [] }: Props) {
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<Item | null>(null)
@@ -67,9 +78,17 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
   const [error, setError] = useState('')
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [togglingId, setTogglingId] = useState<number | null>(null)
+  const [moving, setMoving] = useState<Item | null>(null)
+  const [moveTarget, setMoveTarget] = useState<CategoryType | null>(null)
+  const [moveLoading, setMoveLoading] = useState(false)
   const del = useConfirm<number>()
+  const toast = useToast()
 
   const allFields = [...baseFields, ...extraFields]
+
+  const moveTargets: CategoryType[] = itemType
+    ? (['product', 'handbag', 'clothes'] as CategoryType[]).filter(t => t !== itemType)
+    : []
 
   const fetch = () => {
     api.get(`${endpoint}/`).then(r => {
@@ -122,6 +141,27 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
       // silently ignore
     } finally {
       setTogglingId(null)
+    }
+  }
+
+  function openMove(item: Item) {
+    setMoving(item)
+    setMoveTarget(moveTargets[0] ?? null)
+  }
+
+  async function handleMove() {
+    if (!moving || !itemType || !moveTarget) return
+    setMoveLoading(true)
+    try {
+      await api.post(`/admin/catalogue/${itemType}/${moving.id}/move/`, { target_type: moveTarget })
+      setItems(prev => prev.filter(i => i.id !== moving.id))
+      toast.success(`"${moving.name}" moved to ${CATEGORY_LABELS[moveTarget]}.`)
+      setMoving(null)
+    } catch (err: unknown) {
+      const detail = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
+      toast.error(detail || 'Move failed. Please try again.')
+    } finally {
+      setMoveLoading(false)
     }
   }
 
@@ -237,6 +277,12 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end items-center gap-2">
+                        {moveTargets.length > 0 && (
+                          <button onClick={() => openMove(item)} title="Move to another category"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg border hover:bg-muted transition-colors">
+                            <FolderInput size={13} />
+                          </button>
+                        )}
                         <button onClick={() => openEdit(item)}
                           className="w-8 h-8 flex items-center justify-center rounded-lg border hover:bg-muted transition-colors">
                           <Pencil size={13} />
@@ -283,6 +329,12 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
                     </div>
                   </div>
                   <div className="flex flex-col gap-1.5 shrink-0 items-end">
+                    {moveTargets.length > 0 && (
+                      <button onClick={() => openMove(item)} title="Move to another category"
+                        className="w-8 h-8 flex items-center justify-center rounded-lg border hover:bg-muted transition-colors">
+                        <FolderInput size={13} />
+                      </button>
+                    )}
                     <button onClick={() => openEdit(item)}
                       className="w-8 h-8 flex items-center justify-center rounded-lg border hover:bg-muted transition-colors">
                       <Pencil size={13} />
@@ -381,6 +433,52 @@ export default function CatalogueAdmin({ title, endpoint, extraFields = [] }: Pr
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Move Modal */}
+      {moving && (
+        <div className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4 backdrop-blur-sm">
+          <div className="bg-background rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md">
+            <div className="flex items-center justify-between p-5 border-b">
+              <h3 className="text-lg font-bold">Move item</h3>
+              <button onClick={() => setMoving(null)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Move <span className="font-semibold text-foreground">{moving.name}</span> to another
+                category. Its name, price, stock and image are kept; ratings and sales history are not
+                carried over.
+              </p>
+              <div className="space-y-2">
+                {moveTargets.map(t => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setMoveTarget(t)}
+                    className={`w-full flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium transition-colors ${
+                      moveTarget === t ? 'border-primary bg-primary/10' : 'hover:bg-muted'
+                    }`}
+                  >
+                    <span>{CATEGORY_LABELS[t]}</span>
+                    <span className={`w-4 h-4 rounded-full border-2 ${moveTarget === t ? 'border-primary bg-primary' : 'border-muted-foreground/40'}`} />
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button onClick={handleMove} disabled={moveLoading || !moveTarget}
+                    className="btn-modern btn-modern--primary flex-1 text-sm font-semibold disabled:opacity-50">
+                  {moveLoading ? 'Moving…' : 'Move'}
+                </button>
+                <button onClick={() => setMoving(null)}
+                    className="btn-modern btn-modern--secondary flex-1 text-sm">
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

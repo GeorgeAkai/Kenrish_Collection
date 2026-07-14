@@ -3,10 +3,12 @@ import api from '@/lib/axios'
 import { formatDate } from '@/lib/utils'
 import type { AdminUser, Wishlist } from '@/lib/types'
 import InlineConfirm from '@/components/InlineConfirm'
+import { useToast } from '@/contexts/ToastContext'
 
 const MAX_ADMINS = 3
 
 export default function AdminUsersPage() {
+  const toast = useToast()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [actionId, setActionId] = useState<number | null>(null)
@@ -16,15 +18,21 @@ export default function AdminUsersPage() {
   const [wishlistLoading, setWishlistLoading] = useState(false)
 
   const fetchUsers = () => {
-    api.get('/admin/users/').then(r => setUsers(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
+    api.get('/admin/users/').then(r => setUsers(r.data.results ?? r.data)).catch(() => {
+      toast.error("Couldn't load users. Please refresh and try again.")
+    }).finally(() => setLoading(false))
   }
 
   useEffect(() => { fetchUsers() }, [])
 
   async function promote(id: number) {
     setConfirming(null); setActionId(id)
-    try { await api.post(`/admin/users/${id}/promote/`); fetchUsers() }
-    finally { setActionId(null) }
+    try {
+      await api.post(`/admin/users/${id}/promote/`); fetchUsers()
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
+      toast.error(msg ?? "Couldn't promote user. Please try again.")
+    } finally { setActionId(null) }
   }
 
   async function demote(id: number) {
@@ -33,7 +41,7 @@ export default function AdminUsersPage() {
       await api.post(`/admin/users/${id}/demote/`); fetchUsers()
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
-      if (msg) alert(msg)
+      toast.error(msg ?? "Couldn't revoke admin. Please try again.")
     } finally { setActionId(null) }
   }
 
@@ -43,7 +51,7 @@ export default function AdminUsersPage() {
       await api.delete(`/admin/users/${id}/delete/`); fetchUsers()
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
-      if (msg) alert(msg)
+      toast.error(msg ?? "Couldn't delete user. Please try again.")
     } finally { setActionId(null) }
   }
 
@@ -54,8 +62,9 @@ export default function AdminUsersPage() {
     try {
       const { data } = await api.get(`/admin/users/${userId}/wishlist/`)
       setWishlistData(data)
-    } catch { /* silent */ }
-    finally { setWishlistLoading(false) }
+    } catch {
+      toast.error("Couldn't load this user's wishlist.")
+    } finally { setWishlistLoading(false) }
   }
 
   const adminCount = users.filter(u => u.is_staff).length

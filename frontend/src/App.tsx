@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
+import { ToastProvider } from '@/contexts/ToastContext'
 import { ProtectedRoute, AdminRoute } from '@/components/RouteGuards'
 import PublicLayout from '@/layouts/PublicLayout'
 import AdminLayout from '@/layouts/AdminLayout'
@@ -57,6 +58,7 @@ export default function App() {
   return (
     <LanguageProvider>
     <ThemeProvider>
+    <ToastProvider>
     <AuthProvider>
       <Routes>
         <Route element={<PublicLayout />}>
@@ -107,6 +109,7 @@ export default function App() {
       </Routes>
       <ChatbotWidget />
     </AuthProvider>
+    </ToastProvider>
     </ThemeProvider>
     </LanguageProvider>
   )

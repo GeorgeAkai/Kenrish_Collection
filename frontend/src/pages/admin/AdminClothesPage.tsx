@@ -5,6 +5,7 @@ export default function AdminClothesPage() {
     <CatalogueAdmin
       title="Clothes"
       endpoint="/admin/clothes"
+      itemType="clothes"
       extraFields={[
         { name: 'size', label: 'Size' },
         { name: 'color', label: 'Color' },

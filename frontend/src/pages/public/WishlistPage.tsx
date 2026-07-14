@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Minus, Plus, ShoppingBag, X, CheckCircle } from 'lucide-react'
 import api from '@/lib/axios'
 import { formatKES } from '@/lib/utils'
+import { useToast } from '@/contexts/ToastContext'
 import type { Wishlist } from '@/lib/types'
 
 type ItemType = 'products' | 'handbags' | 'clothes'
@@ -16,6 +17,7 @@ const API_TYPE: Record<ItemType, ApiType> = {
 
 export default function WishlistPage() {
   const navigate = useNavigate()
+  const toast = useToast()
   const [wishlist, setWishlist] = useState<Wishlist | null>(null)
   const [loading, setLoading] = useState(true)
   const [removing, setRemoving] = useState<string | null>(null)
@@ -29,7 +31,9 @@ export default function WishlistPage() {
   const [orderSuccess, setOrderSuccess] = useState(false)
 
   const fetchWishlist = () => {
-    api.get('/wishlist/').then(r => setWishlist(r.data)).catch(console.error).finally(() => setLoading(false))
+    api.get('/wishlist/').then(r => setWishlist(r.data)).catch(() => {
+      toast.error("Couldn't load your wishlist. Please refresh and try again.")
+    }).finally(() => setLoading(false))
   }
 
   useEffect(() => { fetchWishlist() }, [])
@@ -42,11 +46,24 @@ export default function WishlistPage() {
     setQuantities(q => ({ ...q, [`${type}-${id}`]: Math.max(1, val) }))
   }
 
-  async function remove(type: ItemType, id: number) {
+  async function remove(type: ItemType, id: number, name: string) {
     setRemoving(`${type}-${id}`)
     try {
       await api.delete(`/wishlist/${type}/${id}/`)
       fetchWishlist()
+      toast.success(`Removed "${name}" from wishlist`, {
+        label: 'Undo',
+        onClick: async () => {
+          try {
+            await api.post(`/wishlist/${type}/${id}/`)
+            fetchWishlist()
+          } catch {
+            toast.error("Couldn't undo — please add the item again.")
+          }
+        },
+      })
+    } catch {
+      toast.error("Couldn't remove item from wishlist. Please try again.")
     } finally {
       setRemoving(null)
     }
@@ -154,7 +171,7 @@ export default function WishlistPage() {
                     </div>
 
                     <button
-                      onClick={() => remove(li.type, li.id)}
+                      onClick={() => remove(li.type, li.id, li.name)}
                       disabled={removing === `${li.type}-${li.id}`}
                       className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-40"
                     >

@@ -65,7 +65,7 @@ export default function CatalogueCard({ item, href, onWishlist, inWishlist }: Pr
             </div>
           )}
 
-          {/* "Add to Bag" bar — slides up on hover */}
+          {/* "View Details" bar — slides up on hover */}
           <div className="absolute bottom-0 inset-x-0 px-3 pb-3 translate-y-full group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
             <div className="w-full py-2.5 bg-primary text-primary-foreground text-xs font-semibold rounded-xl text-center shadow-lg">
               {t('common.viewDetails')}
