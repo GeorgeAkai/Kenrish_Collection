@@ -9,6 +9,9 @@ __pycache__/
 *.pyd
 *.so
 db.sqlite3
+venv/
+.venv/
+env/
 
 # Django generated dirs
 staticfiles/
@@ -28,3 +31,6 @@ frontend/dist/
 
 # Docker files themselves
 docker-compose*.yml
+
+
+CLAUDE.md

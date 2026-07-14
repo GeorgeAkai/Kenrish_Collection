@@ -43,3 +43,11 @@ Thumbs.db
 
 # Claude
 .claude/
+
+# Local dev launcher (personal, machine-specific)
+/kenrish.sh
+.kenrish-frontend.pid
+.kenrish-frontend.log
+.kenrish-backend.pid
+.kenrish-backend.log
+.kenrish-mode

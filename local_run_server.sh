@@ -7,4 +7,4 @@ python3 manage.py migrate
 sleep 3
 
 echo "Starting Django server..."
-python3 manage.py runserver
+python3 manage.py runserver 10000
