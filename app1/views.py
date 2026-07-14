@@ -25,6 +25,7 @@ from .models import UserProfile
 from django.contrib.auth.signals import user_logged_in
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
+from django.utils.http import url_has_allowed_host_and_scheme
 
 def is_admin(user):
     """Helper for user_passes_test: returns True if user is staff (admin)."""
@@ -342,37 +343,20 @@ class LoginView(View):
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        # Check if user exists
-        if not User.objects.filter(username=username).exists():
-            return render(request, "login.html", {
-                "error": "User does not exist. Please check your username or Sign up using the link below."
-            })
-
-        # Authenticate user
         user = authenticate(username=username, password=password)
         if user:
             login(request, user)
-            return redirect("home")  # Redirect to home.html after login
+            return redirect("home")
 
         return render(request, "login.html", {
-            "error": "Incorrect password. Please try again."
+            "error": "Invalid username or password. Please try again."
         })
 
 # logout view
 class LogoutView(View):
-    """
-    Logout supported for both GET and POST.
-    NOTE: Using GET for logout is convenient but can be CSRF-sensitive in some setups.
-    """
-    def get(self, request):
-        """User logout via GET"""
-        logout(request)
-        return render(request, "login.html")  # Redirect to login page after logout
-
     def post(self, request):
-        """User logout via POST"""
         logout(request)
-        return render(request, "login.html")  # Redirect to login page after logout
+        return redirect("login")
 
 
 # Password change view
@@ -701,9 +685,11 @@ def add_clothes_to_wishlist(request, pk):
     item = get_object_or_404(Clothes, pk=pk)
     wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
     wishlist.clothes.add(item)  # idempotent
-    messages.success(request, f"Added “{item.name}” to your wishlist.")
-    next_url = request.POST.get("next") or reverse("clothes-detail", kwargs={"pk": pk})
-    return redirect(next_url)
+    messages.success(request, f"Added \u201c{item.name}\u201d to your wishlist.")
+    next_url = request.POST.get("next")
+    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        return redirect(next_url)
+    return redirect("clothes-detail", pk=pk)
 
 @login_required
 def remove_clothes_from_wishlist(request, pk):
@@ -714,9 +700,11 @@ def remove_clothes_from_wishlist(request, pk):
     item = get_object_or_404(Clothes, pk=pk)
     wishlist, _ = Wishlist.objects.get_or_create(user=request.user)
     wishlist.clothes.remove(item)
-    messages.success(request, f"Removed “{item.name}” from your wishlist.")
-    next_url = request.POST.get("next") or reverse("clothes-detail", kwargs={"pk": pk})
-    return redirect(next_url)
+    messages.success(request, f"Removed \u201c{item.name}\u201d from your wishlist.")
+    next_url = request.POST.get("next")
+    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        return redirect(next_url)
+    return redirect("clothes-detail", pk=pk)
 
 
 @login_required

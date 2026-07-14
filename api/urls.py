@@ -53,6 +53,7 @@ urlpatterns = [
     path('admin/handbags/<int:pk>/', views.admin_handbag_detail, name='api-admin-handbag-detail'),
     path('admin/clothes/', views.admin_clothes_list, name='api-admin-clothes-list'),
     path('admin/clothes/<int:pk>/', views.admin_clothes_detail, name='api-admin-clothes-detail'),
+    path('admin/catalogue/<str:item_type>/<int:pk>/move/', views.admin_move_catalogue_item, name='api-admin-move-catalogue-item'),
 
     # --- 9. Admin Services / Gallery / Offers ---
     path('admin/services/', views.admin_service_list, name='api-admin-service-list'),

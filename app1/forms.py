@@ -1,8 +1,17 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import User
+from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
 from datetime import date
 from .models import Product, Rating, Handbag, GalleryImage, Offer, Service, Clothes, Reservation
+
+ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+MAX_IMAGE_SIZE_MB = 5
+
+def validate_image(image):
+    if image and image.size > MAX_IMAGE_SIZE_MB * 1024 * 1024:
+        raise ValidationError(f"Image must be under {MAX_IMAGE_SIZE_MB}MB.")
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(
@@ -31,12 +40,20 @@ class SignUpForm(UserCreationForm):
 
 
 class ProductForm(forms.ModelForm):
+    image = forms.ImageField(
+        required=False,
+        validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS), validate_image]
+    )
     class Meta:
         model = Product
         fields = ["name", "description", "price", "image"]
 
 # Clothes form here
 class ClothesForm(forms.ModelForm):
+    image = forms.ImageField(
+        required=False,
+        validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS), validate_image]
+    )
     class Meta:
         model = Clothes
         fields = ['name', 'description', 'price', 'image', 'stock_quantity', 'cost_price', 'reorder_level']
@@ -53,24 +70,39 @@ class RatingForm(forms.ModelForm):
 
 
 class HandbagForm(forms.ModelForm):
+    image = forms.ImageField(
+        required=False,
+        validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS), validate_image]
+    )
     class Meta:
         model = Handbag
         fields = ['name', 'description', 'price', 'image']
 
 
 class GalleryImageForm(forms.ModelForm):
+    file = forms.FileField(
+        validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS), validate_image]
+    )
     class Meta:
         model = GalleryImage
         fields = ['service', 'file', 'description']
 
 
 class OfferForm(forms.ModelForm):
+    image = forms.ImageField(
+        required=False,
+        validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS), validate_image]
+    )
     class Meta:
         model = Offer
         fields = ['name', 'image', 'description', 'offer_price']
 
 
 class ServiceForm(forms.ModelForm):
+    image = forms.ImageField(
+        required=False,
+        validators=[FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS), validate_image]
+    )
     class Meta:
         model = Service
         fields = ['name', 'short_description', 'full_description', 'price', 'image']

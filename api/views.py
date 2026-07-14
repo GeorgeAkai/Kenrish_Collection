@@ -8,6 +8,7 @@ from datetime import timedelta, date
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.contrib.auth.signals import user_logged_in
 from django.core.mail import send_mail
 from django.db.models import Sum, Count, Q
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
@@ -105,6 +106,7 @@ def login_view(request):
     )
     if user is None:
         return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
+    user_logged_in.send(sender=user.__class__, request=request, user=user)
     refresh = RefreshToken.for_user(user)
     return Response({'access': str(refresh.access_token), 'refresh': str(refresh)})
 
@@ -283,6 +285,9 @@ def delete_account(request):
 @permission_classes([AllowAny])
 def product_list(request):
     qs = Product.objects.filter(is_published=True).order_by('-id')
+    search = request.query_params.get('search', '').strip()
+    if search:
+        qs = qs.filter(name__icontains=search)
     paginator = StandardPagination()
     page = paginator.paginate_queryset(qs, request)
     serializer = ProductListSerializer(page, many=True, context={'request': request})
@@ -303,6 +308,9 @@ def product_detail(request, pk):
 @permission_classes([AllowAny])
 def handbag_list(request):
     qs = Handbag.objects.filter(is_published=True).order_by('-id')
+    search = request.query_params.get('search', '').strip()
+    if search:
+        qs = qs.filter(name__icontains=search)
     paginator = StandardPagination()
     page = paginator.paginate_queryset(qs, request)
     serializer = HandbagListSerializer(page, many=True, context={'request': request})
@@ -323,6 +331,9 @@ def handbag_detail(request, pk):
 @permission_classes([AllowAny])
 def clothes_list(request):
     qs = Clothes.objects.filter(is_published=True).order_by('-id')
+    search = request.query_params.get('search', '').strip()
+    if search:
+        qs = qs.filter(name__icontains=search)
     paginator = StandardPagination()
     page = paginator.paginate_queryset(qs, request)
     serializer = ClothesListSerializer(page, many=True, context={'request': request})
@@ -678,6 +689,76 @@ def admin_clothes_detail(request, pk):
 
 
 # ---------------------------------------------------------------------------
+# 8b. Admin — move a catalogue item between categories
+# ---------------------------------------------------------------------------
+
+_CATALOGUE_MODEL_MAP = {'product': Product, 'handbag': Handbag, 'clothes': Clothes}
+_CATALOGUE_DETAIL_SERIALIZER = {
+    'product': ProductDetailSerializer,
+    'handbag': HandbagDetailSerializer,
+    'clothes': ClothesDetailSerializer,
+}
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def admin_move_catalogue_item(request, item_type, pk):
+    """
+    Move a catalogue item from one category to another
+    (e.g. Product → Handbag / Clothes).
+
+    Copies the shared catalogue fields (name, description, pricing, stock,
+    rating, image) into a fresh row of the target model, then deletes the
+    original. The stored image file is reused — Django keeps the file on
+    delete, so the new row points at the same media path.
+
+    Note: category-specific history tied to the source row (ratings, past
+    inventory transactions and sales) is removed along with it, since those
+    FKs cascade on delete.
+    """
+    source_model = _CATALOGUE_MODEL_MAP.get(item_type)
+    target_type = request.data.get('target_type')
+    target_model = _CATALOGUE_MODEL_MAP.get(target_type)
+
+    if source_model is None:
+        return Response({'detail': 'Invalid item_type.'}, status=status.HTTP_400_BAD_REQUEST)
+    if target_model is None:
+        return Response({'detail': 'target_type must be product, handbag, or clothes.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+    if item_type == target_type:
+        return Response({'detail': 'Item is already in that category.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        source = source_model.objects.get(pk=pk)
+    except source_model.DoesNotExist:
+        return Response({'detail': 'Item not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    from django.db import transaction as db_tx
+    with db_tx.atomic():
+        target = target_model(
+            name=source.name,
+            description=source.description,
+            price=source.price,
+            cost_price=source.cost_price,
+            stock_quantity=source.stock_quantity,
+            reorder_level=source.reorder_level,
+            is_published=source.is_published,
+            average_rating=source.average_rating,
+        )
+        # Reuse the existing stored file; Django won't delete it on source.delete().
+        if source.image:
+            target.image = source.image.name
+        target.save()
+        source.delete()
+
+    return Response(
+        _CATALOGUE_DETAIL_SERIALIZER[target_type](target, context={'request': request}).data,
+        status=status.HTTP_201_CREATED,
+    )
+
+
+# ---------------------------------------------------------------------------
 # 9. Admin Services / Gallery / Offers
 # ---------------------------------------------------------------------------
 
@@ -1007,6 +1088,9 @@ def admin_promote_user(request, pk):
         return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
     user.is_staff = True
     user.save()
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    profile.added_by = request.user
+    profile.save()
     return Response({'detail': f'{user.username} promoted to admin.'})
 
 
@@ -1023,6 +1107,10 @@ def admin_demote_user(request, pk):
         return Response({'detail': 'Superuser accounts cannot be demoted.'}, status=status.HTTP_403_FORBIDDEN)
     user.is_staff = False
     user.save()
+    profile = getattr(user, 'userprofile', None)
+    if profile:
+        profile.added_by = None
+        profile.save()
     return Response({'detail': f'{user.username} demoted.'})
 
 
