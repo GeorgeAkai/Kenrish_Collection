@@ -254,6 +254,13 @@ export const translations: Record<Lang, Record<string, string>> = {
     // ── Calendar (months & days) ──────────────────────────────────────
     'cal.days': 'Sun,Mon,Tue,Wed,Thu,Fri,Sat',
     'cal.months': 'January,February,March,April,May,June,July,August,September,October,November,December',
+    // ── Install app prompt ──────────────────────────────────────────────
+    'install.title': 'Install Kenrish Collection',
+    'install.body': 'Add the app to your home screen for quick access — no browser needed.',
+    'install.cta': 'Install app',
+    'install.iosTitle': 'Install this app',
+    'install.iosBody': 'Tap the Share icon, then "Add to Home Screen".',
+    'install.dismiss': 'Not now',
   },
 
   sw: {
@@ -509,5 +516,12 @@ export const translations: Record<Lang, Record<string, string>> = {
     // ── Calendar ──────────────────────────────────────────────────────
     'cal.days': 'Jpl,Jtu,Jun,Jtn,Alh,Iju,Jms',
     'cal.months': 'Januari,Februari,Machi,Aprili,Mei,Juni,Julai,Agosti,Septemba,Oktoba,Novemba,Desemba',
+    // ── Install app prompt ──────────────────────────────────────────────
+    'install.title': 'Sakinisha Kenrish Collection',
+    'install.body': 'Ongeza programu kwenye skrini yako ya nyumbani kwa ufikiaji wa haraka — hakuna kivinjari kinachohitajika.',
+    'install.cta': 'Sakinisha programu',
+    'install.iosTitle': 'Sakinisha programu hii',
+    'install.iosBody': 'Gusa aikoni ya Share, kisha "Add to Home Screen".',
+    'install.dismiss': 'Sio sasa',
   },
 }

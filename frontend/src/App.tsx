@@ -7,6 +7,7 @@ import { ProtectedRoute, AdminRoute } from '@/components/RouteGuards'
 import PublicLayout from '@/layouts/PublicLayout'
 import AdminLayout from '@/layouts/AdminLayout'
 import ChatbotWidget from '@/components/ChatbotWidget'
+import InstallPrompt from '@/components/InstallPrompt'
 
 // Auth
 import LoginPage from '@/pages/auth/LoginPage'
@@ -108,6 +109,7 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ChatbotWidget />
+      <InstallPrompt />
     </AuthProvider>
     </ToastProvider>
     </ThemeProvider>
