@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import api from '@/lib/axios'
 import { formatKES, formatDateTime, formatDate } from '@/lib/utils'
 import type { Invoice } from '@/lib/types'
+import { useShop } from '@/contexts/ShopContext'
 
 const LOGO_URL = '/static/kenrish.png'
 
@@ -80,6 +81,7 @@ function PrintableInvoice({ invoice }: { invoice: Invoice }) {
 }
 
 export default function AdminInvoicesPage() {
+  const { shop, shopParam } = useShop()
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
@@ -95,10 +97,10 @@ export default function AdminInvoicesPage() {
   const [catalog, setCatalog] = useState<Record<string, CatalogItem[]>>({ product: [], handbag: [], clothes: [] })
 
   const fetchInvoices = () => {
-    api.get('/admin/invoices/').then(r => setInvoices(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
+    api.get(`/admin/invoices/?${shopParam}`).then(r => setInvoices(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
   }
 
-  useEffect(() => { fetchInvoices() }, [])
+  useEffect(() => { fetchInvoices() }, [shopParam])
 
   // Load product/handbag/clothes lists when the create modal opens
   useEffect(() => {
@@ -163,6 +165,7 @@ export default function AdminInvoicesPage() {
       await api.post('/admin/invoices/', {
         customer_name: customer.name,
         customer_phone: customer.phone,
+        shop,
         items,
       })
       setShowCreate(false)

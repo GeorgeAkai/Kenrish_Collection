@@ -19,9 +19,46 @@ def _period_qs(qs, period, date_field='created_at'):
     return qs
 
 
-def sales_summary(period='month'):
-    revenue = _period_qs(Sale.objects.all(), period).aggregate(total=Sum('total_amount'))['total'] or Decimal('0')
-    expenses = _period_qs(Expense.objects.all(), period).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+def _shop_filter(qs, shop_slug):
+    if shop_slug and shop_slug != 'enterprise':
+        return qs.filter(shop__slug=shop_slug)
+    return qs
+
+
+def _product_models_for_shop(shop_slug):
+    """Return (model, item_type, filter_kwargs) tuples relevant to a shop."""
+    if shop_slug == 'beauty':
+        return [(Product, 'product', {'product_id__isnull': False})]
+    if shop_slug == 'clothes':
+        return [
+            (Handbag, 'handbag', {'handbag_id__isnull': False}),
+            (Clothes, 'clothes', {'clothes_id__isnull': False}),
+        ]
+    if shop_slug == 'luxury':
+        return []  # pending — no product type assigned yet
+    # enterprise: all
+    return [
+        (Product, 'product', {'product_id__isnull': False}),
+        (Handbag, 'handbag', {'handbag_id__isnull': False}),
+        (Clothes, 'clothes', {'clothes_id__isnull': False}),
+    ]
+
+
+def _inventory_models_for_shop(shop_slug):
+    if shop_slug == 'beauty':
+        return [(Product, 'product')]
+    if shop_slug == 'clothes':
+        return [(Handbag, 'handbag'), (Clothes, 'clothes')]
+    if shop_slug == 'luxury':
+        return []
+    return [(Product, 'product'), (Handbag, 'handbag'), (Clothes, 'clothes')]
+
+
+def sales_summary(period='month', shop_slug=None):
+    sale_qs = _shop_filter(Sale.objects.all(), shop_slug)
+    expense_qs = _shop_filter(Expense.objects.all(), shop_slug)
+    revenue = _period_qs(sale_qs, period).aggregate(total=Sum('total_amount'))['total'] or Decimal('0')
+    expenses = _period_qs(expense_qs, period).aggregate(total=Sum('amount'))['total'] or Decimal('0')
     return {
         'revenue': revenue,
         'expenses': expenses,
@@ -29,15 +66,12 @@ def sales_summary(period='month'):
     }
 
 
-def top_sellers(period='month'):
+def top_sellers(period='month', shop_slug=None):
     results = []
-    for filter_key, model, label in [
-        ('product_id', Product, 'product'),
-        ('handbag_id', Handbag, 'handbag'),
-        ('clothes_id', Clothes, 'clothes'),
-    ]:
+    for model, label, filter_kwargs in _product_models_for_shop(shop_slug):
+        filter_key = f'{label}_id'
         qs = (
-            _period_qs(Sale.objects.filter(**{f'{filter_key}__isnull': False}), period)
+            _shop_filter(_period_qs(Sale.objects.filter(**filter_kwargs), period), shop_slug)
             .values(filter_key)
             .annotate(units_sold=Sum('quantity'))
             .order_by('-units_sold')[:5]
@@ -52,26 +86,27 @@ def top_sellers(period='month'):
     return results
 
 
-def inventory_alerts():
+def inventory_alerts(shop_slug=None):
     alerts = []
-    for model, label in [(Product, 'product'), (Handbag, 'handbag'), (Clothes, 'clothes')]:
+    for model, label in _inventory_models_for_shop(shop_slug):
         for item in model.objects.filter(stock_quantity__lte=F('reorder_level')):
             alerts.append({'id': item.id, 'name': item.name, 'type': label,
                            'stock_quantity': item.stock_quantity, 'reorder_level': item.reorder_level})
     return alerts
 
 
-def stock_value():
+def stock_value(shop_slug=None):
     total = Decimal('0')
-    for model in (Product, Handbag, Clothes):
+    for model, _ in _inventory_models_for_shop(shop_slug):
         for item in model.objects.all():
             total += Decimal(str(item.cost_price)) * item.stock_quantity
     return total
 
 
-def sales_trend(period='month'):
+def sales_trend(period='month', shop_slug=None):
+    qs = _shop_filter(Sale.objects.all(), shop_slug)
     trend = (
-        _period_qs(Sale.objects.all(), period)
+        _period_qs(qs, period)
         .annotate(day=TruncDate('created_at'))
         .values('day')
         .annotate(revenue=Sum('total_amount'))
@@ -80,21 +115,44 @@ def sales_trend(period='month'):
     return [{'date': str(t['day']), 'revenue': t['revenue']} for t in trend]
 
 
-def cash_flow_trend(period='month'):
+def cash_flow_trend(period='month', shop_slug=None):
+    sale_qs = _shop_filter(Sale.objects.all(), shop_slug)
+    expense_qs = _shop_filter(Expense.objects.all(), shop_slug)
     sales_by_day = {
         str(r['day']): r['revenue']
-        for r in _period_qs(Sale.objects.all(), period)
+        for r in _period_qs(sale_qs, period)
         .annotate(day=TruncDate('created_at')).values('day').annotate(revenue=Sum('total_amount'))
     }
     expenses_by_day = {
         str(r['day']): r['total']
-        for r in _period_qs(Expense.objects.all(), period)
+        for r in _period_qs(expense_qs, period)
         .annotate(day=TruncDate('created_at')).values('day').annotate(total=Sum('amount'))
     }
     all_days = sorted(set(list(sales_by_day) + list(expenses_by_day)))
     return [{'date': d, 'revenue': sales_by_day.get(d, 0), 'expenses': expenses_by_day.get(d, 0)} for d in all_days]
 
 
-def expenses_breakdown(period='month'):
-    qs = _period_qs(Expense.objects.all(), period).values('category').annotate(total=Sum('amount')).order_by('-total')
+def expenses_breakdown(period='month', shop_slug=None):
+    qs = _shop_filter(Expense.objects.all(), shop_slug)
+    qs = _period_qs(qs, period).values('category').annotate(total=Sum('amount')).order_by('-total')
     return [{'category': r['category'], 'total': r['total']} for r in qs]
+
+
+def enterprise_summary(period='month'):
+    """Side-by-side per-shop summary for the master dashboard."""
+    shops = [
+        ('beauty', 'Beauty Shop'),
+        ('clothes', 'Clothes Shop'),
+        ('luxury', 'Luxury Attire'),
+    ]
+    result = []
+    for slug, name in shops:
+        s = sales_summary(period=period, shop_slug=slug)
+        result.append({
+            'shop': slug,
+            'name': name,
+            'revenue': float(s['revenue']),
+            'expenses': float(s['expenses']),
+            'net_profit': s['net_profit'],
+        })
+    return result

@@ -4,6 +4,7 @@ import { ScanLine } from 'lucide-react'
 import api from '@/lib/axios'
 import { formatKES, formatDateTime } from '@/lib/utils'
 import type { InventoryItem, Sale } from '@/lib/types'
+import { useShop } from '@/contexts/ShopContext'
 
 type Tab = 'inventory' | 'add-stock' | 'record-sale' | 'sales' | 'scan-receipt'
 type ScanStage = 'upload' | 'review' | 'done'
@@ -329,6 +330,7 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
 }
 
 export default function AdminInventoryPage() {
+  const { shop, shopName, shopParam } = useShop()
   const [tab, setTab] = useState<Tab>('inventory')
   const [inventory, setInventory] = useState<InventoryItem[]>([])
   const [sales, setSales] = useState<Sale[]>([])
@@ -355,15 +357,15 @@ export default function AdminInventoryPage() {
   useEffect(() => {
     if (tab === 'inventory') {
       setLoading(true)
-      api.get('/admin/inventory/').then(r => setInventory(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
+      api.get(`/admin/inventory/?${shopParam}`).then(r => setInventory(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
     } else if (tab === 'sales') {
       setLoading(true)
-      api.get('/admin/inventory/sales/').then(r => setSales(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
+      api.get(`/admin/inventory/sales/?${shopParam}`).then(r => setSales(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
     } else if (tab === 'scan-receipt' || tab === 'record-sale' || tab === 'add-stock') {
       if (inventory.length === 0)
         api.get('/admin/inventory/').then(r => setInventory(r.data.results ?? r.data)).catch(console.error)
     }
-  }, [tab])
+  }, [tab, shopParam])
 
   async function handleAddStock(e: FormEvent) {
     e.preventDefault()
@@ -396,6 +398,7 @@ export default function AdminInventoryPage() {
     setSaleMsg('')
     try {
       await api.post('/admin/inventory/record-sale/', {
+        shop,
         item_type: saleSelected.item_type,
         item_id: saleSelected.id,
         quantity: parseInt(saleForm.quantity),

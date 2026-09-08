@@ -5,6 +5,26 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 
 
+class Shop(models.Model):
+    BEAUTY = 'beauty'
+    CLOTHES = 'clothes'
+    LUXURY = 'luxury'
+    SLUG_CHOICES = [
+        (BEAUTY, 'Beauty Shop'),
+        (CLOTHES, 'Clothes Shop'),
+        (LUXURY, 'Luxury Attire'),
+    ]
+    slug = models.SlugField(max_length=20, unique=True, choices=SLUG_CHOICES)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['slug']
+
+
 class Product(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -239,6 +259,7 @@ class InventoryTransaction(models.Model):
         ('ADJUSTMENT', 'Adjustment'),  # treat quantity as delta (+/-)
     ]
 
+    shop = models.ForeignKey('Shop', on_delete=models.SET_NULL, null=True, blank=True, related_name='inventory_transactions')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
     handbag = models.ForeignKey(Handbag, on_delete=models.CASCADE, null=True, blank=True)
     clothes = models.ForeignKey(Clothes, on_delete=models.CASCADE, null=True, blank=True)  # ✅ include clothes
@@ -280,6 +301,7 @@ class InventoryTransaction(models.Model):
 
 
 class Sale(models.Model):
+    shop = models.ForeignKey('Shop', on_delete=models.SET_NULL, null=True, blank=True, related_name='sales')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True)
     handbag = models.ForeignKey(Handbag, on_delete=models.CASCADE, null=True, blank=True)
     clothes = models.ForeignKey(Clothes, on_delete=models.CASCADE, null=True, blank=True)  # ✅ include clothes
@@ -312,6 +334,7 @@ class Sale(models.Model):
                 amount=self.total_amount,
                 description=f"Sale: {self._target_item().name if self._target_item() else 'Item'} x{self.quantity}",
                 reference_sale=self,
+                shop=self.shop,
                 created_by=self.created_by
             )
 
@@ -344,6 +367,7 @@ class CashFlow(models.Model):
         ('EXPENSE', 'Expense'),
     ]
 
+    shop = models.ForeignKey('Shop', on_delete=models.SET_NULL, null=True, blank=True, related_name='cash_flows')
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.CharField(max_length=255)
@@ -369,6 +393,7 @@ class GalleryLike(models.Model):
 
 
 class Expense(models.Model):
+    shop = models.ForeignKey('Shop', on_delete=models.SET_NULL, null=True, blank=True, related_name='expenses')
     description = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.CharField(max_length=100, default='General')
@@ -383,6 +408,7 @@ class Expense(models.Model):
 
 
 class Invoice(models.Model):
+    shop = models.ForeignKey('Shop', on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices')
     invoice_number = models.CharField(max_length=30, unique=True, editable=False)
     customer_name = models.CharField(max_length=255)
     customer_phone = models.CharField(max_length=20)

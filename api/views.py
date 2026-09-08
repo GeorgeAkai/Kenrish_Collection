@@ -35,7 +35,7 @@ class ChatbotRateThrottle(AnonRateThrottle):
     scope = 'chatbot'
 
 from app1.models import (
-    Product, Handbag, Clothes,
+    Shop, Product, Handbag, Clothes,
     Rating, HandbagRating, ClothesRating,
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
@@ -50,10 +50,11 @@ from api.analytics import (
     inventory_alerts as _inventory_alerts, stock_value as _stock_value,
     sales_trend as _sales_trend, cash_flow_trend as _cash_flow_trend,
     expenses_breakdown as _expenses_breakdown,
+    enterprise_summary as _enterprise_summary,
 )
 
 from .serializers import (
-    RegisterSerializer, UserSerializer,
+    ShopSerializer, RegisterSerializer, UserSerializer,
     ProductListSerializer, ProductDetailSerializer, ProductAdminSerializer,
     HandbagListSerializer, HandbagDetailSerializer, HandbagAdminSerializer,
     ClothesListSerializer, ClothesDetailSerializer, ClothesAdminSerializer,
@@ -571,6 +572,13 @@ def wishlist_clothes(request, pk):
 # 8. Admin Catalogue CRUD
 # ---------------------------------------------------------------------------
 
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def shops_list(request):
+    shops = Shop.objects.all()
+    return Response(ShopSerializer(shops, many=True).data)
+
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAdminUser])
 @parser_classes([MultiPartParser, FormParser, JSONParser])
@@ -863,28 +871,34 @@ def admin_offer_delete(request, pk):
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def admin_inventory_list(request):
+    shop_slug = request.query_params.get('shop')
     items = []
-    for p in Product.objects.all():
-        items.append({
-            'id': p.id, 'name': p.name, 'item_type': 'product',
-            'stock_quantity': p.stock_quantity, 'reorder_level': p.reorder_level,
-            'cost_price': p.cost_price, 'price': p.price,
-            'is_low_stock': p.is_low_stock, 'inventory_value': p.inventory_value,
-        })
-    for h in Handbag.objects.all():
-        items.append({
-            'id': h.id, 'name': h.name, 'item_type': 'handbag',
-            'stock_quantity': h.stock_quantity, 'reorder_level': h.reorder_level,
-            'cost_price': h.cost_price, 'price': h.price,
-            'is_low_stock': h.is_low_stock, 'inventory_value': h.inventory_value,
-        })
-    for c in Clothes.objects.all():
-        items.append({
-            'id': c.id, 'name': c.name, 'item_type': 'clothes',
-            'stock_quantity': c.stock_quantity, 'reorder_level': c.reorder_level,
-            'cost_price': c.cost_price, 'price': c.price,
-            'is_low_stock': c.is_low_stock, 'inventory_value': c.inventory_value,
-        })
+    include_products = not shop_slug or shop_slug in ('beauty', 'enterprise')
+    include_clothes_handbags = not shop_slug or shop_slug in ('clothes', 'enterprise')
+
+    if include_products:
+        for p in Product.objects.all():
+            items.append({
+                'id': p.id, 'name': p.name, 'item_type': 'product',
+                'stock_quantity': p.stock_quantity, 'reorder_level': p.reorder_level,
+                'cost_price': p.cost_price, 'price': p.price,
+                'is_low_stock': p.is_low_stock, 'inventory_value': p.inventory_value,
+            })
+    if include_clothes_handbags:
+        for h in Handbag.objects.all():
+            items.append({
+                'id': h.id, 'name': h.name, 'item_type': 'handbag',
+                'stock_quantity': h.stock_quantity, 'reorder_level': h.reorder_level,
+                'cost_price': h.cost_price, 'price': h.price,
+                'is_low_stock': h.is_low_stock, 'inventory_value': h.inventory_value,
+            })
+        for c in Clothes.objects.all():
+            items.append({
+                'id': c.id, 'name': c.name, 'item_type': 'clothes',
+                'stock_quantity': c.stock_quantity, 'reorder_level': c.reorder_level,
+                'cost_price': c.cost_price, 'price': c.price,
+                'is_low_stock': c.is_low_stock, 'inventory_value': c.inventory_value,
+            })
     return Response(items)
 
 
@@ -974,9 +988,25 @@ def admin_record_sale(request):
     else:
         return Response({'detail': 'item_type must be product, handbag, or clothes.'}, status=status.HTTP_400_BAD_REQUEST)
 
+    shop_slug = request.data.get('shop')
+    shop = None
+    if shop_slug:
+        shop = Shop.objects.filter(slug=shop_slug).first()
+    elif item_type == 'product':
+        shop = Shop.objects.filter(slug='beauty').first()
+    else:
+        shop = Shop.objects.filter(slug='clothes').first()
+
     try:
         sale = _record_sale(item, quantity=quantity, unit_price=unit_price, actor=request.user,
                             customer_name=customer_name, customer_phone=customer_phone)
+        if shop:
+            sale.shop = shop
+            sale.save(update_fields=['shop'])
+            if hasattr(sale, 'cashflow_set'):
+                sale.cashflow_set.update(shop=shop)
+            from app1.models import CashFlow as CF
+            CF.objects.filter(reference_sale=sale).update(shop=shop)
     except InsufficientStockError as e:
         return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     return Response(SaleSerializer(sale).data, status=status.HTTP_201_CREATED)
@@ -985,14 +1015,17 @@ def admin_record_sale(request):
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def admin_sales_list(request):
-    qs = Sale.objects.select_related('product', 'handbag', 'clothes', 'created_by').order_by('-created_at')
+    qs = Sale.objects.select_related('product', 'handbag', 'clothes', 'created_by', 'shop').order_by('-created_at')
     date_from = request.query_params.get('date_from')
     date_to = request.query_params.get('date_to')
     category = request.query_params.get('category')
+    shop_slug = request.query_params.get('shop')
     if date_from:
         qs = qs.filter(created_at__date__gte=date_from)
     if date_to:
         qs = qs.filter(created_at__date__lte=date_to)
+    if shop_slug and shop_slug != 'enterprise':
+        qs = qs.filter(shop__slug=shop_slug)
     if category == 'product':
         qs = qs.filter(product__isnull=False)
     elif category == 'handbag':
@@ -1010,23 +1043,26 @@ def admin_add_expense(request):
     description = request.data.get('description')
     amount = request.data.get('amount')
     category = request.data.get('category', 'General')
+    shop_slug = request.data.get('shop')
     if not description or amount is None:
         return Response({'detail': 'description and amount are required.'}, status=status.HTTP_400_BAD_REQUEST)
     try:
         amount = float(amount)
     except (ValueError, TypeError):
         return Response({'detail': 'Invalid amount.'}, status=status.HTTP_400_BAD_REQUEST)
+    shop = Shop.objects.filter(slug=shop_slug).first() if shop_slug else None
     expense = Expense.objects.create(
         description=description,
         amount=amount,
         category=category,
+        shop=shop,
         created_by=request.user,
     )
-    # Also create a CashFlow entry for the expense
     CashFlow.objects.create(
         transaction_type='EXPENSE',
         amount=expense.amount,
         description=expense.description,
+        shop=shop,
         created_by=request.user,
     )
     return Response(ExpenseSerializer(expense).data, status=status.HTTP_201_CREATED)
@@ -1035,8 +1071,14 @@ def admin_add_expense(request):
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def admin_cash_flow(request):
-    total_revenue = Sale.objects.aggregate(total=Sum('total_amount'))['total'] or 0
-    total_expenses = Expense.objects.aggregate(total=Sum('amount'))['total'] or 0
+    shop_slug = request.query_params.get('shop')
+    sale_qs = Sale.objects.all()
+    expense_qs = Expense.objects.all()
+    if shop_slug and shop_slug != 'enterprise':
+        sale_qs = sale_qs.filter(shop__slug=shop_slug)
+        expense_qs = expense_qs.filter(shop__slug=shop_slug)
+    total_revenue = sale_qs.aggregate(total=Sum('total_amount'))['total'] or 0
+    total_expenses = expense_qs.aggregate(total=Sum('amount'))['total'] or 0
     net = float(total_revenue) - float(total_expenses)
     return Response({
         'total_revenue': total_revenue,
@@ -1173,6 +1215,9 @@ def admin_wishlist_stats(request):
 def admin_invoice_list(request):
     if request.method == 'GET':
         qs = Invoice.objects.all().order_by('-created_at')
+        shop_slug = request.query_params.get('shop')
+        if shop_slug and shop_slug != 'enterprise':
+            qs = qs.filter(shop__slug=shop_slug)
         paginator = StandardPagination()
         page = paginator.paginate_queryset(qs, request)
         return paginator.get_paginated_response(InvoiceListSerializer(page, many=True).data)
@@ -1181,6 +1226,7 @@ def admin_invoice_list(request):
     customer_name = request.data.get('customer_name')
     customer_phone = request.data.get('customer_phone')
     items_data = request.data.get('items', [])
+    shop_slug = request.data.get('shop')
 
     if not customer_name or not customer_phone:
         return Response({'detail': 'customer_name and customer_phone are required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -1192,9 +1238,11 @@ def admin_invoice_list(request):
         if not s.is_valid():
             return Response({'detail': 'Invalid item data.', 'errors': s.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+    shop = Shop.objects.filter(slug=shop_slug).first() if shop_slug else None
     invoice = Invoice.objects.create(
         customer_name=customer_name,
         customer_phone=customer_phone,
+        shop=shop,
         created_by=request.user,
         grand_total=0,
     )
@@ -1264,21 +1312,24 @@ def admin_invoice_detail(request, pk):
 @permission_classes([IsAdminUser])
 def analytics_summary(request):
     period = request.query_params.get('period', 'month')
-    return Response(_sales_summary(period))
+    shop_slug = request.query_params.get('shop')
+    return Response(_sales_summary(period, shop_slug=shop_slug))
 
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def analytics_sales_trend(request):
     period = request.query_params.get('period', 'month')
-    return Response(_sales_trend(period))
+    shop_slug = request.query_params.get('shop')
+    return Response(_sales_trend(period, shop_slug=shop_slug))
 
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def analytics_top_sellers(request):
     period = request.query_params.get('period', 'month')
-    sellers = _top_sellers(period)
+    shop_slug = request.query_params.get('shop')
+    sellers = _top_sellers(period, shop_slug=shop_slug)
     products = [s for s in sellers if s['type'] == 'product']
     handbags = [s for s in sellers if s['type'] == 'handbag']
     clothes = [s for s in sellers if s['type'] == 'clothes']
@@ -1288,27 +1339,42 @@ def analytics_top_sellers(request):
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def analytics_inventory_alerts(request):
-    return Response(_inventory_alerts())
+    shop_slug = request.query_params.get('shop')
+    return Response(_inventory_alerts(shop_slug=shop_slug))
 
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def analytics_stock_value(request):
-    return Response({'total_value': _stock_value()})
+    shop_slug = request.query_params.get('shop')
+    return Response({'total_value': _stock_value(shop_slug=shop_slug)})
 
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def analytics_cash_flow(request):
     period = request.query_params.get('period', 'month')
-    return Response(_cash_flow_trend(period))
+    shop_slug = request.query_params.get('shop')
+    return Response(_cash_flow_trend(period, shop_slug=shop_slug))
 
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def analytics_expenses_breakdown(request):
     period = request.query_params.get('period', 'month')
-    return Response(_expenses_breakdown(period))
+    shop_slug = request.query_params.get('shop')
+    return Response(_expenses_breakdown(period, shop_slug=shop_slug))
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def analytics_enterprise(request):
+    period = request.query_params.get('period', 'month')
+    return Response({
+        'shops': _enterprise_summary(period),
+        'combined': _sales_summary(period),
+        'top_sellers': _top_sellers(period),
+    })
 
 
 @api_view(['POST'])

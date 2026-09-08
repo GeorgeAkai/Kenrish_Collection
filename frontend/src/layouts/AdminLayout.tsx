@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useShop, SHOPS, ShopSlug } from '@/contexts/ShopContext'
 import { LOGO_URL } from '@/lib/brand'
 import {
   LayoutDashboard, Package, ShoppingBag, Shirt, Warehouse,
   Scissors, Image, Tag, Users, FileText, LogOut, Menu, X,
   Sun, Moon, ChevronRight, CalendarCheck, ClipboardList, Settings2, PackagePlus,
+  ChevronDown,
 } from 'lucide-react'
 
 const navItems = [
@@ -44,6 +46,47 @@ export function getAdminPageTitle(pathname: string): string {
     '/admin/invoices': 'Invoices',
   }
   return titles[pathname] ?? 'Admin'
+}
+
+function ShopSwitcher() {
+  const { shop, setShop } = useShop()
+  const [open, setOpen] = useState(false)
+  const current = SHOPS.find(s => s.slug === shop)!
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/15 text-primary text-sm font-semibold transition-all"
+      >
+        <span>{current.emoji}</span>
+        <span className="hidden sm:inline">{current.name}</span>
+        <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-full mt-2 z-50 bg-card border border-border rounded-2xl shadow-xl overflow-hidden min-w-[190px]">
+            {SHOPS.map(s => (
+              <button
+                key={s.slug}
+                onClick={() => { setShop(s.slug as ShopSlug); setOpen(false) }}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors ${
+                  shop === s.slug
+                    ? 'bg-primary/10 text-primary font-semibold'
+                    : 'text-foreground hover:bg-muted'
+                }`}
+              >
+                <span className="text-base">{s.emoji}</span>
+                <span>{s.name}</span>
+                {shop === s.slug && <span className="ml-auto text-xs text-primary">✓</span>}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
 }
 
 function Sidebar({ onClose }: { onClose?: () => void }) {
@@ -134,6 +177,14 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
   const pageTitle = getAdminPageTitle(location.pathname)
+  const { shop, shopName } = useShop()
+
+  const shopColor: Record<string, string> = {
+    beauty:     'bg-pink-50 text-pink-700 dark:bg-pink-950/30 dark:text-pink-300 border-pink-200 dark:border-pink-800',
+    clothes:    'bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300 border-violet-200 dark:border-violet-800',
+    luxury:     'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+    enterprise: 'bg-primary/10 text-primary border-primary/20',
+  }
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -167,7 +218,17 @@ export default function AdminLayout() {
             <Menu size={18} />
           </button>
           <h1 className="text-sm font-semibold text-foreground">{pageTitle}</h1>
+
+          {/* Shop context badge */}
+          <div className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold ${shopColor[shop]}`}>
+            <span>{SHOPS.find(s => s.slug === shop)?.emoji}</span>
+            <span>{shopName}</span>
+          </div>
+
           <div className="flex-1" />
+
+          <ShopSwitcher />
+
           <Link
             to="/"
             className="text-xs text-muted-foreground hover:text-primary transition-colors hidden sm:block"

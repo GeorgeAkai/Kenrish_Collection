@@ -3,6 +3,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import { ToastProvider } from '@/contexts/ToastContext'
+import { ShopProvider } from '@/contexts/ShopContext'
 import { ProtectedRoute, AdminRoute } from '@/components/RouteGuards'
 import PublicLayout from '@/layouts/PublicLayout'
 import AdminLayout from '@/layouts/AdminLayout'
@@ -88,7 +89,7 @@ export default function App() {
         </Route>
 
         <Route element={<AdminRoute />}>
-          <Route element={<AdminLayout />}>
+          <Route element={<ShopProvider><AdminLayout /></ShopProvider>}>
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/admin/products" element={<AdminProductsPage />} />
             <Route path="/admin/handbags" element={<AdminHandbagsPage />} />

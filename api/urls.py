@@ -85,6 +85,9 @@ urlpatterns = [
     path('admin/invoices/', views.admin_invoice_list, name='api-admin-invoice-list'),
     path('admin/invoices/<int:pk>/', views.admin_invoice_detail, name='api-admin-invoice-detail'),
 
+    # --- Shops ---
+    path('shops/', views.shops_list, name='api-shops'),
+
     # --- 13. Analytics ---
     path('admin/analytics/reset/', views.analytics_reset, name='api-analytics-reset'),
     path('admin/analytics/summary/', views.analytics_summary, name='api-analytics-summary'),
@@ -94,6 +97,7 @@ urlpatterns = [
     path('admin/analytics/stock-value/', views.analytics_stock_value, name='api-analytics-stock-value'),
     path('admin/analytics/cash-flow/', views.analytics_cash_flow, name='api-analytics-cash-flow'),
     path('admin/analytics/expenses-breakdown/', views.analytics_expenses_breakdown, name='api-analytics-expenses-breakdown'),
+    path('admin/analytics/enterprise/', views.analytics_enterprise, name='api-analytics-enterprise'),
 
     # --- 14. Chatbot streaming ---
     path('chatbot/stream/', views.chatbot_stream, name='api-chatbot-stream'),

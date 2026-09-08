@@ -5,12 +5,18 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from app1.models import (
-    Product, Handbag, Clothes,
+    Shop, Product, Handbag, Clothes,
     Rating, HandbagRating, ClothesRating,
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
 )
+
+
+class ShopSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Shop
+        fields = ['slug', 'name', 'description']
 
 
 # ---------------------------------------------------------------------------
