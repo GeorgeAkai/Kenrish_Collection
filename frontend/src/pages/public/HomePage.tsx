@@ -2,17 +2,14 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '@/lib/axios'
 import { formatKES } from '@/lib/utils'
-import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Ban, Truck, ShieldCheck, Headphones, Search, X, Shirt, Gem, ArrowRight } from 'lucide-react'
+import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Truck, ShieldCheck, Headphones, Search, X, Shirt, Gem, ArrowRight } from 'lucide-react'
 import type { Product, Handbag, Clothes, Offer, Service } from '@/lib/types'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { LOGO_URL } from '@/lib/brand'
+import TodaySchedule from '@/components/TodaySchedule'
+import BookingModal from '@/components/beauty/BookingModal'
+import type { PublicSlot } from '@/lib/slots'
 
-interface PublicSlot { time: string; available: boolean; booked: boolean; past: boolean }
-
-function formatSlotTime(t: string) {
-  const [h, m] = t.split(':').map(Number)
-  return `${h % 12 === 0 ? 12 : h % 12}:${m.toString().padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`
-}
 
 interface HomeData {
   featured_products: Product[]
@@ -101,6 +98,8 @@ export default function HomePage() {
   const { t } = useLanguage()
   const [data, setData] = useState<HomeData | null>(null)
   const [services, setServices] = useState<Service[]>([])
+  const [allServices, setAllServices] = useState<Service[]>([])
+  const [booking, setBooking] = useState<{ serviceId: number | null; time: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<Tab>('products')
   const [search, setSearch] = useState('')
@@ -116,9 +115,9 @@ export default function HomePage() {
   ]
 
   const TESTIMONIALS = [
-    { nameKey: 'home.t1Name', roleKey: 'home.t1Role', textKey: 'home.t1Text', initials: 'SM', color: 'bg-fuchsia-400' },
-    { nameKey: 'home.t2Name', roleKey: 'home.t2Role', textKey: 'home.t2Text', initials: 'GK', color: 'bg-violet-500' },
-    { nameKey: 'home.t3Name', roleKey: 'home.t3Role', textKey: 'home.t3Text', initials: 'MW', color: 'bg-pink-400' },
+    { nameKey: 'home.t1Name', roleKey: 'home.t1Role', textKey: 'home.t1Text', initials: 'SM', color: 'bg-primary text-primary-foreground' },
+    { nameKey: 'home.t2Name', roleKey: 'home.t2Role', textKey: 'home.t2Text', initials: 'GK', color: 'bg-inverse text-inverse-foreground' },
+    { nameKey: 'home.t3Name', roleKey: 'home.t3Role', textKey: 'home.t3Text', initials: 'MW', color: 'bg-gold-tint text-gold-ink' },
   ]
 
   useEffect(() => {
@@ -129,6 +128,7 @@ export default function HomePage() {
     ]).then(([homeData, svcData, slots]) => {
       setData(homeData)
       setServices(svcData.slice(0, 2))
+      setAllServices(svcData)
       setTodaySlots(slots)
     }).catch(console.error).finally(() => setLoading(false))
   }, [])
@@ -269,8 +269,13 @@ export default function HomePage() {
         <div className="absolute bottom-0 inset-x-0 h-28 pointer-events-none hero-fade-bottom" />
       </section>
 
+      {/* ═══ TODAY'S OPENINGS — phones get it right under the hero ═════════ */}
+      <section className="lg:hidden px-4 pt-2 pb-12">
+        <TodaySchedule slots={todaySlots} services={allServices} dateLabel={todayLabel} onBook={setBooking} />
+      </section>
+
       {/* ═══ PROMO STRIP ════════════════════════════════════════════════ */}
-      <div className="bg-primary text-primary-foreground py-3 px-5 overflow-hidden">
+      <div className="hidden sm:block bg-primary text-primary-foreground py-3 px-5 overflow-hidden">
         <div className="flex items-center justify-center gap-8 text-sm font-medium flex-wrap">
           <span>{t('home.promoProducts')}</span>
           <span className="hidden sm:block">{t('home.promoConsultations')}</span>
@@ -629,7 +634,7 @@ export default function HomePage() {
                   &ldquo;{t(testimonial.textKey)}&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full ${testimonial.color} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
+                  <div className={`w-10 h-10 rounded-full ${testimonial.color} flex items-center justify-center text-xs font-bold shrink-0`}>
                     {testimonial.initials}
                   </div>
                   <div>
@@ -643,8 +648,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══ BOOK YOUR SPOT ═════════════════════════════════════════════ */}
-      <section className="py-20 px-5">
+      {/* ═══ BOOK YOUR SPOT (desktop; phones see Today's openings under the hero) ═══ */}
+      <section className="hidden lg:block py-20 px-5">
         <div className="max-w-7xl mx-auto">
           <div className="rounded-3xl overflow-hidden border border-border grid grid-cols-1 lg:grid-cols-2 shadow-2xl shadow-primary/10">
 
@@ -702,91 +707,24 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right — live today's schedule */}
-            <div className="bg-card p-8 lg:p-10 flex flex-col">
-              <div className="flex items-center justify-between mb-5">
-                <div>
-                  <h3 className="font-semibold text-sm">{t('home.todaySchedule')}</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">{todayLabel}</p>
-                </div>
-                <span className="flex items-center gap-1.5 text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 px-2.5 py-1 rounded-full border border-green-200 dark:border-green-800">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block" />
-                  {t('home.live')}
-                </span>
-              </div>
-
-              {todaySlots.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-center py-8">
-                  <CalendarDays size={36} className="text-muted-foreground/30 mb-3" />
-                  <p className="text-sm text-muted-foreground">{t('home.closedSunday')}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{t('home.checkBackDays')}</p>
-                  <Link
-                    to="/reservation"
-                    className="mt-5 inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
-                  >
-                    {t('home.browseFuture')} <ChevronRight size={12} />
-                  </Link>
-                </div>
-              ) : (
-                <>
-                  <div className="flex gap-3 mb-5">
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-xs font-medium text-green-700 dark:text-green-400">
-                      <span className="w-2 h-2 rounded-full bg-green-500" />
-                      {todaySlots.filter(s => s.available).length} {t('home.openSlots')}
-                    </span>
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/20 text-xs font-medium text-primary">
-                      <span className="w-2 h-2 rounded-full bg-primary" />
-                      {todaySlots.filter(s => s.booked).length} {t('home.bookedSlots')}
-                    </span>
-                  </div>
-
-                  <div className="space-y-1.5 flex-1 overflow-hidden">
-                    {todaySlots.filter(s => !s.past || s.booked).slice(0, 10).map(slot => (
-                      <div
-                        key={slot.time}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-colors
-                          ${slot.booked
-                            ? 'bg-primary/8 border border-primary/15'
-                            : 'bg-muted/30 border border-transparent'
-                          }`}
-                      >
-                        <span className="w-16 shrink-0 font-mono text-muted-foreground">
-                          {formatSlotTime(slot.time)}
-                        </span>
-                        <span className={`flex-1 h-2 rounded-full ${
-                          slot.booked ? 'bg-primary/35' : 'bg-green-200 dark:bg-green-900/40'
-                        }`} />
-                        <div className="shrink-0 flex items-center gap-1">
-                          {slot.booked ? (
-                            <>
-                              <Ban size={10} className="text-primary/60" />
-                              <span className="text-primary/70 font-medium">{t('home.slotBooked')}</span>
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle2 size={10} className="text-green-500" />
-                              <span className="text-green-600 dark:text-green-400 font-medium">{t('home.slotFree')}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Link
-                    to="/reservation"
-                    className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors"
-                  >
-                    {t('home.seeFullSchedule')} <ChevronRight size={14} />
-                  </Link>
-                </>
-              )}
+            {/* Right — today's openings */}
+            <div className="bg-card">
+              <TodaySchedule bare slots={todaySlots} services={allServices} dateLabel={todayLabel} onBook={setBooking} />
             </div>
 
           </div>
         </div>
       </section>
 
+      {booking && (
+        <BookingModal
+          services={allServices}
+          initialServiceId={booking.serviceId ?? undefined}
+          initialDate={todayKey}
+          initialTime={booking.time}
+          onClose={() => setBooking(null)}
+        />
+      )}
     </div>
   )
 }
