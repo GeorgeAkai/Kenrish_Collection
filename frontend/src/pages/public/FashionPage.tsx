@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import api from '@/lib/axios'
 import CatalogueCard from '@/components/CatalogueCard'
 import { useWishlist } from '@/hooks/useWishlist'
-import type { Product, Handbag, Clothes, PaginatedResponse } from '@/lib/types'
+import type { Handbag, Clothes, PaginatedResponse } from '@/lib/types'
 
-type ChipKey = 'all' | 'products' | 'handbags' | 'clothes'
-type WishlistType = 'products' | 'handbags' | 'clothes'
+type ChipKey = 'all' | 'handbags' | 'clothes'
+type WishlistType = 'handbags' | 'clothes'
 
 interface FashionItem {
   id: number
@@ -20,7 +20,6 @@ interface FashionItem {
 
 const CHIPS: { key: ChipKey; label: string }[] = [
   { key: 'all', label: 'All' },
-  { key: 'products', label: 'Products' },
   { key: 'handbags', label: 'Handbags' },
   { key: 'clothes', label: 'Attire' },
 ]
@@ -33,12 +32,10 @@ export default function FashionPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get<PaginatedResponse<Product>>('/products/'),
       api.get<PaginatedResponse<Handbag>>('/handbags/'),
       api.get<PaginatedResponse<Clothes>>('/clothes/'),
-    ]).then(([products, handbags, clothes]) => {
+    ]).then(([handbags, clothes]) => {
       const merged: FashionItem[] = [
-        ...products.data.results.map(p => ({ ...p, type: 'products' as const, href: `/products/${p.id}` })),
         ...handbags.data.results.map(h => ({ ...h, type: 'handbags' as const, href: `/handbags/${h.id}` })),
         ...clothes.data.results.map(c => ({ ...c, type: 'clothes' as const, href: `/clothes/${c.id}` })),
       ]
@@ -54,7 +51,7 @@ export default function FashionPage() {
         <h1 className="text-4xl font-semibold mb-3" style={{ fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: '-0.01em' }}>
           Fashion
         </h1>
-        <p className="text-muted-foreground max-w-lg">Cosmetics, handbags and attire — browse the full collection in one place.</p>
+        <p className="text-muted-foreground max-w-lg">Handbags and attire — browse the full collection in one place.</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mb-8">

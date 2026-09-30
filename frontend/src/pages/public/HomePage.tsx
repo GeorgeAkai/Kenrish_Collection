@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '@/lib/axios'
 import { formatKES, formatDate } from '@/lib/utils'
-import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Ban, Truck, ShieldCheck, Headphones, Search, X } from 'lucide-react'
+import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Ban, Truck, ShieldCheck, Headphones, Search, X, Shirt, Gem, ArrowRight } from 'lucide-react'
 import type { Product, Handbag, Clothes, Offer, Service } from '@/lib/types'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { LOGO_URL } from '@/lib/brand'
@@ -278,6 +278,63 @@ export default function HomePage() {
           <span>{t('home.promoHours')}</span>
         </div>
       </div>
+
+      {/* ═══ THREE SHOPS ════════════════════════════════════════════════ */}
+      <section className="py-20 px-5 bg-background">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">One Boutique, Three Worlds</p>
+            <h2
+              className="text-3xl lg:text-4xl font-semibold"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              Explore Kenrish
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                key: 'beauty', Icon: Scissors, title: 'Kenrish Beauty', href: '/beauty',
+                blurb: 'Hairdressing, barbering, nails and manicures — plus the beauty products to keep it up at home.',
+                cta: 'Explore Beauty',
+              },
+              {
+                key: 'fashion', Icon: Shirt, title: 'Kenrish Fashion', href: '/fashion',
+                blurb: 'Handbags and attire, curated for every season.',
+                cta: 'Explore Fashion',
+              },
+              {
+                key: 'luxury', Icon: Gem, title: 'Kenrish Luxury', href: '/luxury',
+                blurb: 'Rare pieces, by inquiry only — provenance, materials and dimensions on every item.',
+                cta: 'Explore Luxury',
+              },
+            ].map(shop => (
+              <div
+                key={shop.key}
+                data-theme={shop.key}
+                className="rounded-2xl overflow-hidden border border-border p-9 flex flex-col bg-background text-foreground"
+                style={{ boxShadow: 'var(--shadow-card)' }}
+              >
+                <shop.Icon size={26} className="mb-5" style={{ color: 'var(--gold-ink)' }} />
+                <h3
+                  className="text-2xl font-semibold mb-3"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  {shop.title}
+                </h3>
+                <p className="text-sm opacity-75 leading-relaxed mb-7 flex-1">{shop.blurb}</p>
+                <Link
+                  to={shop.href}
+                  className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-full bg-primary text-primary-foreground hover:opacity-90 transition-opacity w-fit"
+                >
+                  {shop.cta} <ArrowRight size={14} />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ═══ COLLECTIONS — tabbed ══════════════════════════════════════ */}
       {(data?.featured_products?.length || data?.featured_handbags?.length || data?.featured_clothes?.length) ? (

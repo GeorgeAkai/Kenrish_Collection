@@ -11,22 +11,16 @@ export default function PublicLayout() {
   const { isAuthenticated, user, logout } = useAuth()
   const { theme, toggle: toggleTheme } = useTheme()
   const { lang, setLang, t } = useLanguage()
-  const storefront = useStorefrontTheme()
+  useStorefrontTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
 
   const navLinks = [
-    { to: '/beauty', label: 'Beauty' },
-    { to: '/fashion', label: 'Fashion' },
-    { to: '/luxury', label: 'Luxury' },
-    { to: '/products', label: t('nav.products') },
-    { to: '/handbags', label: t('nav.handbags') },
-    { to: '/clothes', label: t('nav.clothes') },
-    { to: '/services', label: t('nav.services') },
-    { to: '/gallery', label: t('nav.gallery') },
+    { to: '/beauty', label: 'Kenrish Beauty' },
+    { to: '/fashion', label: 'Kenrish Fashion' },
+    { to: '/luxury', label: 'Kenrish Luxury' },
     { to: '/offers', label: t('nav.offers') },
-    { to: '/reservation', label: t('nav.reservations') },
     { to: '/about', label: t('nav.about') },
   ]
 
@@ -107,16 +101,14 @@ export default function PublicLayout() {
               {t('nav.switchLang')}
             </button>
 
-            {/* Dark mode toggle — hidden on fixed boutique canvases (Beauty/Fashion/Luxury) */}
-            {!storefront && (
-              <button
-                onClick={toggleTheme}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition-all text-muted-foreground"
-                aria-label="Toggle theme"
-              >
-                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-              </button>
-            )}
+            {/* Dark mode toggle */}
+            <button
+              onClick={toggleTheme}
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition-all text-muted-foreground"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
 
             {isAuthenticated ? (
               <>

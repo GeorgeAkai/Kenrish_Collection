@@ -5,6 +5,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { ProtectedRoute, AdminRoute } from '@/components/RouteGuards'
 import PublicLayout from '@/layouts/PublicLayout'
+import BeautyLayout from '@/layouts/BeautyLayout'
 import AdminLayout from '@/layouts/AdminLayout'
 import ChatbotWidget from '@/components/ChatbotWidget'
 import InstallPrompt from '@/components/InstallPrompt'
@@ -31,6 +32,7 @@ import OrdersPage from '@/pages/public/OrdersPage'
 import ReservationPage from '@/pages/public/ReservationPage'
 import ProfilePage from '@/pages/public/ProfilePage'
 import BeautyPage from '@/pages/public/BeautyPage'
+import BeautyServicesPage from '@/pages/public/BeautyServicesPage'
 import FashionPage from '@/pages/public/FashionPage'
 import LuxuryPage from '@/pages/public/LuxuryPage'
 import LuxuryDetailPage from '@/pages/public/LuxuryDetailPage'
@@ -87,7 +89,13 @@ export default function App() {
           <Route path="/privacy-policy" element={<div className="max-w-3xl mx-auto px-4 py-10"><h1 className="text-2xl font-bold mb-4">Privacy Policy</h1><p className="text-muted-foreground">We respect your privacy. Your personal information is collected only to process orders and improve your experience. We do not sell your data to third parties.</p></div>} />
           <Route path="/terms-of-service" element={<div className="max-w-3xl mx-auto px-4 py-10"><h1 className="text-2xl font-bold mb-4">Terms of Service</h1><p className="text-muted-foreground">By using Kenrish Collection, you agree to our terms. All sales are final unless goods are defective. Contact us at 0708440390 for any issues.</p></div>} />
           <Route path="/reservation" element={<ReservationPage />} />
-          <Route path="/beauty" element={<BeautyPage />} />
+          <Route path="/beauty" element={<BeautyLayout />}>
+            <Route index element={<BeautyPage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="services" element={<BeautyServicesPage />} />
+            <Route path="gallery" element={<GalleryPage />} />
+            <Route path="reservations" element={<ReservationPage />} />
+          </Route>
           <Route path="/fashion" element={<FashionPage />} />
           <Route path="/luxury" element={<LuxuryPage />} />
           <Route path="/luxury/:id" element={<LuxuryDetailPage />} />

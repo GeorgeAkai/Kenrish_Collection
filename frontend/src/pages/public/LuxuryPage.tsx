@@ -36,9 +36,15 @@ export default function LuxuryPage() {
         {loading ? (
           <p className="text-center text-muted-foreground py-20">Loading…</p>
         ) : items.length === 0 ? (
-          <p className="text-center text-muted-foreground py-20 flex items-center justify-center gap-2">
-            <Gem size={16} className="opacity-40" /> No pieces published yet.
-          </p>
+          <div className="flex flex-col items-center justify-center text-center py-24">
+            <Gem size={40} className="mb-5" style={{ color: 'var(--gold-ink)' }} />
+            <p className="text-2xl mb-2" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif", fontWeight: 500 }}>
+              Coming Soon
+            </p>
+            <p className="text-sm text-muted-foreground max-w-xs">
+              The Atelier Collection is being curated. Check back soon for our first pieces.
+            </p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {items.map(item => <LuxuryItemCard key={item.id} item={item} />)}
