@@ -279,3 +279,35 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@kenrish.com')
 # For development, you can use console backend to see emails in terminal
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Logging: Django's built-in default only sends request-error tracebacks to
+# ADMINS by email when DEBUG=False (and only to console when DEBUG=True),
+# neither of which is configured here -- so in production, every unhandled
+# exception's traceback was going nowhere at all, not even Cloud Run's log
+# stream. Route everything to stdout/stderr unconditionally, which Cloud Run
+# (and gunicorn generally) captures as logs regardless of DEBUG.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
