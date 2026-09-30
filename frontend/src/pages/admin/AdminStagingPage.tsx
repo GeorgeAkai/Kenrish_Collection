@@ -194,8 +194,14 @@ function DraftCard({
   )
 }
 
-export default function AdminStagingPage() {
-  const [drafts, setDrafts] = useState<DraftProduct[]>([])
+type Shop = 'beauty' | 'fashion'
+
+export default function AdminStagingPage({ shop }: { shop?: Shop } = {}) {
+  const [draftsRaw, setDrafts] = useState<DraftProduct[]>([])
+  const drafts = draftsRaw.filter(d => {
+    if (!shop) return true
+    return shop === 'beauty' ? d.item_type === 'product' : d.item_type === 'handbag' || d.item_type === 'clothes'
+  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

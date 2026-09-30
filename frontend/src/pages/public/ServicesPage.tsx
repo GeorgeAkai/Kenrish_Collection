@@ -120,22 +120,22 @@ export default function ServicesPage() {
       {/* CTA */}
       <section className="px-5 pb-16">
         <div
-          className="max-w-2xl mx-auto rounded-3xl p-12 text-center relative overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #7C3060 0%, #A85090 55%, #C07DB0 100%)' }}
+          className="max-w-2xl mx-auto rounded-3xl p-12 text-center relative overflow-hidden bg-primary text-primary-foreground"
+          style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)' }}
         >
-          <Sparkles size={28} className="mx-auto mb-4 text-white/80" />
+          <Sparkles size={28} className="mx-auto mb-4 text-primary-foreground/80" />
           <h2
-            className="text-2xl font-bold mb-3 text-white"
+            className="text-2xl font-bold mb-3 text-primary-foreground"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
             {t('services.ctaTitle')}
           </h2>
-          <p className="text-white/75 mb-8 text-sm leading-relaxed">
+          <p className="text-primary-foreground/75 mb-8 text-sm leading-relaxed">
             {t('services.ctaDesc')}
           </p>
           <a
             href="tel:+254708440390"
-            className="inline-flex items-center gap-2 bg-white text-primary px-8 py-3.5 rounded-full font-semibold text-sm hover:opacity-90 transition-opacity shadow-xl"
+            className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-8 py-3.5 rounded-full font-semibold text-sm hover:opacity-90 transition-opacity shadow-xl"
           >
             📞 0708 440390
           </a>

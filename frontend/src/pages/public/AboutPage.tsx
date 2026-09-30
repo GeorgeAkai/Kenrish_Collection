@@ -9,23 +9,23 @@ export default function AboutPage() {
     <div>
       {/* Hero */}
       <section
-        className="relative py-24 px-4 text-center overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #7C3060 0%, #9B3D78 50%, #A85090 100%)' }}
+        className="relative py-24 px-4 text-center overflow-hidden bg-primary text-primary-foreground"
+        style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)' }}
       >
-        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/5 pointer-events-none" />
-        <div className="absolute -bottom-24 -left-14 w-72 h-72 rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-primary-foreground/5 pointer-events-none" />
+        <div className="absolute -bottom-24 -left-14 w-72 h-72 rounded-full bg-primary-foreground/5 pointer-events-none" />
 
         <div className="relative max-w-2xl mx-auto">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white/15 mb-6">
-            <Sparkles size={26} className="text-white" />
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary-foreground/15 mb-6">
+            <Sparkles size={26} className="text-primary-foreground" />
           </div>
           <h1
-            className="text-4xl lg:text-5xl font-bold mb-4 text-white"
+            className="text-4xl lg:text-5xl font-bold mb-4 text-primary-foreground"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
           >
             {t('about.title')}
           </h1>
-          <p className="text-white/70 leading-relaxed text-base">
+          <p className="text-primary-foreground/70 leading-relaxed text-base">
             {t('about.subtitle')}
           </p>
         </div>

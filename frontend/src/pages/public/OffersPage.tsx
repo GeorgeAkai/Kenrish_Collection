@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 import api from '@/lib/axios'
-import { formatDate } from '@/lib/utils'
+import { formatKES } from '@/lib/utils'
 import type { Offer } from '@/lib/types'
 import { useLanguage } from '@/contexts/LanguageContext'
 
@@ -13,6 +14,12 @@ export default function OffersPage() {
   useEffect(() => {
     api.get('/offers/').then(r => setOffers(r.data)).catch(console.error).finally(() => setLoading(false))
   }, [])
+
+  // /offers/ already returns only active (non-expired) offers — no active
+  // offers means the section is disabled, not just empty.
+  if (!loading && offers.length === 0) {
+    return <Navigate to="/" replace />
+  }
 
   return (
     <div>
@@ -59,12 +66,12 @@ export default function OffersPage() {
                   <div className="relative aspect-video overflow-hidden">
                     <img
                       src={offer.image}
-                      alt={offer.title}
+                      alt={offer.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute top-3 right-3">
                       <span className="bg-primary text-primary-foreground text-sm font-bold px-3 py-1.5 rounded-full shadow-lg">
-                        {offer.discount_percentage}% OFF
+                        {formatKES(offer.offer_price)}
                       </span>
                     </div>
                   </div>
@@ -75,21 +82,16 @@ export default function OffersPage() {
                       className="text-lg font-semibold"
                       style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                     >
-                      {offer.title}
+                      {offer.name}
                     </h2>
                     {!offer.image && (
-                      <span className="shrink-0 text-xl font-bold product-price">{offer.discount_percentage}% OFF</span>
+                      <span className="shrink-0 text-xl font-bold product-price">{formatKES(offer.offer_price)}</span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">{offer.description}</p>
-                  {offer.valid_until && (
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {t('offers.validUntil')} {formatDate(offer.valid_until)}
-                    </p>
-                  )}
                   <div className="mt-4 bg-primary/8 border border-primary/20 rounded-xl p-3 text-center">
                     <p className="text-sm font-semibold text-primary">
-                      {t('offers.save')} {offer.discount_percentage}% — {t('offers.visitStore')}
+                      {t('offers.visitStore')}
                     </p>
                     <a href="tel:+254708440390" className="text-xs text-muted-foreground hover:text-primary transition-colors mt-1 block">
                       📞 0708 440390

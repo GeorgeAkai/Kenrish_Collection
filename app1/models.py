@@ -195,7 +195,13 @@ class GalleryImage(models.Model):
         ('manicure', 'Manicure'),
         ('pedicure', 'Pedicure'),
     ]
+    SHOP_CHOICES = [
+        ('beauty', 'Beauty'),
+        ('fashion', 'Fashion'),
+        ('luxury', 'Luxury'),
+    ]
     service = models.CharField(max_length=20, choices=SERVICE_CHOICES, blank=True, null=True)
+    shop = models.CharField(max_length=20, choices=SHOP_CHOICES, default='beauty')
     file = models.FileField(upload_to='gallery/', null=True, blank=True)
     description = models.CharField(max_length=255, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -307,9 +313,10 @@ class Sale(models.Model):
                 item.stock_quantity = max(0, item.stock_quantity - self.quantity)
                 item.save()
 
+            # Product = Beauty (cosmetics); Handbag/Clothes = Fashion.
             CashFlow.objects.create(
                 transaction_type='REVENUE',
-                shop='fashion',
+                shop='beauty' if self.product else 'fashion',
                 amount=self.total_amount,
                 description=f"Sale: {self._target_item().name if self._target_item() else 'Item'} x{self.quantity}",
                 reference_sale=self,

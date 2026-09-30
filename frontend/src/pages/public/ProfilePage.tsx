@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useAccentTheme, ACCENTS } from '@/contexts/AccentThemeContext'
 import api from '@/lib/axios'
 import {
-  Camera, Heart, ShoppingBag, CalendarDays, Lock, Sun, Moon, Trash2, User, AlertTriangle,
+  Camera, Heart, ShoppingBag, CalendarDays, Lock, Sun, Moon, Trash2, User, AlertTriangle, Check,
 } from 'lucide-react'
 
 interface Profile {
@@ -19,6 +20,7 @@ interface Profile {
 export default function ProfilePage() {
   const { logout, user: authUser } = useAuth()
   const { theme, toggle: toggleTheme } = useTheme()
+  const { accent, setAccent } = useAccentTheme()
   const navigate = useNavigate()
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -202,6 +204,30 @@ export default function ProfilePage() {
           >
             <Moon size={15} /> Dark
           </button>
+        </div>
+
+        <p className="text-xs text-muted-foreground mt-5 mb-2.5">Accent colour</p>
+        <div className="flex flex-wrap gap-3">
+          {ACCENTS.map(({ key, label, swatch }) => (
+            <button
+              key={key}
+              onClick={() => setAccent(key)}
+              title={label}
+              className={`flex items-center gap-2 pl-1.5 pr-3.5 py-1.5 rounded-full border-2 text-sm font-medium transition-all ${
+                accent === key
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border text-muted-foreground hover:border-muted-foreground'
+              }`}
+            >
+              <span
+                className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: swatch }}
+              >
+                {accent === key && <Check size={11} className="text-white" strokeWidth={3} />}
+              </span>
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 

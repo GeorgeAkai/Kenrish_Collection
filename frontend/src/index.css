@@ -53,93 +53,8 @@
   --radius-lux: 2px;
 }
 
-/* ── Light mode: Modern cosmetics plum/mauve palette ──── */
+/* ── Light mode: Gold (default) ─────────────────────────────────────── */
 :root {
-  --background: #F9F6FB;
-  --foreground: #1A1220;
-  --card: #FDFAFF;
-  --card-foreground: #1A1220;
-  --popover: #FDFAFF;
-  --popover-foreground: #1A1220;
-  --primary: #7C3060;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F0E8F5;
-  --secondary-foreground: #1A1220;
-  --muted: #E5D8EE;
-  --muted-foreground: #6A4E78;
-  --accent: #C07DB0;
-  --accent-foreground: #FFFFFF;
-  --destructive: #c0392b;
-  --border: rgba(124, 48, 96, 0.14);
-  --input: #F0E8F5;
-  --ring: #7C3060;
-  --gold: #F59E0B;
-  --radius: 0.75rem;
-  --chart-1: #7C3060;
-  --chart-2: #C07DB0;
-  --chart-3: #DDB8D0;
-  --chart-4: #6A4E78;
-  --chart-5: #A0608A;
-  --sidebar: #FDFAFF;
-  --sidebar-foreground: #1A1220;
-  --sidebar-primary: #7C3060;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F0E8F5;
-  --sidebar-accent-foreground: #1A1220;
-  --sidebar-border: rgba(124, 48, 96, 0.14);
-  --sidebar-ring: #7C3060;
-
-  /* Fallbacks for tokens the storefront themes introduce below, so nothing
-     breaks on routes that never set [data-theme]. */
-  --gold-ink: #7C3060;
-  --surface: var(--card);
-  --surface-muted: var(--secondary);
-  --shadow-card: 0 1px 2px rgba(26, 26, 26, 0.04), 0 4px 16px rgba(92, 64, 36, 0.06);
-  --shadow-lift: 0 12px 32px rgba(92, 64, 36, 0.14);
-  --shadow-pop: 0 24px 64px rgba(26, 26, 26, 0.18);
-}
-
-/* ── Dark mode: deep obsidian with mauve accents ────── */
-.dark {
-  --background: #08060E;
-  --foreground: #F2EEF8;
-  --card: rgba(255, 255, 255, 0.05);
-  --card-foreground: #F2EEF8;
-  --popover: #120D1C;
-  --popover-foreground: #F2EEF8;
-  --primary: #D48EC0;
-  --primary-foreground: #1A0520;
-  --secondary: rgba(255, 255, 255, 0.07);
-  --secondary-foreground: #F2EEF8;
-  --muted: rgba(255, 255, 255, 0.04);
-  --muted-foreground: #C4B0D8;
-  --accent: #A06090;
-  --accent-foreground: #FFFFFF;
-  --destructive: #c0392b;
-  --border: rgba(255, 255, 255, 0.11);
-  --input: rgba(255, 255, 255, 0.08);
-  --ring: #D48EC0;
-  --gold: #F59E0B;
-  --chart-1: #D48EC0;
-  --chart-2: #A06090;
-  --chart-3: #C4A0D8;
-  --chart-4: #8870A8;
-  --chart-5: #E0A0C8;
-  --sidebar: #100C1A;
-  --sidebar-foreground: #F2EEF8;
-  --sidebar-primary: #D48EC0;
-  --sidebar-primary-foreground: #1A0520;
-  --sidebar-accent: rgba(255, 255, 255, 0.07);
-  --sidebar-accent-foreground: #F2EEF8;
-  --sidebar-border: rgba(255, 255, 255, 0.09);
-  --sidebar-ring: #D48EC0;
-}
-
-/* ── Storefront themes (Kenrish design system) ──────────────────────────
-   Scoped to [data-theme], set by StorefrontThemeContext on /beauty, /fashion,
-   /luxury only — every other route keeps the plum/mauve palette above
-   untouched. Values are taken verbatim from the design system's tokens.json. */
-[data-theme="beauty"] {
   --background: #faf7f2;
   --foreground: #1a1a1a;
   --card: #ffffff;
@@ -160,8 +75,7 @@
   --ring: #d4a373;
   --gold: #8a5a2b;
   --gold-ink: #8a5a2b;
-  --surface: #ffffff;
-  --surface-muted: #f2ece2;
+  --radius: 0.75rem;
   --chart-1: #d4a373;
   --chart-2: #1a1a1a;
   --chart-3: #9c7a1e;
@@ -175,53 +89,16 @@
   --sidebar-accent-foreground: #f4f4f5;
   --sidebar-border: #27272a;
   --sidebar-ring: #d4a373;
+
+  --surface: var(--card);
+  --surface-muted: var(--secondary);
   --shadow-card: 0 1px 2px rgba(26, 26, 26, 0.04), 0 4px 16px rgba(92, 64, 36, 0.06);
   --shadow-lift: 0 12px 32px rgba(92, 64, 36, 0.14);
   --shadow-pop: 0 24px 64px rgba(26, 26, 26, 0.18);
 }
 
-[data-theme="fashion"] {
-  --background: #ffffff;
-  --foreground: #111111;
-  --card: #ffffff;
-  --card-foreground: #111111;
-  --popover: #ffffff;
-  --popover-foreground: #111111;
-  --primary: #c59b27;
-  --primary-foreground: #111111;
-  --secondary: #f5f5f4;
-  --secondary-foreground: #111111;
-  --muted: #f5f5f4;
-  --muted-foreground: #57534e;
-  --accent: #b48c1f;
-  --accent-foreground: #111111;
-  --destructive: #b42318;
-  --border: #e7e5e4;
-  --input: #8f8a84;
-  --ring: #c59b27;
-  --gold: #7a5e12;
-  --gold-ink: #7a5e12;
-  --surface: #ffffff;
-  --surface-muted: #f5f5f4;
-  --chart-1: #d4a373;
-  --chart-2: #111111;
-  --chart-3: #9c7a1e;
-  --chart-4: #e7e0d4;
-  --chart-5: #eeeceb;
-  --sidebar: #18181b;
-  --sidebar-foreground: #f4f4f5;
-  --sidebar-primary: #d4a373;
-  --sidebar-primary-foreground: #111111;
-  --sidebar-accent: #27272a;
-  --sidebar-accent-foreground: #f4f4f5;
-  --sidebar-border: #27272a;
-  --sidebar-ring: #c59b27;
-  --shadow-card: 0 1px 2px rgba(17, 17, 17, 0.05);
-  --shadow-lift: 0 12px 28px rgba(17, 17, 17, 0.10);
-  --shadow-pop: 0 24px 64px rgba(17, 17, 17, 0.16);
-}
-
-[data-theme="luxury"] {
+/* ── Dark mode: Black & Gold ─────────────────────────────────────────── */
+.dark {
   --background: #0a0a0a;
   --foreground: #f5f0e6;
   --card: #141414;
@@ -242,10 +119,7 @@
   --ring: #d4af37;
   --gold: #d4af37;
   --gold-ink: #d4af37;
-  --surface: #141414;
-  --surface-muted: #1c1c1c;
-  --radius: 0.75rem;
-  --chart-1: #d4a373;
+  --chart-1: #d4af37;
   --chart-2: #f5f0e6;
   --chart-3: #8c6a1a;
   --chart-4: #3a332a;
@@ -263,12 +137,125 @@
   --shadow-pop: 0 24px 64px rgba(0, 0, 0, 0.7);
 }
 
-/* Luxury: near-square media/buttons instead of pills, per the design brief. */
-[data-theme="luxury"] .btn-primary,
-[data-theme="luxury"] .btn-outline,
-[data-theme="luxury"] .product-image,
-[data-theme="luxury"] .product-card {
-  border-radius: var(--radius-lux);
+/* ── Accent palettes ───────────────────────────────────────────────────
+   Set via [data-accent] on <html> by AccentThemeContext (Profile > Theme).
+   Gold is the default and needs no override block — it IS :root/.dark. */
+
+[data-accent="pink"] {
+  --background: #fdf2f7; --foreground: #2a1420;
+  --card: #ffffff; --card-foreground: #2a1420;
+  --popover: #ffffff; --popover-foreground: #2a1420;
+  --primary: #d6538c; --primary-foreground: #ffffff;
+  --secondary: #fbe4ee; --secondary-foreground: #2a1420;
+  --muted: #fbe4ee; --muted-foreground: #8a5570;
+  --accent: #c23d72; --accent-foreground: #ffffff;
+  --destructive: #b42318;
+  --border: #f3c9dd; --input: #d9a7c0; --ring: #d6538c;
+  --gold: #b8386a; --gold-ink: #b8386a;
+  --chart-1: #d6538c; --chart-2: #c23d72; --chart-3: #f3b8d3; --chart-4: #8a5570; --chart-5: #e685ac;
+  --sidebar-primary: #d6538c; --sidebar-ring: #d6538c;
+}
+.dark[data-accent="pink"] {
+  --background: #170b12; --foreground: #f9e6ee;
+  --card: #241019; --card-foreground: #f9e6ee;
+  --popover: #241019; --popover-foreground: #f9e6ee;
+  --primary: #ec6fa0; --primary-foreground: #170b12;
+  --secondary: #2e1521; --secondary-foreground: #f9e6ee;
+  --muted: #2e1521; --muted-foreground: #d3a0bb;
+  --accent: #f487b3; --accent-foreground: #170b12;
+  --destructive: #e5534b;
+  --border: #3a1c2a; --input: #4a2436; --ring: #ec6fa0;
+  --gold: #ec6fa0; --gold-ink: #ec6fa0;
+  --chart-1: #ec6fa0; --chart-2: #f487b3; --chart-3: #c85a89; --chart-4: #8a5570; --chart-5: #ffb3d1;
+  --sidebar-primary: #ec6fa0; --sidebar-ring: #ec6fa0;
+}
+
+/* Mauve — the original Kenrish plum/mauve palette, kept as a picker option. */
+[data-accent="mauve"] {
+  --background: #F9F6FB; --foreground: #1A1220;
+  --card: #FDFAFF; --card-foreground: #1A1220;
+  --popover: #FDFAFF; --popover-foreground: #1A1220;
+  --primary: #7C3060; --primary-foreground: #FFFFFF;
+  --secondary: #F0E8F5; --secondary-foreground: #1A1220;
+  --muted: #E5D8EE; --muted-foreground: #6A4E78;
+  --accent: #C07DB0; --accent-foreground: #FFFFFF;
+  --destructive: #c0392b;
+  --border: rgba(124, 48, 96, 0.14); --input: #F0E8F5; --ring: #7C3060;
+  --gold: #7C3060; --gold-ink: #7C3060;
+  --chart-1: #7C3060; --chart-2: #C07DB0; --chart-3: #DDB8D0; --chart-4: #6A4E78; --chart-5: #A0608A;
+  --sidebar-primary: #7C3060; --sidebar-ring: #7C3060;
+}
+.dark[data-accent="mauve"] {
+  --background: #08060E; --foreground: #F2EEF8;
+  --card: #1c1626; --card-foreground: #F2EEF8;
+  --popover: #120D1C; --popover-foreground: #F2EEF8;
+  --primary: #D48EC0; --primary-foreground: #1A0520;
+  --secondary: #211a2c; --secondary-foreground: #F2EEF8;
+  --muted: #1a1522; --muted-foreground: #C4B0D8;
+  --accent: #A06090; --accent-foreground: #FFFFFF;
+  --destructive: #c0392b;
+  --border: rgba(255, 255, 255, 0.11); --input: rgba(255, 255, 255, 0.08); --ring: #D48EC0;
+  --gold: #D48EC0; --gold-ink: #D48EC0;
+  --chart-1: #D48EC0; --chart-2: #A06090; --chart-3: #C4A0D8; --chart-4: #8870A8; --chart-5: #E0A0C8;
+  --sidebar-primary: #D48EC0; --sidebar-ring: #D48EC0;
+}
+
+[data-accent="green"] {
+  --background: #f4faf6; --foreground: #123324;
+  --card: #ffffff; --card-foreground: #123324;
+  --popover: #ffffff; --popover-foreground: #123324;
+  --primary: #2f7d4f; --primary-foreground: #ffffff;
+  --secondary: #e3f1e7; --secondary-foreground: #123324;
+  --muted: #e3f1e7; --muted-foreground: #4f7a63;
+  --accent: #256640; --accent-foreground: #ffffff;
+  --destructive: #b42318;
+  --border: #cfe8d8; --input: #a9cdb8; --ring: #2f7d4f;
+  --gold: #1f5e3a; --gold-ink: #1f5e3a;
+  --chart-1: #2f7d4f; --chart-2: #256640; --chart-3: #8fd1ab; --chart-4: #4f7a63; --chart-5: #5fae7f;
+  --sidebar-primary: #2f7d4f; --sidebar-ring: #2f7d4f;
+}
+.dark[data-accent="green"] {
+  --background: #08150d; --foreground: #e6f6ec;
+  --card: #0f2418; --card-foreground: #e6f6ec;
+  --popover: #0f2418; --popover-foreground: #e6f6ec;
+  --primary: #4fbf80; --primary-foreground: #08150d;
+  --secondary: #143322; --secondary-foreground: #e6f6ec;
+  --muted: #143322; --muted-foreground: #9fcbb0;
+  --accent: #6fd89a; --accent-foreground: #08150d;
+  --destructive: #e5534b;
+  --border: #1c3f2a; --input: #234c33; --ring: #4fbf80;
+  --gold: #4fbf80; --gold-ink: #4fbf80;
+  --chart-1: #4fbf80; --chart-2: #6fd89a; --chart-3: #2f8f5c; --chart-4: #9fcbb0; --chart-5: #3fae6f;
+  --sidebar-primary: #4fbf80; --sidebar-ring: #4fbf80;
+}
+
+[data-accent="blue"] {
+  --background: #f4f8fd; --foreground: #10233d;
+  --card: #ffffff; --card-foreground: #10233d;
+  --popover: #ffffff; --popover-foreground: #10233d;
+  --primary: #2f6fd6; --primary-foreground: #ffffff;
+  --secondary: #e2ebfa; --secondary-foreground: #10233d;
+  --muted: #e2ebfa; --muted-foreground: #51698c;
+  --accent: #2456ab; --accent-foreground: #ffffff;
+  --destructive: #b42318;
+  --border: #cddef5; --input: #a7c1e8; --ring: #2f6fd6;
+  --gold: #1f4f9e; --gold-ink: #1f4f9e;
+  --chart-1: #2f6fd6; --chart-2: #2456ab; --chart-3: #9dc0f5; --chart-4: #51698c; --chart-5: #5f8fe0;
+  --sidebar-primary: #2f6fd6; --sidebar-ring: #2f6fd6;
+}
+.dark[data-accent="blue"] {
+  --background: #060f1e; --foreground: #e6eefb;
+  --card: #0d1930; --card-foreground: #e6eefb;
+  --popover: #0d1930; --popover-foreground: #e6eefb;
+  --primary: #5b93ea; --primary-foreground: #060f1e;
+  --secondary: #12213f; --secondary-foreground: #e6eefb;
+  --muted: #12213f; --muted-foreground: #9db4dc;
+  --accent: #7fabf0; --accent-foreground: #060f1e;
+  --destructive: #e5534b;
+  --border: #1c2f52; --input: #223a63; --ring: #5b93ea;
+  --gold: #5b93ea; --gold-ink: #5b93ea;
+  --chart-1: #5b93ea; --chart-2: #7fabf0; --chart-3: #3f6fc4; --chart-4: #9db4dc; --chart-5: #4a80d6;
+  --sidebar-primary: #5b93ea; --sidebar-ring: #5b93ea;
 }
 
 /* ── Base styles ─────────────────────────────────────────────────────── */
@@ -288,12 +275,12 @@
 
 /* ── Utilities ───────────────────────────────────────────────────────── */
 @layer utilities {
-  /* Soft lavender gradient — Figma hero background */
+  /* Hero background gradient — follows the active accent theme */
   .gradient-hero {
-    background: linear-gradient(135deg, #F0E8F5 0%, #F9F6FB 100%);
+    background: linear-gradient(135deg, var(--secondary) 0%, var(--background) 100%);
   }
   .dark .gradient-hero {
-    background: linear-gradient(135deg, #110A1C 0%, #08060E 50%, #1A0818 100%);
+    background: linear-gradient(135deg, var(--card) 0%, var(--background) 60%, var(--secondary) 100%);
   }
 
   /* Hero bottom fade — transitions the hero into the section below */
@@ -310,29 +297,12 @@
     animation-delay: -3.5s;
   }
 
-  /* Plum-to-mauve gradient text */
-  .text-gradient-plum {
-    background: linear-gradient(135deg, #7C3060, #C07DB0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .dark .text-gradient-plum {
-    background: linear-gradient(135deg, #D48EC0, #A06090);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* Backward-compat alias */
+  /* Accent gradient text — uses gold-ink (a readable text-weight tone of the
+     active theme's primary), not primary itself, which is a fill-only color
+     on light canvases per the design system's contrast rules. */
+  .text-gradient-plum,
   .text-gradient-navy {
-    background: linear-gradient(135deg, #7C3060, #C07DB0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .dark .text-gradient-navy {
-    background: linear-gradient(135deg, #D48EC0, #A06090);
+    background: linear-gradient(135deg, var(--gold-ink), var(--accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -390,8 +360,8 @@ main {
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(124, 48, 96, 0.35); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(124, 48, 96, 0.6); }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--primary) 45%, transparent); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--primary) 70%, transparent); }
 
 /* ── Marquee ─────────────────────────────────────────────────────── */
 @keyframes marquee {

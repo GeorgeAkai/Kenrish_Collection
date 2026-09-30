@@ -70,9 +70,10 @@ def record_sale(item, quantity, unit_price, actor, customer_name='', customer_ph
         sale._skip_stock_adjustment = True
         sale.save()
 
+        # Product = Beauty (cosmetics); Handbag/Clothes = Fashion.
         CashFlow.objects.create(
             transaction_type='REVENUE',
-            shop='fashion',
+            shop='beauty' if isinstance(item, Product) else 'fashion',
             amount=sale.total_amount,
             description=f'Sale: {item.name} x{quantity}',
             reference_sale=sale,

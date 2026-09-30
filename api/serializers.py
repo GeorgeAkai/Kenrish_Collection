@@ -231,7 +231,7 @@ class GalleryImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GalleryImage
-        fields = ['id', 'service', 'file', 'description', 'uploaded_at', 'like_count', 'user_has_liked', 'is_video']
+        fields = ['id', 'service', 'shop', 'file', 'description', 'uploaded_at', 'like_count', 'user_has_liked', 'is_video']
 
     def get_file(self, obj):
         request = self.context.get('request')

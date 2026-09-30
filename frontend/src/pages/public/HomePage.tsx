@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '@/lib/axios'
-import { formatKES, formatDate } from '@/lib/utils'
+import { formatKES } from '@/lib/utils'
 import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Ban, Truck, ShieldCheck, Headphones, Search, X, Shirt, Gem, ArrowRight } from 'lucide-react'
 import type { Product, Handbag, Clothes, Offer, Service } from '@/lib/types'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -312,8 +312,7 @@ export default function HomePage() {
             ].map(shop => (
               <div
                 key={shop.key}
-                data-theme={shop.key}
-                className="rounded-2xl overflow-hidden border border-border p-9 flex flex-col bg-background text-foreground"
+                className="rounded-2xl overflow-hidden border border-border p-9 flex flex-col bg-card text-card-foreground card-hover"
                 style={{ boxShadow: 'var(--shadow-card)' }}
               >
                 <shop.Icon size={26} className="mb-5" style={{ color: 'var(--gold-ink)' }} />
@@ -429,33 +428,31 @@ export default function HomePage() {
       {/* ═══ CLOTHING BANNER ════════════════════════════════════════════ */}
       {data?.featured_clothes && data.featured_clothes.length > 0 && (
         <section className="py-24 max-w-7xl mx-auto px-6">
-          <div className="relative rounded-3xl overflow-hidden min-h-[380px] flex items-center">
-            <div className="absolute inset-0 bg-[#1A1220] dark:bg-[#08060E]" />
-            <div className="absolute inset-0 hidden dark:block bg-gradient-to-br from-[#110A1C] via-[#08060E] to-[#180A16]" />
+          <div className="relative rounded-3xl overflow-hidden min-h-[380px] flex items-center" style={{ background: 'var(--sidebar)' }}>
             <img
               src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1400&h=700&fit=crop&auto=format"
               alt="Clothing boutique interior"
-              className="absolute inset-0 w-full h-full object-cover opacity-40 dark:opacity-20"
+              className="absolute inset-0 w-full h-full object-cover opacity-30"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#1A1220]/90 via-[#1A1220]/60 to-transparent dark:from-[#08060E]/95 dark:via-[#08060E]/70 dark:to-transparent" />
-            <div className="absolute inset-0 hidden dark:block bg-gradient-to-br from-violet-900/30 via-transparent to-fuchsia-900/20 pointer-events-none" />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, color-mix(in srgb, var(--sidebar) 92%, transparent) 0%, color-mix(in srgb, var(--sidebar) 65%, transparent) 55%, transparent 100%)' }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--primary) 25%, transparent), transparent 60%, color-mix(in srgb, var(--accent) 18%, transparent))' }} />
 
             <div className="relative px-10 md:px-16 py-16 max-w-lg">
-              <p className="text-xs font-semibold text-primary mb-3 tracking-[0.18em] uppercase">
+              <p className="text-xs font-semibold mb-3 tracking-[0.18em] uppercase" style={{ color: 'var(--sidebar-primary)' }}>
                 {t('home.newThisSeason')}
               </p>
               <h2
-                className="text-4xl lg:text-5xl font-semibold text-white leading-tight mb-5"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                className="text-4xl lg:text-5xl font-semibold leading-tight mb-5"
+                style={{ fontFamily: "'Playfair Display', Georgia, serif", color: 'var(--sidebar-foreground)' }}
               >
                 {t('home.clothingTitle')}
               </h2>
-              <p className="text-white/70 text-sm leading-relaxed mb-8">
+              <p className="text-sm leading-relaxed mb-8" style={{ color: 'color-mix(in srgb, var(--sidebar-foreground) 70%, transparent)' }}>
                 {t('home.clothingDesc')}
               </p>
               <Link
                 to="/clothes"
-                className="inline-flex items-center gap-2 px-7 py-3.5 bg-white text-foreground dark:bg-primary dark:text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity shadow-xl"
+                className="inline-flex items-center gap-2 px-7 py-3.5 bg-primary text-primary-foreground rounded-full font-medium text-sm hover:opacity-90 transition-opacity shadow-xl"
               >
                 {t('home.exploreClothing')} <ChevronRight size={14} />
               </Link>
@@ -480,8 +477,7 @@ export default function HomePage() {
       {/* ═══ SERVICES PREVIEW ══════════════════════════════════════════ */}
       {services.length > 0 && (
         <section className="py-20 relative overflow-hidden">
-          <div className="absolute inset-0 bg-secondary/40 dark:hidden" />
-          <div className="hidden dark:block absolute inset-0 bg-gradient-to-br from-[#110A1C] via-[#08060E] to-[#1A0818]" />
+          <div className="absolute inset-0 bg-secondary/40 dark:bg-secondary/20" />
 
           <div className="relative max-w-7xl mx-auto px-5">
             <div className="text-center mb-14">
@@ -583,22 +579,17 @@ export default function HomePage() {
                     <div className="h-52 overflow-hidden">
                       <img
                         src={offer.image}
-                        alt={offer.title}
+                        alt={offer.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>
                   )}
                   <div className="absolute top-3 right-3 product-tag shadow-md">
-                    {offer.discount_percentage}% OFF
+                    {formatKES(offer.offer_price)}
                   </div>
                   <div className="p-5">
-                    <h3 className="font-semibold text-foreground">{offer.title}</h3>
+                    <h3 className="font-semibold text-foreground">{offer.name}</h3>
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{offer.description}</p>
-                    {offer.valid_until && (
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {t('home.validUntil')} {formatDate(offer.valid_until)}
-                      </p>
-                    )}
                   </div>
                 </div>
               ))}
@@ -659,23 +650,23 @@ export default function HomePage() {
 
             {/* Left — copy */}
             <div
-              className="relative p-10 lg:p-14 overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #7C3060 0%, #9B3D78 50%, #A85090 100%)' }}
+              className="relative p-10 lg:p-14 overflow-hidden bg-primary text-primary-foreground"
+              style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)' }}
             >
-              <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/5 pointer-events-none" />
-              <div className="absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
+              <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-primary-foreground/5 pointer-events-none" />
+              <div className="absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-primary-foreground/5 pointer-events-none" />
 
               <div className="relative">
-                <p className="text-xs font-semibold text-white/60 mb-3 tracking-[0.18em] uppercase">
+                <p className="text-xs font-semibold text-primary-foreground/60 mb-3 tracking-[0.18em] uppercase">
                   {t('home.appointments')}
                 </p>
                 <h2
-                  className="text-3xl lg:text-4xl font-semibold text-white mb-5 leading-tight"
+                  className="text-3xl lg:text-4xl font-semibold text-primary-foreground mb-5 leading-tight"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
                 >
                   {t('home.bookSpotL1')}<br />{t('home.bookSpotL2')}
                 </h2>
-                <p className="text-white/75 text-sm leading-relaxed mb-8 max-w-sm">
+                <p className="text-primary-foreground/75 text-sm leading-relaxed mb-8 max-w-sm">
                   {t('home.bookingDesc')}
                 </p>
 
@@ -685,8 +676,8 @@ export default function HomePage() {
                     t('home.bookingWalkIn'),
                     t('home.bookingServices'),
                   ].map(item => (
-                    <li key={item} className="flex items-center gap-2.5 text-sm text-white/90">
-                      <CheckCircle2 size={14} className="text-white/60 shrink-0" />
+                    <li key={item} className="flex items-center gap-2.5 text-sm text-primary-foreground/90">
+                      <CheckCircle2 size={14} className="text-primary-foreground/60 shrink-0" />
                       {item}
                     </li>
                   ))}
@@ -695,14 +686,14 @@ export default function HomePage() {
                 <div className="flex flex-wrap gap-3">
                   <Link
                     to="/reservation"
-                    className="inline-flex items-center gap-2.5 bg-white text-primary px-7 py-3 rounded-full font-semibold text-sm hover:opacity-90 transition-opacity shadow-xl"
+                    className="inline-flex items-center gap-2.5 bg-primary-foreground text-primary px-7 py-3 rounded-full font-semibold text-sm hover:opacity-90 transition-opacity shadow-xl"
                   >
                     <CalendarDays size={14} />
                     {t('home.viewFullCalendar')}
                   </Link>
                   <a
                     href="tel:+254708440390"
-                    className="inline-flex items-center gap-2.5 border border-white/30 text-white px-7 py-3 rounded-full font-semibold text-sm hover:bg-white/10 transition-colors"
+                    className="inline-flex items-center gap-2.5 border border-primary-foreground/30 text-primary-foreground px-7 py-3 rounded-full font-semibold text-sm hover:bg-primary-foreground/10 transition-colors"
                   >
                     <Phone size={14} />
                     {t('common.callUs')}

@@ -16,7 +16,9 @@ function isVideoFile(file: File) {
   return file.type.startsWith('video/')
 }
 
-export default function AdminGalleryPage() {
+type Shop = 'beauty' | 'fashion' | 'luxury'
+
+export default function AdminGalleryPage({ shop }: { shop?: Shop } = {}) {
   const [items, setItems] = useState<GalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -31,10 +33,11 @@ export default function AdminGalleryPage() {
   const del = useConfirm<number>()
 
   const fetchItems = () => {
-    api.get('/admin/gallery/').then(r => setItems(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
+    const params = shop ? `?shop=${shop}` : ''
+    api.get(`/admin/gallery/${params}`).then(r => setItems(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
   }
 
-  useEffect(() => { fetchItems() }, [])
+  useEffect(() => { fetchItems() }, [shop])
 
   function selectFile(f: File) {
     setFile(f)
@@ -91,6 +94,7 @@ export default function AdminGalleryPage() {
       const fd = new FormData()
       fd.append('file', file)
       if (description) fd.append('description', description)
+      if (shop) fd.append('shop', shop)
       await api.post('/admin/gallery/', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: e => {
@@ -109,7 +113,7 @@ export default function AdminGalleryPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold">Gallery</h2>
+        <h2 className="text-xl font-semibold">{shop ? `${shop[0].toUpperCase()}${shop.slice(1)} Gallery` : 'Gallery'}</h2>
         <button
           onClick={() => { setShowForm(true); setError('') }}
           className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90"

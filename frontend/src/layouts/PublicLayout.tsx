@@ -3,24 +3,29 @@ import { Link, Outlet, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { useStorefrontTheme } from '@/contexts/StorefrontThemeContext'
 import { Menu, X, Sun, Moon, Heart, MapPin, Phone, Clock, Globe, UserCircle, LayoutDashboard, ShieldCheck } from 'lucide-react'
 import { LOGO_URL } from '@/lib/brand'
+import api from '@/lib/axios'
+import type { Offer } from '@/lib/types'
 
 export default function PublicLayout() {
   const { isAuthenticated, user, logout } = useAuth()
   const { theme, toggle: toggleTheme } = useTheme()
   const { lang, setLang, t } = useLanguage()
-  useStorefrontTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [hasActiveOffers, setHasActiveOffers] = useState(false)
   const location = useLocation()
+
+  useEffect(() => {
+    api.get<Offer[]>('/offers/').then(r => setHasActiveOffers(r.data.length > 0)).catch(() => {})
+  }, [])
 
   const navLinks = [
     { to: '/beauty', label: 'Kenrish Beauty' },
     { to: '/fashion', label: 'Kenrish Fashion' },
     { to: '/luxury', label: 'Kenrish Luxury' },
-    { to: '/offers', label: t('nav.offers') },
+    ...(hasActiveOffers ? [{ to: '/offers', label: t('nav.offers') }] : []),
     { to: '/about', label: t('nav.about') },
   ]
 
@@ -279,7 +284,7 @@ export default function PublicLayout() {
                   { to: '/products', label: t('footer.beautyProducts') },
                   { to: '/handbags', label: t('footer.handbags') },
                   { to: '/clothes', label: t('footer.clothing') },
-                  { to: '/offers', label: t('footer.currentOffers') },
+                  ...(hasActiveOffers ? [{ to: '/offers', label: t('footer.currentOffers') }] : []),
                 ].map(({ to, label }) => (
                   <li key={to}>
                     <Link to={to} className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200">

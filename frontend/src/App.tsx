@@ -1,13 +1,13 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { AccentThemeProvider } from '@/contexts/AccentThemeContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { ProtectedRoute, AdminRoute } from '@/components/RouteGuards'
 import PublicLayout from '@/layouts/PublicLayout'
 import BeautyLayout from '@/layouts/BeautyLayout'
 import AdminLayout from '@/layouts/AdminLayout'
-import ChatbotWidget from '@/components/ChatbotWidget'
 import InstallPrompt from '@/components/InstallPrompt'
 
 // Auth
@@ -69,6 +69,7 @@ export default function App() {
   return (
     <LanguageProvider>
     <ThemeProvider>
+    <AccentThemeProvider>
     <ToastProvider>
     <AuthProvider>
       <Routes>
@@ -110,7 +111,8 @@ export default function App() {
 
         <Route element={<AdminRoute />}>
           <Route element={<AdminLayout />}>
-            <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/admin" element={<Navigate to="/admin/executive" replace />} />
+            <Route path="/admin/dashboard-legacy" element={<AdminDashboardPage />} />
             <Route path="/admin/products" element={<AdminProductsPage />} />
             <Route path="/admin/handbags" element={<AdminHandbagsPage />} />
             <Route path="/admin/clothes" element={<AdminClothesPage />} />
@@ -127,15 +129,26 @@ export default function App() {
             <Route path="/admin/luxury" element={<AdminLuxuryPage />} />
             <Route path="/admin/luxury-inquiries" element={<AdminLuxuryInquiriesPage />} />
             <Route path="/admin/executive" element={<AdminExecutiveDashboardPage />} />
+
+            {/* Shop-scoped admin views */}
+            <Route path="/admin/beauty/orders" element={<AdminOrdersPage shop="beauty" />} />
+            <Route path="/admin/beauty/staging" element={<AdminStagingPage shop="beauty" />} />
+            <Route path="/admin/beauty/gallery" element={<AdminGalleryPage shop="beauty" />} />
+            <Route path="/admin/beauty/inventory" element={<AdminInventoryPage shop="beauty" />} />
+            <Route path="/admin/fashion/inventory" element={<AdminInventoryPage shop="fashion" />} />
+            <Route path="/admin/fashion/gallery" element={<AdminGalleryPage shop="fashion" />} />
+            <Route path="/admin/luxury/draft-products" element={<AdminLuxuryPage filter="drafts" />} />
+            <Route path="/admin/luxury/inventory" element={<AdminLuxuryPage filter="published" />} />
+            <Route path="/admin/luxury/gallery" element={<AdminGalleryPage shop="luxury" />} />
           </Route>
         </Route>
 
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <ChatbotWidget />
       <InstallPrompt />
     </AuthProvider>
     </ToastProvider>
+    </AccentThemeProvider>
     </ThemeProvider>
     </LanguageProvider>
   )

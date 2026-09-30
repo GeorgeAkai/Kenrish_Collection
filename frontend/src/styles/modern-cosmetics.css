@@ -1,6 +1,6 @@
 /* Modern Cosmetics — shared CSS utilities for product cards, buttons, and layout.
-   Reads its tokens directly from index.css (no local --mc-* overrides) so a
-   route's [data-theme] and the light/dark .class both apply here for free.
+   Reads its tokens directly from index.css (no local --mc-* overrides) so the
+   active [data-accent] and light/dark .class both apply here for free.
 */
 
 /* ── Product grid ─────────────────────────────────────────────── */

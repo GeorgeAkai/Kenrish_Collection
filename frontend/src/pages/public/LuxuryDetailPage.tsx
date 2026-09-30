@@ -100,7 +100,7 @@ export default function LuxuryDetailPage() {
             <CheckCircle size={16} className="text-primary" /> Inquiry sent — we'll be in touch. <Link to="/luxury/inquiries" className="underline">Track it here</Link>.
           </div>
         ) : (
-          <button onClick={openInquiry} className="btn-primary" style={{ borderRadius: 'var(--radius-lux)' }}>
+          <button onClick={openInquiry} className="btn-primary">
             Inquire / Reserve Item
           </button>
         )}

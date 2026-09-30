@@ -364,7 +364,7 @@ def home_view(request):
     featured_products = Product.objects.filter(is_published=True).order_by('-is_featured', '-average_rating', '-id')[:8]
     featured_handbags = Handbag.objects.filter(is_published=True).order_by('-average_rating', '-id')[:5]
     featured_clothes = Clothes.objects.filter(is_published=True).order_by('-average_rating', '-id')[:5]
-    offers = Offer.objects.all().order_by('-created_at')
+    offers = _active_offers_qs().order_by('-created_at')
     return Response({
         'featured_products': ProductListSerializer(featured_products, many=True, context=ctx).data,
         'featured_handbags': HandbagListSerializer(featured_handbags, many=True, context=ctx).data,
@@ -402,6 +402,9 @@ def service_detail(request, pk):
 @permission_classes([AllowAny])
 def gallery_list(request):
     qs = GalleryImage.objects.all().order_by('-uploaded_at')
+    shop = request.query_params.get('shop')
+    if shop:
+        qs = qs.filter(shop=shop)
     return Response(GalleryImageSerializer(qs, many=True, context={'request': request}).data)
 
 
@@ -425,10 +428,17 @@ def gallery_like(request, pk):
 # 5. Offers
 # ---------------------------------------------------------------------------
 
+def _active_offers_qs():
+    # Offer has no expiry field (no valid_until) -- every row is "active"
+    # until an admin deletes it. Kept as a named helper so offer_list/
+    # home_view share one definition of "active" if that ever changes.
+    return Offer.objects.all()
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def offer_list(request):
-    qs = Offer.objects.all().order_by('-created_at')
+    qs = _active_offers_qs().order_by('-created_at')
     return Response(OfferSerializer(qs, many=True, context={'request': request}).data)
 
 
@@ -805,6 +815,9 @@ def admin_service_detail(request, pk):
 def admin_gallery_list(request):
     if request.method == 'GET':
         qs = GalleryImage.objects.all().order_by('-uploaded_at')
+        shop = request.query_params.get('shop')
+        if shop:
+            qs = qs.filter(shop=shop)
         return Response(GalleryImageSerializer(qs, many=True, context={'request': request}).data)
     serializer = GalleryAdminSerializer(data=request.data)
     if not serializer.is_valid():
@@ -1827,6 +1840,13 @@ def _resolve_item(item_type, item_id):
     return None
 
 
+# Product = Beauty (cosmetics); Handbag/Clothes = Fashion. Kenrish Beauty and
+# Kenrish Fashion are run as separate departments, so a single order is never
+# allowed to mix items from both -- enforced here, not just in the frontend,
+# so the rule holds regardless of caller.
+_SHOP_FOR_ITEM_TYPE = {'product': 'beauty', 'handbag': 'fashion', 'clothes': 'fashion'}
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_order(request):
@@ -1839,6 +1859,13 @@ def create_order(request):
 
     if not items_data:
         return Response({'detail': 'Order must contain at least one item.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    shops_in_order = {_SHOP_FOR_ITEM_TYPE.get(d['item_type']) for d in items_data}
+    if len(shops_in_order) > 1:
+        return Response(
+            {'detail': 'An order can only contain items from one store (Beauty or Fashion) at a time. Please place separate orders.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     from django.db import transaction as db_tx
     from decimal import Decimal

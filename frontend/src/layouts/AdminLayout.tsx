@@ -1,62 +1,129 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
+import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { LOGO_URL } from '@/lib/brand'
 import {
-  LayoutDashboard, Package, ShoppingBag, Shirt, Warehouse,
+  Package, ShoppingBag, Shirt, Warehouse,
   Scissors, Image, Tag, Users, FileText, LogOut, Menu, X,
-  Sun, Moon, ChevronRight, CalendarCheck, ClipboardList, Settings2, PackagePlus,
+  Sun, Moon, ChevronRight, ChevronDown, CalendarCheck, ClipboardList, Settings2, PackagePlus,
   Gem, MessageSquareText, TrendingUp,
 } from 'lucide-react'
 
-const navItems = [
-  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/admin/executive', label: 'Executive Dashboard', icon: TrendingUp },
-  { to: '/admin/products', label: 'Products', icon: Package },
-  { to: '/admin/handbags', label: 'Handbags', icon: ShoppingBag },
-  { to: '/admin/clothes', label: 'Clothes', icon: Shirt },
-  { to: '/admin/luxury', label: 'Luxury', icon: Gem },
-  { to: '/admin/luxury-inquiries', label: 'Luxury Inquiries', icon: MessageSquareText },
-  { to: '/admin/inventory', label: 'Inventory', icon: Warehouse },
-  { to: '/admin/staging', label: 'Draft Products', icon: PackagePlus },
-  { to: '/admin/orders', label: 'Orders', icon: ClipboardList },
-  { to: '/admin/services', label: 'Services', icon: Scissors },
-  { to: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
-  { to: '/admin/slot-config', label: 'Schedule Settings', icon: Settings2 },
-  { to: '/admin/gallery', label: 'Gallery', icon: Image },
-  { to: '/admin/offers', label: 'Offers', icon: Tag },
-  { to: '/admin/users', label: 'Users', icon: Users },
-  { to: '/admin/invoices', label: 'Invoices', icon: FileText },
+interface NavLeaf { to: string; label: string; icon: LucideIcon; end?: boolean }
+interface NavGroup { label: string; icon: LucideIcon; children: NavLeaf[] }
+type NavEntry = ({ kind: 'leaf' } & NavLeaf) | ({ kind: 'group' } & NavGroup)
+
+const NAV: NavEntry[] = [
+  { kind: 'leaf', to: '/admin/executive', label: 'Executive Dashboard', icon: TrendingUp, end: true },
+  {
+    kind: 'group', label: 'Kenrish Beauty Dashboard', icon: Scissors,
+    children: [
+      { to: '/admin/products', label: 'Products', icon: Package },
+      { to: '/admin/services', label: 'Services', icon: Scissors },
+      { to: '/admin/beauty/orders', label: 'Orders', icon: ClipboardList },
+      { to: '/admin/beauty/staging', label: 'Draft Products', icon: PackagePlus },
+      { to: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
+      { to: '/admin/beauty/gallery', label: 'Gallery', icon: Image },
+      { to: '/admin/beauty/inventory', label: 'Inventory', icon: Warehouse },
+    ],
+  },
+  {
+    kind: 'group', label: 'Kenrish Fashion', icon: Shirt,
+    children: [
+      { to: '/admin/clothes', label: 'Clothes', icon: Shirt },
+      { to: '/admin/handbags', label: 'Handbags', icon: ShoppingBag },
+      { to: '/admin/fashion/inventory', label: 'Inventory', icon: Warehouse },
+      { to: '/admin/fashion/gallery', label: 'Gallery', icon: Image },
+    ],
+  },
+  {
+    kind: 'group', label: 'Kenrish Luxury', icon: Gem,
+    children: [
+      { to: '/admin/luxury/draft-products', label: 'Draft Products', icon: PackagePlus },
+      { to: '/admin/luxury/inventory', label: 'Inventory', icon: Warehouse },
+      { to: '/admin/luxury/gallery', label: 'Gallery', icon: Image },
+      // Not in the original spec, but dropping it would remove the concierge
+      // inquiry inbox from the admin UI entirely -- kept here instead.
+      { to: '/admin/luxury-inquiries', label: 'Inquiries', icon: MessageSquareText },
+    ],
+  },
+  { kind: 'leaf', to: '/admin/offers', label: 'Offers', icon: Tag },
+  { kind: 'leaf', to: '/admin/invoices', label: 'Invoices', icon: FileText },
+  { kind: 'leaf', to: '/admin/slot-config', label: 'Schedule Settings', icon: Settings2 },
+  { kind: 'leaf', to: '/admin/users', label: 'Users', icon: Users },
 ]
 
+const PAGE_TITLES: Record<string, string> = {
+  '/admin': 'Dashboard',
+  '/admin/executive': 'Executive Dashboard',
+  '/admin/dashboard-legacy': 'Dashboard (Legacy)',
+  '/admin/products': 'Products',
+  '/admin/handbags': 'Handbags',
+  '/admin/clothes': 'Clothes',
+  '/admin/luxury': 'Luxury',
+  '/admin/luxury-inquiries': 'Luxury Inquiries',
+  '/admin/inventory': 'Inventory',
+  '/admin/staging': 'Draft Products',
+  '/admin/orders': 'Orders',
+  '/admin/services': 'Services',
+  '/admin/reservations': 'Reservations',
+  '/admin/slot-config': 'Schedule Settings',
+  '/admin/gallery': 'Gallery',
+  '/admin/offers': 'Offers',
+  '/admin/users': 'Users',
+  '/admin/invoices': 'Invoices',
+  '/admin/beauty/orders': 'Beauty Orders',
+  '/admin/beauty/staging': 'Beauty Draft Products',
+  '/admin/beauty/gallery': 'Beauty Gallery',
+  '/admin/beauty/inventory': 'Beauty Inventory',
+  '/admin/fashion/inventory': 'Fashion Inventory',
+  '/admin/fashion/gallery': 'Fashion Gallery',
+  '/admin/luxury/draft-products': 'Luxury Draft Products',
+  '/admin/luxury/inventory': 'Luxury Inventory',
+  '/admin/luxury/gallery': 'Luxury Gallery',
+}
+
 export function getAdminPageTitle(pathname: string): string {
-  const titles: Record<string, string> = {
-    '/admin': 'Dashboard',
-    '/admin/executive': 'Executive Dashboard',
-    '/admin/products': 'Products',
-    '/admin/handbags': 'Handbags',
-    '/admin/clothes': 'Clothes',
-    '/admin/luxury': 'Luxury',
-    '/admin/luxury-inquiries': 'Luxury Inquiries',
-    '/admin/inventory': 'Inventory',
-    '/admin/staging': 'Draft Products',
-    '/admin/orders': 'Orders',
-    '/admin/services': 'Services',
-    '/admin/reservations': 'Reservations',
-    '/admin/slot-config': 'Schedule Settings',
-    '/admin/gallery': 'Gallery',
-    '/admin/offers': 'Offers',
-    '/admin/users': 'Users',
-    '/admin/invoices': 'Invoices',
-  }
-  return titles[pathname] ?? 'Admin'
+  return PAGE_TITLES[pathname] ?? 'Admin'
+}
+
+function groupContainsPath(group: NavGroup, pathname: string) {
+  return group.children.some(c => pathname === c.to || pathname.startsWith(c.to + '/'))
 }
 
 function Sidebar({ onClose }: { onClose?: () => void }) {
   const { user, logout } = useAuth()
   const { theme, toggle } = useTheme()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const [openGroups, setOpenGroups] = useState<Set<string>>(() => {
+    const initial = new Set<string>()
+    for (const entry of NAV) {
+      if (entry.kind === 'group' && groupContainsPath(entry, location.pathname)) initial.add(entry.label)
+    }
+    return initial
+  })
+
+  useEffect(() => {
+    for (const entry of NAV) {
+      if (entry.kind === 'group' && groupContainsPath(entry, location.pathname)) {
+        setOpenGroups(prev => prev.has(entry.label) ? prev : new Set(prev).add(entry.label))
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname])
+
+  function toggleGroup(label: string) {
+    setOpenGroups(prev => {
+      const next = new Set(prev)
+      if (next.has(label)) next.delete(label)
+      else next.add(label)
+      return next
+    })
+  }
 
   function handleLogout() {
     logout()
@@ -81,29 +148,76 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
 
       {/* Nav */}
       <nav className="flex-1 py-4 px-3 overflow-y-auto space-y-0.5">
-        {navItems.map(({ to, label, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            onClick={onClose}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
-                isActive
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground'
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <Icon size={16} className={isActive ? 'text-primary' : ''} />
-                <span className="flex-1">{label}</span>
-                {isActive && <ChevronRight size={14} className="text-primary" />}
-              </>
-            )}
-          </NavLink>
-        ))}
+        {NAV.map(entry => {
+          if (entry.kind === 'leaf') {
+            return (
+              <NavLink
+                key={entry.to}
+                to={entry.to}
+                end={entry.end}
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                    isActive
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
+                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <entry.icon size={16} className={isActive ? 'text-primary' : ''} />
+                    <span className="flex-1">{entry.label}</span>
+                    {isActive && <ChevronRight size={14} className="text-primary" />}
+                  </>
+                )}
+              </NavLink>
+            )
+          }
+
+          const open = openGroups.has(entry.label)
+          const active = groupContainsPath(entry, location.pathname)
+          return (
+            <div key={entry.label}>
+              <button
+                onClick={() => toggleGroup(entry.label)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                  active ? 'text-sidebar-accent-foreground font-semibold' : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground'
+                }`}
+              >
+                <entry.icon size={16} className={active ? 'text-primary' : ''} />
+                <span className="flex-1 text-left">{entry.label}</span>
+                {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+              </button>
+              {open && (
+                <div className="ml-4 pl-3 border-l border-sidebar-border space-y-0.5 mt-0.5 mb-1">
+                  {entry.children.map(child => (
+                    <NavLink
+                      key={child.to}
+                      to={child.to}
+                      end={child.end}
+                      onClick={onClose}
+                      className={({ isActive }) =>
+                        `flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all ${
+                          isActive
+                            ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
+                            : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground'
+                        }`
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <child.icon size={14} className={isActive ? 'text-primary' : ''} />
+                          <span className="flex-1">{child.label}</span>
+                        </>
+                      )}
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </nav>
 
       {/* Footer */}

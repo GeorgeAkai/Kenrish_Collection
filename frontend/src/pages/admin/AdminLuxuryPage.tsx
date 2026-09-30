@@ -37,8 +37,18 @@ const FIELDS = [
   { name: 'price', label: 'Price (KES) — leave blank for "Price on Application"', type: 'number' as const },
 ]
 
-export default function AdminLuxuryPage() {
-  const [items, setItems] = useState<LuxuryItem[]>([])
+interface Props {
+  /** 'published' -> Inventory (live/available catalog); 'drafts' -> Draft Products (unpublished only). Omit for the full admin list. */
+  filter?: 'published' | 'drafts'
+}
+
+export default function AdminLuxuryPage({ filter }: Props = {}) {
+  const [itemsRaw, setItems] = useState<LuxuryItem[]>([])
+  const items = itemsRaw.filter(i => {
+    if (filter === 'published') return i.is_published
+    if (filter === 'drafts') return !i.is_published
+    return true
+  })
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<LuxuryItem | null>(null)
   const [showForm, setShowForm] = useState(false)
@@ -60,7 +70,7 @@ export default function AdminLuxuryPage() {
     setEditing(null)
     setForm({})
     setAvailability('available')
-    setIsPublished(true)
+    setIsPublished(filter !== 'drafts')
     setImageFile(null)
     setError('')
     setShowForm(true)
@@ -121,7 +131,10 @@ export default function AdminLuxuryPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold flex items-center gap-2"><Gem size={18} className="text-primary" /> Luxury Items</h2>
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Gem size={18} className="text-primary" />
+            {filter === 'published' ? 'Luxury Inventory' : filter === 'drafts' ? 'Luxury Draft Products' : 'Luxury Items'}
+          </h2>
           <p className="text-sm text-muted-foreground mt-0.5">{items.length} items</p>
         </div>
         <button onClick={openCreate} className="btn-modern btn-modern--primary flex items-center gap-2 text-sm font-medium">

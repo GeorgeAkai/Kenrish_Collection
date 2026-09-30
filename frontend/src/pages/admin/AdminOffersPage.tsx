@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import api from '@/lib/axios'
-import { formatDate } from '@/lib/utils'
+import { formatKES } from '@/lib/utils'
 import type { Offer } from '@/lib/types'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -11,7 +11,7 @@ export default function AdminOffersPage() {
   const [loading, setLoading] = useState(true)
   const del = useConfirm<number>()
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ title: '', description: '', discount_percentage: '', valid_until: '' })
+  const [form, setForm] = useState({ name: '', description: '', offer_price: '' })
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -38,7 +38,7 @@ export default function AdminOffersPage() {
       if (imageFile) fd.append('image', imageFile)
       await api.post('/admin/offers/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       setShowForm(false)
-      setForm({ title: '', description: '', discount_percentage: '', valid_until: '' })
+      setForm({ name: '', description: '', offer_price: '' })
       setImageFile(null)
       fetch()
     } catch {
@@ -62,14 +62,13 @@ export default function AdminOffersPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {offers.map(offer => (
             <div key={offer.id} className="border rounded-lg overflow-hidden">
-              {offer.image && <img src={offer.image} alt={offer.title} className="w-full h-40 object-cover" />}
+              {offer.image && <img src={offer.image} alt={offer.name} className="w-full h-40 object-cover" />}
               <div className="p-4">
                 <div className="flex justify-between items-start">
-                  <h3 className="font-semibold">{offer.title}</h3>
-                  <span className="text-amber-500 font-bold">{offer.discount_percentage}%</span>
+                  <h3 className="font-semibold">{offer.name}</h3>
+                  <span className="text-amber-500 font-bold">{formatKES(offer.offer_price)}</span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{offer.description}</p>
-                {offer.valid_until && <p className="text-xs text-muted-foreground mt-2">Valid until {formatDate(offer.valid_until)}</p>}
                 <div className="flex gap-2 mt-3">
                   {del.isAsking(offer.id) ? (
                     <InlineConfirm onConfirm={() => handleDelete(offer.id)} onCancel={del.cancel} />
@@ -93,9 +92,9 @@ export default function AdminOffersPage() {
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Title</label>
+                <label className="block text-sm font-medium mb-1">Name</label>
                 <input type="text" required className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                  value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+                  value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Description</label>
@@ -103,14 +102,9 @@ export default function AdminOffersPage() {
                   value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Discount %</label>
-                <input type="number" required min="1" max="100" step="any" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                  value={form.discount_percentage} onChange={e => setForm(f => ({ ...f, discount_percentage: e.target.value }))} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Valid Until</label>
-                <input type="date" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                  value={form.valid_until} onChange={e => setForm(f => ({ ...f, valid_until: e.target.value }))} />
+                <label className="block text-sm font-medium mb-1">Offer price (KES)</label>
+                <input type="number" required min="0" step="any" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                  value={form.offer_price} onChange={e => setForm(f => ({ ...f, offer_price: e.target.value }))} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Image</label>

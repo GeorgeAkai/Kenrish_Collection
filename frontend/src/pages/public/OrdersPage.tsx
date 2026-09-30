@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronDown, ChevronUp, ShoppingBag } from 'lucide-react'
+import { ChevronDown, ChevronUp, ShoppingBag, Scissors, Shirt } from 'lucide-react'
 import api from '@/lib/axios'
 import { formatKES, formatDateTime } from '@/lib/utils'
 import type { Order, OrderStatus } from '@/lib/types'
@@ -12,6 +12,15 @@ const STATUS_STYLE: Record<OrderStatus, string> = {
   CONFIRMED: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   COMPLETED: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
   CANCELLED: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400',
+}
+
+// Orders are single-shop by construction (api/views.py::create_order rejects
+// mixed-shop item lists), so the first item's type identifies the whole order.
+function orderShop(order: Order): { label: string; icon: typeof Scissors } {
+  const firstType = order.items[0]?.item_type
+  return firstType === 'product'
+    ? { label: 'Beauty', icon: Scissors }
+    : { label: 'Fashion', icon: Shirt }
 }
 
 export default function OrdersPage() {
@@ -57,13 +66,18 @@ export default function OrdersPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {orders.map(order => (
+          {orders.map(order => {
+            const shop = orderShop(order)
+            return (
             <div key={order.id} className="border border-border rounded-2xl bg-card overflow-hidden">
               {/* Header */}
               <div className="flex items-center gap-4 p-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-sm">Order #{order.id}</span>
+                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                      <shop.icon size={10} /> {shop.label}
+                    </span>
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLE[order.status]}`}>
                       {order.status_display}
                     </span>
@@ -116,7 +130,7 @@ export default function OrdersPage() {
                 </div>
               )}
             </div>
-          ))}
+          )})}
         </div>
       )}
     </div>

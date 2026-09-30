@@ -66,11 +66,10 @@ export interface GalleryImage {
 
 export interface Offer {
   id: number
-  title: string
+  name: string
   description: string
-  discount_percentage: string
+  offer_price: string
   image: string | null
-  valid_until: string | null
   created_at: string
 }
 

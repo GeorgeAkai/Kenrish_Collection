@@ -328,11 +328,20 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
   )
 }
 
-export default function AdminInventoryPage() {
+type Shop = 'beauty' | 'fashion'
+
+function matchesShop(itemType: string, shop?: Shop) {
+  if (!shop) return true
+  return shop === 'beauty' ? itemType === 'product' : itemType === 'handbag' || itemType === 'clothes'
+}
+
+export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
   const [tab, setTab] = useState<Tab>('inventory')
-  const [inventory, setInventory] = useState<InventoryItem[]>([])
-  const [sales, setSales] = useState<Sale[]>([])
+  const [inventoryRaw, setInventory] = useState<InventoryItem[]>([])
+  const [salesRaw, setSales] = useState<Sale[]>([])
   const [loading, setLoading] = useState(true)
+  const inventory = inventoryRaw.filter(i => matchesShop(i.item_type, shop))
+  const sales = salesRaw.filter(s => matchesShop(s.item_type, shop))
 
   // Add stock form
   const [stockForm, setStockForm] = useState({ item_type: 'product', item_id: '', quantity: '', cost_price: '' })
