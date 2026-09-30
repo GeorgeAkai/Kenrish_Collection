@@ -40,7 +40,7 @@ from app1.models import (
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
-    PasswordChangeCode,
+    PasswordChangeCode, LuxuryItem, LuxuryInquiry,
 )
 
 from app1.inventory import add_stock, record_sale as _record_sale, InsufficientStockError
@@ -50,6 +50,7 @@ from api.analytics import (
     inventory_alerts as _inventory_alerts, stock_value as _stock_value,
     sales_trend as _sales_trend, cash_flow_trend as _cash_flow_trend,
     expenses_breakdown as _expenses_breakdown,
+    shop_breakdown as _shop_breakdown, active_bookings_count as _active_bookings_count,
 )
 
 from .serializers import (
@@ -67,6 +68,8 @@ from .serializers import (
     OrderSerializer, OrderCreateSerializer,
     SlotConfigurationSerializer,
     UserProfileSerializer, UserProfileUpdateSerializer,
+    LuxuryItemListSerializer, LuxuryItemDetailSerializer, LuxuryItemAdminSerializer,
+    LuxuryInquirySerializer, LuxuryInquiryAdminSerializer,
 )
 
 
@@ -1311,6 +1314,18 @@ def analytics_expenses_breakdown(request):
     return Response(_expenses_breakdown(period))
 
 
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def analytics_shop_breakdown(request):
+    period = request.query_params.get('period', 'month')
+    data = _shop_breakdown(period)
+    return Response({
+        'totals': data['totals'],
+        'top_shop': data['top_shop'],
+        'active_bookings': _active_bookings_count(),
+    })
+
+
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def analytics_reset(request):
@@ -1930,6 +1945,150 @@ def admin_order_detail(request, pk):
     order.admin_notes = admin_notes
     order.save()
     return Response(OrderSerializer(order).data)
+
+
+# ---------------------------------------------------------------------------
+# Luxury (public + customer)
+# ---------------------------------------------------------------------------
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def luxury_item_list(request):
+    qs = LuxuryItem.objects.filter(is_published=True).order_by('-created_at')
+    serializer = LuxuryItemListSerializer(qs, many=True, context={'request': request})
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def luxury_item_detail(request, pk):
+    try:
+        obj = LuxuryItem.objects.get(pk=pk)
+    except LuxuryItem.DoesNotExist:
+        return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+    return Response(LuxuryItemDetailSerializer(obj, context={'request': request}).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def luxury_inquiry_create(request, pk):
+    try:
+        item = LuxuryItem.objects.get(pk=pk)
+    except LuxuryItem.DoesNotExist:
+        return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = LuxuryInquirySerializer(data=request.data, context={'request': request})
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.save(customer=request.user, item=item, status=LuxuryInquiry.STATUS_PENDING)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_luxury_inquiries(request):
+    qs = LuxuryInquiry.objects.filter(customer=request.user).select_related('item').order_by('-created_at')
+    return Response(LuxuryInquirySerializer(qs, many=True, context={'request': request}).data)
+
+
+# ---------------------------------------------------------------------------
+# Luxury (admin)
+# ---------------------------------------------------------------------------
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAdminUser])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def admin_luxury_item_list(request):
+    if request.method == 'GET':
+        qs = LuxuryItem.objects.all().order_by('-created_at')
+        paginator = StandardPagination()
+        page = paginator.paginate_queryset(qs, request)
+        return paginator.get_paginated_response(
+            LuxuryItemDetailSerializer(page, many=True, context={'request': request}).data
+        )
+    serializer = LuxuryItemAdminSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', 'PATCH', 'DELETE'])
+@permission_classes([IsAdminUser])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def admin_luxury_item_detail(request, pk):
+    try:
+        obj = LuxuryItem.objects.get(pk=pk)
+    except LuxuryItem.DoesNotExist:
+        return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        return Response(LuxuryItemDetailSerializer(obj, context={'request': request}).data)
+    elif request.method == 'PATCH':
+        serializer = LuxuryItemAdminSerializer(obj, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data)
+    else:
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_luxury_inquiry_list(request):
+    status_filter = request.query_params.get('status', '')
+    qs = LuxuryInquiry.objects.select_related('item', 'customer').order_by('-created_at')
+    if status_filter:
+        qs = qs.filter(status=status_filter)
+    return Response(LuxuryInquiryAdminSerializer(qs, many=True, context={'request': request}).data)
+
+
+@api_view(['PATCH', 'DELETE'])
+@permission_classes([IsAdminUser])
+def admin_luxury_inquiry_detail(request, pk):
+    inquiry = LuxuryInquiry.objects.filter(pk=pk).select_related('item', 'customer').first()
+    if not inquiry:
+        return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'DELETE':
+        inquiry.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    serializer = LuxuryInquiryAdminSerializer(inquiry, data=request.data, partial=True, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def admin_luxury_inquiry_mark_sold(request, pk):
+    from decimal import Decimal, InvalidOperation
+    inquiry = LuxuryInquiry.objects.filter(pk=pk).select_related('item').first()
+    if not inquiry:
+        return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    raw_price = request.data.get('final_price')
+    try:
+        final_price = Decimal(str(raw_price))
+        if final_price <= 0:
+            raise InvalidOperation
+    except (TypeError, InvalidOperation):
+        return Response({'detail': 'A valid final_price is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    item = inquiry.item
+    CashFlow.objects.create(
+        transaction_type='REVENUE',
+        shop='luxury',
+        amount=final_price,
+        description=f'Luxury sale: {item.name}',
+        created_by=request.user,
+    )
+    item.availability = 'sold'
+    item.save(update_fields=['availability', 'updated_at'])
+    inquiry.status = LuxuryInquiry.STATUS_CLOSED
+    inquiry.save(update_fields=['status', 'updated_at'])
+    return Response(LuxuryInquiryAdminSerializer(inquiry, context={'request': request}).data)
 
 
 # ---------------------------------------------------------------------------

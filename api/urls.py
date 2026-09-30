@@ -94,6 +94,7 @@ urlpatterns = [
     path('admin/analytics/stock-value/', views.analytics_stock_value, name='api-analytics-stock-value'),
     path('admin/analytics/cash-flow/', views.analytics_cash_flow, name='api-analytics-cash-flow'),
     path('admin/analytics/expenses-breakdown/', views.analytics_expenses_breakdown, name='api-analytics-expenses-breakdown'),
+    path('admin/analytics/shop-breakdown/', views.analytics_shop_breakdown, name='api-analytics-shop-breakdown'),
 
     # --- 14. Chatbot streaming ---
     path('chatbot/stream/', views.chatbot_stream, name='api-chatbot-stream'),
@@ -126,4 +127,15 @@ urlpatterns = [
     path('orders/<int:pk>/cancel/', views.cancel_order, name='api-cancel-order'),
     path('admin/orders/', views.admin_order_list, name='api-admin-orders'),
     path('admin/orders/<int:pk>/', views.admin_order_detail, name='api-admin-order-detail'),
+
+    # --- 18. Luxury ---
+    path('luxury/', views.luxury_item_list, name='api-luxury-list'),
+    path('luxury/<int:pk>/', views.luxury_item_detail, name='api-luxury-detail'),
+    path('luxury/<int:pk>/inquire/', views.luxury_inquiry_create, name='api-luxury-inquire'),
+    path('luxury/inquiries/my/', views.my_luxury_inquiries, name='api-my-luxury-inquiries'),
+    path('admin/luxury/', views.admin_luxury_item_list, name='api-admin-luxury-list'),
+    path('admin/luxury/<int:pk>/', views.admin_luxury_item_detail, name='api-admin-luxury-detail'),
+    path('admin/luxury-inquiries/', views.admin_luxury_inquiry_list, name='api-admin-luxury-inquiry-list'),
+    path('admin/luxury-inquiries/<int:pk>/', views.admin_luxury_inquiry_detail, name='api-admin-luxury-inquiry-detail'),
+    path('admin/luxury-inquiries/<int:pk>/mark-sold/', views.admin_luxury_inquiry_mark_sold, name='api-admin-luxury-mark-sold'),
 ]

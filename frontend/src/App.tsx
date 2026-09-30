@@ -30,6 +30,11 @@ import WishlistPage from '@/pages/public/WishlistPage'
 import OrdersPage from '@/pages/public/OrdersPage'
 import ReservationPage from '@/pages/public/ReservationPage'
 import ProfilePage from '@/pages/public/ProfilePage'
+import BeautyPage from '@/pages/public/BeautyPage'
+import FashionPage from '@/pages/public/FashionPage'
+import LuxuryPage from '@/pages/public/LuxuryPage'
+import LuxuryDetailPage from '@/pages/public/LuxuryDetailPage'
+import MyLuxuryInquiriesPage from '@/pages/public/MyLuxuryInquiriesPage'
 
 // Admin
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
@@ -46,6 +51,9 @@ import AdminReservationsPage from '@/pages/admin/AdminReservationsPage'
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage'
 import AdminSlotConfigPage from '@/pages/admin/AdminSlotConfigPage'
 import AdminStagingPage from '@/pages/admin/AdminStagingPage'
+import AdminLuxuryPage from '@/pages/admin/AdminLuxuryPage'
+import AdminLuxuryInquiriesPage from '@/pages/admin/AdminLuxuryInquiriesPage'
+import AdminExecutiveDashboardPage from '@/pages/admin/AdminExecutiveDashboardPage'
 
 const NotFound = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
@@ -79,11 +87,16 @@ export default function App() {
           <Route path="/privacy-policy" element={<div className="max-w-3xl mx-auto px-4 py-10"><h1 className="text-2xl font-bold mb-4">Privacy Policy</h1><p className="text-muted-foreground">We respect your privacy. Your personal information is collected only to process orders and improve your experience. We do not sell your data to third parties.</p></div>} />
           <Route path="/terms-of-service" element={<div className="max-w-3xl mx-auto px-4 py-10"><h1 className="text-2xl font-bold mb-4">Terms of Service</h1><p className="text-muted-foreground">By using Kenrish Collection, you agree to our terms. All sales are final unless goods are defective. Contact us at 0708440390 for any issues.</p></div>} />
           <Route path="/reservation" element={<ReservationPage />} />
+          <Route path="/beauty" element={<BeautyPage />} />
+          <Route path="/fashion" element={<FashionPage />} />
+          <Route path="/luxury" element={<LuxuryPage />} />
+          <Route path="/luxury/:id" element={<LuxuryDetailPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/change-password" element={<ChangePasswordPage />} />
+            <Route path="/luxury/inquiries" element={<MyLuxuryInquiriesPage />} />
           </Route>
         </Route>
 
@@ -103,6 +116,9 @@ export default function App() {
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
             <Route path="/admin/slot-config" element={<AdminSlotConfigPage />} />
             <Route path="/admin/staging" element={<AdminStagingPage />} />
+            <Route path="/admin/luxury" element={<AdminLuxuryPage />} />
+            <Route path="/admin/luxury-inquiries" element={<AdminLuxuryInquiriesPage />} />
+            <Route path="/admin/executive" element={<AdminExecutiveDashboardPage />} />
           </Route>
         </Route>
 

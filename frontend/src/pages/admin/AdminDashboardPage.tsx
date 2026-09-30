@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Heart } from 'lucide-react'
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from 'recharts'
 import type { PieLabelRenderProps } from 'recharts'
 import api from '@/lib/axios'
 import { formatKES } from '@/lib/utils'
 import type { GalleryImage } from '@/lib/types'
 import { AlertTriangle, RotateCcw, Download } from 'lucide-react'
+import StatCard from '@/components/admin/StatCard'
+import SalesTrendChart from '@/components/admin/charts/SalesTrendChart'
 
-type Period = 'today' | 'week' | 'month'
+type Period = 'today' | 'week' | 'month' | 'quarter' | 'year'
 
 interface Summary { revenue: number; expenses: number; net_profit: number }
 interface TrendPoint { date: string; revenue: number }
@@ -17,15 +19,6 @@ interface TopSeller { name: string; type: string; units_sold: number }
 interface Alert { id: number; name: string; type: string; stock_quantity: number; reorder_level: number }
 interface ExpenseRow { category: string; total: number }
 interface WishlistStat { name: string; type: string; wish_count: number }
-
-function StatCard({ label, value, accent }: { label: string; value: string; accent?: string }) {
-  return (
-    <div className="border rounded-xl p-5">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className={`text-2xl font-bold mt-1 ${accent ?? ''}`}>{value}</p>
-    </div>
-  )
-}
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6']
 
@@ -117,6 +110,8 @@ export default function AdminDashboardPage() {
     { key: 'today', label: 'Today' },
     { key: 'week', label: 'This Week' },
     { key: 'month', label: 'This Month' },
+    { key: 'quarter', label: 'This Quarter' },
+    { key: 'year', label: 'This Year' },
   ]
 
   return (
@@ -220,17 +215,7 @@ export default function AdminDashboardPage() {
             {/* Sales Trend */}
             <div className="border rounded-xl p-5">
               <h3 className="font-semibold mb-4">Revenue Trend</h3>
-              {trend.length > 0 ? (
-                <ResponsiveContainer width="100%" height={220}>
-                  <LineChart data={trend}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(Number(v)/1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(v) => formatKES(Number(v))} />
-                    <Line type="monotone" dataKey="revenue" stroke="#6366f1" name="Revenue" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : <p className="text-center text-muted-foreground py-10">No trend data for this period.</p>}
+              <SalesTrendChart data={trend} />
             </div>
 
             {/* Top Sellers */}
@@ -243,7 +228,7 @@ export default function AdminDashboardPage() {
                     <XAxis type="number" tick={{ fontSize: 11 }} />
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={90} />
                     <Tooltip formatter={(v) => Number(v)} />
-                    <Bar dataKey="units_sold" fill="#6366f1" name="Units Sold" radius={[0, 3, 3, 0]} />
+                    <Bar dataKey="units_sold" fill="var(--chart-1)" name="Units Sold" radius={[0, 3, 3, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : <p className="text-center text-muted-foreground py-10">No sales yet.</p>}

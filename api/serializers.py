@@ -10,6 +10,7 @@ from app1.models import (
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
+    LuxuryItem, LuxuryInquiry,
 )
 
 
@@ -542,3 +543,77 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['avatar', 'bio', 'phone']
+
+
+# ---------------------------------------------------------------------------
+# Luxury
+# ---------------------------------------------------------------------------
+
+class LuxuryItemListSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LuxuryItem
+        fields = ['id', 'name', 'price', 'image', 'availability', 'edition_size']
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url)
+        return None
+
+
+class LuxuryItemDetailSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LuxuryItem
+        fields = '__all__'
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url)
+        return None
+
+
+class LuxuryItemAdminSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=False)
+
+    class Meta:
+        model = LuxuryItem
+        fields = '__all__'
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class LuxuryInquirySerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.name', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = LuxuryInquiry
+        fields = [
+            'id', 'item', 'item_name', 'phone', 'whatsapp', 'preferred_viewing_date',
+            'status', 'status_display', 'admin_notes', 'created_at',
+        ]
+        # `item` comes from the URL (see luxury_inquiry_create), not the request body.
+        read_only_fields = ['item', 'status', 'admin_notes', 'created_at']
+
+
+class LuxuryInquiryAdminSerializer(serializers.ModelSerializer):
+    item_name = serializers.CharField(source='item.name', read_only=True)
+    customer_username = serializers.CharField(source='customer.username', read_only=True)
+    customer_display = serializers.SerializerMethodField()
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = LuxuryInquiry
+        fields = [
+            'id', 'item', 'item_name', 'customer', 'customer_username', 'customer_display',
+            'phone', 'whatsapp', 'preferred_viewing_date', 'status', 'status_display',
+            'admin_notes', 'created_at',
+        ]
+
+    def get_customer_display(self, obj):
+        full = obj.customer.get_full_name()
+        return full if full else obj.customer.username

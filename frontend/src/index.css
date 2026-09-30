@@ -41,11 +41,16 @@
   --color-foreground: var(--foreground);
   --color-background: var(--background);
   --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
   --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-pill: 9999px;
+  --radius-lux: 2px;
 }
 
 /* ── Light mode: Modern cosmetics plum/mauve palette ──── */
@@ -83,6 +88,15 @@
   --sidebar-accent-foreground: #1A1220;
   --sidebar-border: rgba(124, 48, 96, 0.14);
   --sidebar-ring: #7C3060;
+
+  /* Fallbacks for tokens the storefront themes introduce below, so nothing
+     breaks on routes that never set [data-theme]. */
+  --gold-ink: #7C3060;
+  --surface: var(--card);
+  --surface-muted: var(--secondary);
+  --shadow-card: 0 1px 2px rgba(26, 26, 26, 0.04), 0 4px 16px rgba(92, 64, 36, 0.06);
+  --shadow-lift: 0 12px 32px rgba(92, 64, 36, 0.14);
+  --shadow-pop: 0 24px 64px rgba(26, 26, 26, 0.18);
 }
 
 /* ── Dark mode: deep obsidian with mauve accents ────── */
@@ -119,6 +133,142 @@
   --sidebar-accent-foreground: #F2EEF8;
   --sidebar-border: rgba(255, 255, 255, 0.09);
   --sidebar-ring: #D48EC0;
+}
+
+/* ── Storefront themes (Kenrish design system) ──────────────────────────
+   Scoped to [data-theme], set by StorefrontThemeContext on /beauty, /fashion,
+   /luxury only — every other route keeps the plum/mauve palette above
+   untouched. Values are taken verbatim from the design system's tokens.json. */
+[data-theme="beauty"] {
+  --background: #faf7f2;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #d4a373;
+  --primary-foreground: #1a1a1a;
+  --secondary: #f2ece2;
+  --secondary-foreground: #1a1a1a;
+  --muted: #f2ece2;
+  --muted-foreground: #6b6158;
+  --accent: #c89565;
+  --accent-foreground: #1a1a1a;
+  --destructive: #b42318;
+  --border: #e7dfd2;
+  --input: #9c8f80;
+  --ring: #d4a373;
+  --gold: #8a5a2b;
+  --gold-ink: #8a5a2b;
+  --surface: #ffffff;
+  --surface-muted: #f2ece2;
+  --chart-1: #d4a373;
+  --chart-2: #1a1a1a;
+  --chart-3: #9c7a1e;
+  --chart-4: #e7d3bc;
+  --chart-5: #ebe4d8;
+  --sidebar: #18181b;
+  --sidebar-foreground: #f4f4f5;
+  --sidebar-primary: #d4a373;
+  --sidebar-primary-foreground: #1a1a1a;
+  --sidebar-accent: #27272a;
+  --sidebar-accent-foreground: #f4f4f5;
+  --sidebar-border: #27272a;
+  --sidebar-ring: #d4a373;
+  --shadow-card: 0 1px 2px rgba(26, 26, 26, 0.04), 0 4px 16px rgba(92, 64, 36, 0.06);
+  --shadow-lift: 0 12px 32px rgba(92, 64, 36, 0.14);
+  --shadow-pop: 0 24px 64px rgba(26, 26, 26, 0.18);
+}
+
+[data-theme="fashion"] {
+  --background: #ffffff;
+  --foreground: #111111;
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --popover: #ffffff;
+  --popover-foreground: #111111;
+  --primary: #c59b27;
+  --primary-foreground: #111111;
+  --secondary: #f5f5f4;
+  --secondary-foreground: #111111;
+  --muted: #f5f5f4;
+  --muted-foreground: #57534e;
+  --accent: #b48c1f;
+  --accent-foreground: #111111;
+  --destructive: #b42318;
+  --border: #e7e5e4;
+  --input: #8f8a84;
+  --ring: #c59b27;
+  --gold: #7a5e12;
+  --gold-ink: #7a5e12;
+  --surface: #ffffff;
+  --surface-muted: #f5f5f4;
+  --chart-1: #d4a373;
+  --chart-2: #111111;
+  --chart-3: #9c7a1e;
+  --chart-4: #e7e0d4;
+  --chart-5: #eeeceb;
+  --sidebar: #18181b;
+  --sidebar-foreground: #f4f4f5;
+  --sidebar-primary: #d4a373;
+  --sidebar-primary-foreground: #111111;
+  --sidebar-accent: #27272a;
+  --sidebar-accent-foreground: #f4f4f5;
+  --sidebar-border: #27272a;
+  --sidebar-ring: #c59b27;
+  --shadow-card: 0 1px 2px rgba(17, 17, 17, 0.05);
+  --shadow-lift: 0 12px 28px rgba(17, 17, 17, 0.10);
+  --shadow-pop: 0 24px 64px rgba(17, 17, 17, 0.16);
+}
+
+[data-theme="luxury"] {
+  --background: #0a0a0a;
+  --foreground: #f5f0e6;
+  --card: #141414;
+  --card-foreground: #f5f0e6;
+  --popover: #141414;
+  --popover-foreground: #f5f0e6;
+  --primary: #d4af37;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1c1c1c;
+  --secondary-foreground: #f5f0e6;
+  --muted: #1c1c1c;
+  --muted-foreground: #a8a29e;
+  --accent: #e0bf55;
+  --accent-foreground: #0a0a0a;
+  --destructive: #f07a6a;
+  --border: #2a2a2a;
+  --input: #5c5650;
+  --ring: #d4af37;
+  --gold: #d4af37;
+  --gold-ink: #d4af37;
+  --surface: #141414;
+  --surface-muted: #1c1c1c;
+  --radius: 0.75rem;
+  --chart-1: #d4a373;
+  --chart-2: #f5f0e6;
+  --chart-3: #8c6a1a;
+  --chart-4: #3a332a;
+  --chart-5: #222222;
+  --sidebar: #18181b;
+  --sidebar-foreground: #f4f4f5;
+  --sidebar-primary: #d4af37;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #27272a;
+  --sidebar-accent-foreground: #f4f4f5;
+  --sidebar-border: #27272a;
+  --sidebar-ring: #d4af37;
+  --shadow-card: 0 0 0 1px rgba(212, 175, 55, 0.08);
+  --shadow-lift: 0 16px 40px rgba(0, 0, 0, 0.6);
+  --shadow-pop: 0 24px 64px rgba(0, 0, 0, 0.7);
+}
+
+/* Luxury: near-square media/buttons instead of pills, per the design brief. */
+[data-theme="luxury"] .btn-primary,
+[data-theme="luxury"] .btn-outline,
+[data-theme="luxury"] .product-image,
+[data-theme="luxury"] .product-card {
+  border-radius: var(--radius-lux);
 }
 
 /* ── Base styles ─────────────────────────────────────────────────────── */

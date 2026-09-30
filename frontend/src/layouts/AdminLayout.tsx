@@ -7,13 +7,17 @@ import {
   LayoutDashboard, Package, ShoppingBag, Shirt, Warehouse,
   Scissors, Image, Tag, Users, FileText, LogOut, Menu, X,
   Sun, Moon, ChevronRight, CalendarCheck, ClipboardList, Settings2, PackagePlus,
+  Gem, MessageSquareText, TrendingUp,
 } from 'lucide-react'
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/admin/executive', label: 'Executive Dashboard', icon: TrendingUp },
   { to: '/admin/products', label: 'Products', icon: Package },
   { to: '/admin/handbags', label: 'Handbags', icon: ShoppingBag },
   { to: '/admin/clothes', label: 'Clothes', icon: Shirt },
+  { to: '/admin/luxury', label: 'Luxury', icon: Gem },
+  { to: '/admin/luxury-inquiries', label: 'Luxury Inquiries', icon: MessageSquareText },
   { to: '/admin/inventory', label: 'Inventory', icon: Warehouse },
   { to: '/admin/staging', label: 'Draft Products', icon: PackagePlus },
   { to: '/admin/orders', label: 'Orders', icon: ClipboardList },
@@ -29,9 +33,12 @@ const navItems = [
 export function getAdminPageTitle(pathname: string): string {
   const titles: Record<string, string> = {
     '/admin': 'Dashboard',
+    '/admin/executive': 'Executive Dashboard',
     '/admin/products': 'Products',
     '/admin/handbags': 'Handbags',
     '/admin/clothes': 'Clothes',
+    '/admin/luxury': 'Luxury',
+    '/admin/luxury-inquiries': 'Luxury Inquiries',
     '/admin/inventory': 'Inventory',
     '/admin/staging': 'Draft Products',
     '/admin/orders': 'Orders',

@@ -5,18 +5,20 @@ from django.db.models import F, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
-from app1.models import Product, Handbag, Clothes, Sale, Expense
+from app1.models import Product, Handbag, Clothes, Sale, Expense, CashFlow, Reservation
+
+PERIOD_DAYS = {'today': 0, 'week': 7, 'month': 30, 'quarter': 90, 'year': 365}
 
 
 def _period_qs(qs, period, date_field='created_at'):
     today = timezone.now().date()
     if period == 'today':
         return qs.filter(**{f'{date_field}__date': today})
-    elif period == 'week':
-        return qs.filter(**{f'{date_field}__date__gte': today - timedelta(days=7)})
-    elif period == 'month':
-        return qs.filter(**{f'{date_field}__date__gte': today - timedelta(days=30)})
-    return qs
+    # Unrecognized period (previously fell through and returned unfiltered
+    # all-time data, silently) now falls back to the 'month' window instead
+    # of raising, so a bad query param can't 500 six public analytics endpoints.
+    days = PERIOD_DAYS.get(period, PERIOD_DAYS['month'])
+    return qs.filter(**{f'{date_field}__date__gte': today - timedelta(days=days)})
 
 
 def sales_summary(period='month'):
@@ -98,3 +100,26 @@ def cash_flow_trend(period='month'):
 def expenses_breakdown(period='month'):
     qs = _period_qs(Expense.objects.all(), period).values('category').annotate(total=Sum('amount')).order_by('-total')
     return [{'category': r['category'], 'total': r['total']} for r in qs]
+
+
+def shop_breakdown(period='month'):
+    """Revenue per storefront. Rows predating the `shop` field (NULL) are all
+    pre-existing Fashion (Product/Handbag/Clothes) sales, since that was the
+    only revenue-generating storefront before Luxury's Mark Sold action."""
+    qs = (
+        _period_qs(CashFlow.objects.filter(transaction_type='REVENUE'), period)
+        .values('shop').annotate(total=Sum('amount'))
+    )
+    totals = {'beauty': Decimal('0'), 'fashion': Decimal('0'), 'luxury': Decimal('0')}
+    for row in qs:
+        key = row['shop'] or 'fashion'
+        totals[key] = totals.get(key, Decimal('0')) + (row['total'] or Decimal('0'))
+    top_shop = max(totals, key=lambda k: totals[k]) if any(totals.values()) else None
+    return {'totals': totals, 'top_shop': top_shop}
+
+
+def active_bookings_count():
+    """Beauty's volume KPI, in place of revenue (no revenue capture on
+    reservation completion exists — see plan decision on Beauty revenue)."""
+    today = timezone.now().date()
+    return Reservation.objects.filter(status=Reservation.STATUS_APPROVED, reservation_date__gte=today).count()

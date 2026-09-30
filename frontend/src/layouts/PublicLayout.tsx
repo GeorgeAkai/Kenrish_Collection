@@ -3,6 +3,7 @@ import { Link, Outlet, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useStorefrontTheme } from '@/contexts/StorefrontThemeContext'
 import { Menu, X, Sun, Moon, Heart, MapPin, Phone, Clock, Globe, UserCircle, LayoutDashboard, ShieldCheck } from 'lucide-react'
 import { LOGO_URL } from '@/lib/brand'
 
@@ -10,11 +11,15 @@ export default function PublicLayout() {
   const { isAuthenticated, user, logout } = useAuth()
   const { theme, toggle: toggleTheme } = useTheme()
   const { lang, setLang, t } = useLanguage()
+  const storefront = useStorefrontTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
 
   const navLinks = [
+    { to: '/beauty', label: 'Beauty' },
+    { to: '/fashion', label: 'Fashion' },
+    { to: '/luxury', label: 'Luxury' },
     { to: '/products', label: t('nav.products') },
     { to: '/handbags', label: t('nav.handbags') },
     { to: '/clothes', label: t('nav.clothes') },
@@ -102,14 +107,16 @@ export default function PublicLayout() {
               {t('nav.switchLang')}
             </button>
 
-            {/* Dark mode toggle */}
-            <button
-              onClick={toggleTheme}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition-all text-muted-foreground"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
+            {/* Dark mode toggle — hidden on fixed boutique canvases (Beauty/Fashion/Luxury) */}
+            {!storefront && (
+              <button
+                onClick={toggleTheme}
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground transition-all text-muted-foreground"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              </button>
+            )}
 
             {isAuthenticated ? (
               <>
@@ -275,6 +282,8 @@ export default function PublicLayout() {
               <p className="font-semibold text-sm mb-4 text-foreground">{t('footer.shop')}</p>
               <ul className="space-y-2.5">
                 {[
+                  { to: '/fashion', label: 'Fashion' },
+                  { to: '/luxury', label: 'Luxury' },
                   { to: '/products', label: t('footer.beautyProducts') },
                   { to: '/handbags', label: t('footer.handbags') },
                   { to: '/clothes', label: t('footer.clothing') },

@@ -1,20 +1,7 @@
 /* Modern Cosmetics — shared CSS utilities for product cards, buttons, and layout.
-   Uses the Figma plum/mauve design system variables set in index.css.
+   Reads its tokens directly from index.css (no local --mc-* overrides) so a
+   route's [data-theme] and the light/dark .class both apply here for free.
 */
-
-:root {
-  --mc-background: #F9F6FB;
-  --mc-foreground: #1A1220;
-  --mc-card: #FDFAFF;
-  --mc-primary: #7C3060;
-  --mc-primary-fg: #FFFFFF;
-  --mc-secondary: #F0E8F5;
-  --mc-accent: #C07DB0;
-  --mc-muted: #E5D8EE;
-  --mc-muted-fg: #6A4E78;
-  --mc-border: rgba(124, 48, 96, 0.14);
-  --mc-radius: 16px;
-}
 
 /* ── Product grid ─────────────────────────────────────────────── */
 .product-grid {
@@ -37,9 +24,9 @@
 
 /* ── Product card — Figma rounded-2xl with lift hover ─────────── */
 .product-card {
-  background: var(--mc-card);
-  border-radius: var(--mc-radius);
-  border: 1px solid var(--mc-border);
+  background: var(--card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(16, 12, 26, 0.06);
   transition: transform 0.28s ease, box-shadow 0.28s ease;
@@ -56,7 +43,7 @@
   position: relative;
   overflow: hidden;
   aspect-ratio: 4 / 5;
-  background: var(--mc-muted);
+  background: var(--muted);
 }
 
 .product-image img {
@@ -98,8 +85,8 @@
   border-radius: 999px;
   font-size: 0.68rem;
   font-weight: 600;
-  background: var(--mc-primary);
-  color: var(--mc-primary-fg);
+  background: var(--primary);
+  color: var(--primary-foreground);
   letter-spacing: 0.02em;
 }
 
@@ -124,32 +111,31 @@
 }
 
 .btn-modern--primary {
-  background: var(--mc-primary);
-  color: var(--mc-primary-fg);
-  box-shadow: 0 6px 20px rgba(124, 48, 96, 0.25);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-lift, 0 6px 20px rgba(0, 0, 0, 0.15));
 }
 
 .btn-modern--primary:hover {
   opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 10px 28px rgba(124, 48, 96, 0.32);
 }
 
 .btn-modern--secondary {
   background: transparent;
-  color: var(--mc-primary);
-  border: 2px solid var(--mc-primary);
+  color: var(--primary);
+  border: 2px solid var(--primary);
 }
 
 .btn-modern--secondary:hover {
-  background: var(--mc-secondary);
+  background: var(--secondary);
 }
 
 /* ── Hero section ─────────────────────────────────────────────── */
 .hero-section {
   padding: 5rem 0;
-  background: linear-gradient(135deg, var(--mc-secondary) 0%, var(--mc-background) 100%);
-  color: var(--mc-foreground);
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--background) 100%);
+  color: var(--foreground);
 }
 
 .hero-title {
@@ -163,27 +149,8 @@
   box-shadow: 0 4px 16px rgba(16, 12, 26, 0.05);
 }
 
-/* ── Dark mode adjustments (uses .dark class from ThemeContext) ── */
-.dark {
-  --mc-background: #08060E;
-  --mc-foreground: #F2EEF8;
-  --mc-card: #251b2d;
-  --mc-border: rgba(255, 255, 255, 0.1);
-  --mc-muted: rgba(255, 255, 255, 0.06);
-  --mc-primary: #D48EC0;
-  --mc-accent: #A06090;
-  --mc-secondary: rgba(255, 255, 255, 0.06);
-}
-
-.dark .product-card {
-  background: #251b2d;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
-}
-
+/* Dark mode: .product-card/.hero-section above already read --card/--background/
+   etc, which index.css redefines under .dark — no separate overrides needed here. */
 .dark .product-card:hover {
   box-shadow: 0 16px 40px rgba(212, 142, 192, 0.12);
-}
-
-.dark .hero-section {
-  background: linear-gradient(135deg, #110A1C 0%, #08060E 100%);
 }

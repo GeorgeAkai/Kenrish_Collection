@@ -309,6 +309,7 @@ class Sale(models.Model):
 
             CashFlow.objects.create(
                 transaction_type='REVENUE',
+                shop='fashion',
                 amount=self.total_amount,
                 description=f"Sale: {self._target_item().name if self._target_item() else 'Item'} x{self.quantity}",
                 reference_sale=self,
@@ -343,10 +344,18 @@ class CashFlow(models.Model):
         ('REVENUE', 'Revenue'),
         ('EXPENSE', 'Expense'),
     ]
+    SHOP_CHOICES = [
+        ('beauty', 'Beauty'),
+        ('fashion', 'Fashion'),
+        ('luxury', 'Luxury'),
+    ]
 
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.CharField(max_length=255)
+    # Nullable: rows created before this field existed have no shop attribution
+    # and are treated as legacy Fashion revenue by the analytics layer.
+    shop = models.CharField(max_length=20, choices=SHOP_CHOICES, null=True, blank=True)
     reference_sale = models.ForeignKey(Sale, on_delete=models.CASCADE, null=True, blank=True)
     reference_transaction = models.ForeignKey(InventoryTransaction, on_delete=models.CASCADE, null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -556,3 +565,62 @@ class PasswordChangeCode(models.Model):
 
     def is_expired(self):
         return timezone.now() > self.expires_at
+
+
+class LuxuryItem(models.Model):
+    """Kept as its own model rather than a fourth arm of the
+    Product/Handbag/Clothes polymorphism — Luxury has no cart, no stock, and
+    a different field shape (material/dimensions/provenance/edition), so
+    forcing it into that pattern would only add debt."""
+
+    AVAILABILITY_CHOICES = [
+        ('available', 'Available'),
+        ('reserved', 'Reserved'),
+        ('sold', 'Sold'),
+    ]
+
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    image = models.ImageField(upload_to="luxury_images/", null=True, blank=True)
+    material = models.CharField(max_length=255, blank=True)
+    dimensions = models.CharField(max_length=255, blank=True)
+    provenance = models.TextField(blank=True)
+    edition_size = models.PositiveIntegerField(null=True, blank=True)
+    price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # null = price on application
+    availability = models.CharField(max_length=20, choices=AVAILABILITY_CHOICES, default='available')
+    is_published = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.name
+
+
+class LuxuryInquiry(models.Model):
+    STATUS_PENDING = 'PENDING'
+    STATUS_CONTACTED = 'CONTACTED'
+    STATUS_CLOSED = 'CLOSED'
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_CONTACTED, 'Contacted'),
+        (STATUS_CLOSED, 'Closed'),
+    ]
+
+    item = models.ForeignKey(LuxuryItem, on_delete=models.CASCADE, related_name='inquiries')
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='luxury_inquiries')
+    phone = models.CharField(max_length=20)
+    whatsapp = models.CharField(max_length=20, blank=True)
+    preferred_viewing_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    admin_notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.customer.username} — {self.item.name} ({self.status})"

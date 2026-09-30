@@ -72,6 +72,7 @@ def record_sale(item, quantity, unit_price, actor, customer_name='', customer_ph
 
         CashFlow.objects.create(
             transaction_type='REVENUE',
+            shop='fashion',
             amount=sale.total_amount,
             description=f'Sale: {item.name} x{quantity}',
             reference_sale=sale,
