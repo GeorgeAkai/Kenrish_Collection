@@ -218,7 +218,11 @@ if _S3_ACCESS_KEY:
     AWS_SECRET_ACCESS_KEY = os.getenv('SECRET_ACCESS_KEY')
     AWS_STORAGE_BUCKET_NAME = 'kenrish-bucket'
     AWS_S3_ENDPOINT_URL = os.getenv('S3_ENDPOINT_URL', '').rstrip('/') + '/s3'
-    AWS_S3_REGION_NAME = 'us-east-1'
+    # Must match the Supabase project's actual region (Storage > Configuration >
+    # S3) -- a mismatched region breaks AWS SigV4 request signing, which
+    # Supabase's S3-compatible gateway surfaces as a generic 403 Forbidden
+    # rather than a clear "wrong region" error.
+    AWS_S3_REGION_NAME = os.getenv('S3_REGION_NAME', 'us-west-2')
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = 'public-read'
     AWS_S3_CUSTOM_DOMAIN = f"fyejjrqtkivnscygihyx.supabase.co/storage/v1/object/public/kenrish-bucket"
