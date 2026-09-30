@@ -206,6 +206,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 _S3_ACCESS_KEY = os.getenv('S3_ACCESS_KEY')
 if _S3_ACCESS_KEY:
+    from botocore.config import Config
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
@@ -232,6 +233,17 @@ if _S3_ACCESS_KEY:
     # one getting a unique suffix -- acceptable until the key's permissions
     # are fixed properly in Supabase (S3 Access Keys), which restores this.
     AWS_S3_FILE_OVERWRITE = True
+    # boto3 >=1.36 defaults to sending PutObject with an aws-chunked trailer
+    # checksum (CRC32) that Supabase's S3 gateway can't parse -- it returns a
+    # response botocore can't extract an Error Code/Message from, surfacing
+    # as `ClientError: An error occurred () when calling the PutObject
+    # operation:` with an empty code. Forcing "when_required" instead of the
+    # new default "when_supported" restores the old plain-PUT behavior that
+    # every non-AWS S3-compatible backend actually understands.
+    AWS_S3_CLIENT_CONFIG = Config(
+        request_checksum_calculation='when_required',
+        response_checksum_validation='when_required',
+    )
     AWS_DEFAULT_ACL = 'public-read'
     AWS_S3_CUSTOM_DOMAIN = f"fyejjrqtkivnscygihyx.supabase.co/storage/v1/object/public/kenrish-bucket"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
