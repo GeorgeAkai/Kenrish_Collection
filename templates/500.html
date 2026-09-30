@@ -1,6 +1,6 @@
-{% extends "base_modern.html" %}
 {% load static %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Server Error | Kenrish Collection</title>
@@ -69,7 +69,7 @@
         <img src="{% static 'kenrish.png' %}" alt="Kenrish Collection" class="kenrish-error-logo mb-4">
         <h1 class="kenrish-error-title display-5 mb-3">Something Went Wrong</h1>
         <p class="text-muted fs-5 mb-4">Sorry, an unexpected error occurred. Please try again later.</p>
-        <a href="{% url 'home' %}" class="kenrish-error-btn">Go to Home</a>
+        <a href="/" class="kenrish-error-btn">Go to Home</a>
     </div>
     <button id="darkModeToggle" class="btn btn-outline-secondary rounded-pill ms-2" style="position:fixed;bottom:24px;right:24px;z-index:9999;">
         <i class="bi bi-moon"></i>
@@ -89,4 +89,4 @@
     });
     </script>
 </body>
-{% endblock %}
+</html>
