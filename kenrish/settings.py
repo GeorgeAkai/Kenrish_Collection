@@ -223,7 +223,15 @@ if _S3_ACCESS_KEY:
     # Supabase's S3-compatible gateway surfaces as a generic 403 Forbidden
     # rather than a clear "wrong region" error.
     AWS_S3_REGION_NAME = os.getenv('S3_REGION_NAME', 'us-west-2')
-    AWS_S3_FILE_OVERWRITE = False
+    # False makes django-storages call HeadObject before every upload (to
+    # decide whether it needs to add a unique suffix), which is exactly the
+    # call that's been failing with 403 -- almost certainly because the S3
+    # access key has write permission but not read/head. True skips that
+    # check entirely. Trade-off: two uploads that land on the exact same
+    # filename will now silently overwrite each other instead of the second
+    # one getting a unique suffix -- acceptable until the key's permissions
+    # are fixed properly in Supabase (S3 Access Keys), which restores this.
+    AWS_S3_FILE_OVERWRITE = True
     AWS_DEFAULT_ACL = 'public-read'
     AWS_S3_CUSTOM_DOMAIN = f"fyejjrqtkivnscygihyx.supabase.co/storage/v1/object/public/kenrish-bucket"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
