@@ -26,11 +26,17 @@ function formatSlotTime(t: string) {
 export default function BookingModal({
   services,
   initialServiceId,
+  initialDate,
+  initialTime,
   onClose,
   onBooked,
 }: {
   services: Service[]
   initialServiceId?: number
+  /** YYYY-MM-DD — preset from "Today's openings". */
+  initialDate?: string
+  /** HH:MM — preset from "Today's openings". */
+  initialTime?: string
   onClose: () => void
   onBooked?: () => void
 }) {
@@ -39,8 +45,8 @@ export default function BookingModal({
 
   const [form, setForm] = useState({
     service: initialServiceId ? String(initialServiceId) : '',
-    reservation_date: '',
-    reservation_time: '',
+    reservation_date: initialDate ?? '',
+    reservation_time: initialTime ?? '',
     notes: '',
   })
   const [slots, setSlots] = useState<FormSlot[]>([])

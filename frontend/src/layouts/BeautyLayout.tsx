@@ -11,7 +11,7 @@ const SUBNAV = [
 export default function BeautyLayout() {
   return (
     <div>
-      <div className="border-b border-border bg-card/60 sticky top-20 z-30 backdrop-blur-sm">
+      <div className="border-b border-border bg-card/60">
         <nav className="max-w-6xl mx-auto px-5 flex gap-1 overflow-x-auto no-scrollbar">
           {SUBNAV.map(({ to, label, icon: Icon }) => (
             <NavLink

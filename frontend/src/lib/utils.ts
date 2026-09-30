@@ -33,3 +33,9 @@ export function isVideoUrl(url: string | null | undefined, flagFromApi?: boolean
   const clean = url.split('?')[0].toLowerCase()
   return VIDEO_EXTS.some(ext => clean.endsWith(ext))
 }
+
+/** Whole shillings for dashboards and KPIs: "KES 1,450". */
+export function formatKESWhole(amount: string | number): string {
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount
+  return `KES ${Math.round(num || 0).toLocaleString('en-KE')}`
+}

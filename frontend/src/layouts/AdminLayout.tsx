@@ -8,7 +8,7 @@ import {
   Package, ShoppingBag, Shirt, Warehouse,
   Scissors, Image, Tag, Users, FileText, LogOut, Menu, X,
   Sun, Moon, ChevronRight, ChevronDown, CalendarCheck, ClipboardList, Settings2, PackagePlus,
-  Gem, MessageSquareText, TrendingUp,
+  Gem, MessageSquareText, TrendingUp, ArrowRight,
 } from 'lucide-react'
 
 interface NavLeaf { to: string; label: string; icon: LucideIcon; end?: boolean }
@@ -132,15 +132,19 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
   }
 
   return (
-    <aside className="flex flex-col h-full bg-sidebar border-r border-sidebar-border w-64">
-      {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border shrink-0">
-        <Link to="/" className="flex items-center gap-2" onClick={onClose}>
-          <img src={LOGO_URL} alt="Kenrish Collection" className="h-12 w-auto object-contain" />
-          <span className="text-xs font-semibold text-primary uppercase tracking-wider">Admin</span>
+    <aside className="flex flex-col h-full bg-sidebar text-sidebar-foreground border-r border-sidebar-border w-72 lg:w-64">
+      {/* Brand */}
+      <div className="h-16 flex items-center justify-between gap-2 px-4 border-b border-sidebar-border shrink-0">
+        <Link to="/" className="flex items-center gap-3 min-w-0" onClick={onClose}>
+          <img src={LOGO_URL} alt="" className="w-10 h-10 rounded-lg object-cover bg-black shrink-0" />
+          <span className="leading-tight">
+            <span className="block font-heading text-lg font-semibold text-white">Kenrish</span>
+            <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-sidebar-primary">Admin</span>
+          </span>
         </Link>
         {onClose && (
-          <button onClick={onClose} className="lg:hidden text-muted-foreground hover:text-foreground">
+          <button onClick={onClose} aria-label="Close menu" autoFocus
+            className="lg:hidden w-10 h-10 rounded-full flex items-center justify-center text-sidebar-muted hover:bg-sidebar-accent hover:text-white">
             <X size={18} />
           </button>
         )}
@@ -157,18 +161,18 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
                 end={entry.end}
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                  `relative flex items-center gap-3 h-11 lg:h-10 px-3 rounded-xl text-sm transition-colors ${
                     isActive
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
-                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground'
+                      ? 'bg-sidebar-accent text-sidebar-primary font-semibold'
+                      : 'text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-white'
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <entry.icon size={16} className={isActive ? 'text-primary' : ''} />
+                    {isActive && <span className="absolute -left-3 top-2.5 bottom-2.5 w-[3px] rounded-r bg-sidebar-primary" />}
+                    <entry.icon size={17} strokeWidth={1.75} />
                     <span className="flex-1">{entry.label}</span>
-                    {isActive && <ChevronRight size={14} className="text-primary" />}
                   </>
                 )}
               </NavLink>
@@ -181,11 +185,12 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
             <div key={entry.label}>
               <button
                 onClick={() => toggleGroup(entry.label)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${
-                  active ? 'text-sidebar-accent-foreground font-semibold' : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground'
+                aria-expanded={open}
+                className={`w-full flex items-center gap-3 h-11 lg:h-10 px-3 rounded-xl text-sm transition-colors ${
+                  active ? 'text-white font-semibold' : 'text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-white'
                 }`}
               >
-                <entry.icon size={16} className={active ? 'text-primary' : ''} />
+                <entry.icon size={17} strokeWidth={1.75} className={active ? 'text-sidebar-primary' : ''} />
                 <span className="flex-1 text-left">{entry.label}</span>
                 {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               </button>
@@ -198,16 +203,16 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
                       end={child.end}
                       onClick={onClose}
                       className={({ isActive }) =>
-                        `flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all ${
+                        `flex items-center gap-2.5 h-10 lg:h-9 px-3 rounded-lg text-[13px] transition-colors ${
                           isActive
-                            ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
-                            : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground'
+                            ? 'bg-sidebar-accent text-sidebar-primary font-semibold'
+                            : 'text-sidebar-muted hover:bg-sidebar-accent hover:text-white'
                         }`
                       }
                     >
-                      {({ isActive }) => (
+                      {() => (
                         <>
-                          <child.icon size={14} className={isActive ? 'text-primary' : ''} />
+                          <child.icon size={15} strokeWidth={1.75} />
                           <span className="flex-1">{child.label}</span>
                         </>
                       )}
@@ -221,40 +226,43 @@ function Sidebar({ onClose }: { onClose?: () => void }) {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-sidebar-border p-4 space-y-3 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center text-primary text-xs font-bold">
-            {user?.username?.[0]?.toUpperCase()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-sidebar-foreground truncate">{user?.username}</p>
-            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-          </div>
+      <div className="border-t border-sidebar-border px-4 py-3 flex items-center gap-3 shrink-0">
+        <div className="w-9 h-9 rounded-full bg-sidebar-primary text-sidebar-primary-foreground flex items-center justify-center text-sm font-bold shrink-0">
+          {user?.username?.[0]?.toUpperCase()}
         </div>
-        <div className="flex items-center justify-between">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-xs text-red-500/80 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 px-2 py-1 rounded-lg transition-colors"
-          >
-            <LogOut size={13} /> Logout
-          </button>
-          <button
-            onClick={toggle}
-            className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground"
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-          </button>
+        <div className="flex-1 min-w-0 leading-tight">
+          <p className="text-sm font-semibold text-white truncate">{user?.username}</p>
+          <p className="text-xs text-sidebar-muted truncate">Admin · all stores</p>
         </div>
+        <button onClick={toggle} aria-label="Toggle theme"
+          className="w-9 h-9 flex items-center justify-center rounded-full text-sidebar-muted hover:bg-sidebar-accent hover:text-white">
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
+        <button onClick={handleLogout} aria-label="Log out" title="Log out"
+          className="w-9 h-9 flex items-center justify-center rounded-full text-sidebar-muted hover:bg-sidebar-accent hover:text-white">
+          <LogOut size={16} />
+        </button>
       </div>
     </aside>
   )
 }
 
 export default function AdminLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const location = useLocation()
   const pageTitle = getAdminPageTitle(location.pathname)
+  // The drawer remembers the page it was opened on, so navigating closes it.
+  const [drawerAt, setDrawerAt] = useState<string | null>(null)
+  const sidebarOpen = drawerAt === location.pathname
+  const setSidebarOpen = (open: boolean) => setDrawerAt(open ? location.pathname : null)
+
+  useEffect(() => {
+    if (!sidebarOpen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setDrawerAt(null) }
+    document.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev }
+  }, [sidebarOpen])
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -265,39 +273,37 @@ export default function AdminLayout() {
 
       {/* Mobile sidebar drawer */}
       {sidebarOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
-            onClick={() => setSidebarOpen(false)}
-          />
-          <div className="fixed inset-y-0 left-0 z-50 lg:hidden sidebar-drawer-enter">
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Admin menu">
+          <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" onClick={() => setSidebarOpen(false)} />
+          <div className="absolute inset-y-0 left-0 sidebar-drawer-enter shadow-2xl">
             <Sidebar onClose={() => setSidebarOpen(false)} />
           </div>
-        </>
+        </div>
       )}
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-14 lg:h-16 border-b bg-card/80 backdrop-blur-sm sticky top-0 z-30 flex items-center px-4 lg:px-6 gap-3">
+        <header className="h-14 lg:h-16 border-b border-border bg-card/95 backdrop-blur-sm sticky top-0 z-30 flex items-center px-3 sm:px-4 lg:px-7 gap-2 sm:gap-3">
           <button
-            className="lg:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary transition-colors"
             onClick={() => setSidebarOpen(true)}
-            aria-label="Open sidebar"
+            aria-label="Open menu"
           >
-            <Menu size={18} />
+            <Menu size={20} />
           </button>
-          <h1 className="text-sm font-semibold text-foreground">{pageTitle}</h1>
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm min-w-0">
+            <span className="hidden lg:inline text-muted-foreground">Admin</span>
+            <ChevronRight size={14} className="hidden lg:inline text-muted-foreground" />
+            <h1 className="font-semibold text-foreground truncate">{pageTitle}</h1>
+          </nav>
           <div className="flex-1" />
-          <Link
-            to="/"
-            className="text-xs text-muted-foreground hover:text-primary transition-colors hidden sm:block"
-          >
-            ← View store
+          <Link to="/" className="flex items-center gap-1.5 text-sm font-semibold text-gold-ink hover:underline underline-offset-2">
+            View store <ArrowRight size={14} />
           </Link>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        <main className="flex-1 p-4 lg:p-7 overflow-auto">
           <Outlet />
         </main>
       </div>
