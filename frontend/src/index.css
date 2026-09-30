@@ -44,6 +44,18 @@
   --color-gold-ink: var(--gold-ink);
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);
+  --color-gold-tint: var(--gold-tint);
+  --color-gold-deep: var(--gold-deep);
+  --color-inverse: var(--inverse);
+  --color-inverse-foreground: var(--inverse-foreground);
+  --color-border-control: var(--border-control);
+  --color-success: var(--success);
+  --color-success-tint: var(--success-tint);
+  --color-warning: var(--warning);
+  --color-warning-tint: var(--warning-tint);
+  --color-danger: var(--danger);
+  --color-danger-tint: var(--danger-tint);
+  --color-sidebar-muted: var(--sidebar-muted);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -92,6 +104,19 @@
 
   --surface: var(--card);
   --surface-muted: var(--secondary);
+  /* Derived from the active accent, so the Profile > Theme picker carries through. */
+  --gold-tint: color-mix(in srgb, var(--primary) 20%, var(--card));
+  --gold-deep: color-mix(in srgb, var(--primary) 86%, #000);
+  --inverse: var(--foreground);
+  --inverse-foreground: var(--background);
+  --border-control: var(--input);
+  --success: #2f6b3a;
+  --success-tint: #e6f0e3;
+  --warning: #8a5a00;
+  --warning-tint: #fbf0d9;
+  --danger: #a23b2a;
+  --danger-tint: #f6e3de;
+  --sidebar-muted: #a1a1aa;
   --shadow-card: 0 1px 2px rgba(26, 26, 26, 0.04), 0 4px 16px rgba(92, 64, 36, 0.06);
   --shadow-lift: 0 12px 32px rgba(92, 64, 36, 0.14);
   --shadow-pop: 0 24px 64px rgba(26, 26, 26, 0.18);
@@ -133,6 +158,12 @@
   --sidebar-border: #27272a;
   --sidebar-ring: #d4af37;
   --shadow-card: 0 0 0 1px rgba(212, 175, 55, 0.08);
+  --success: #7bc48a;
+  --success-tint: #15241a;
+  --warning: #e3b55b;
+  --warning-tint: #2a2010;
+  --danger: #f08a7a;
+  --danger-tint: #2a1512;
   --shadow-lift: 0 16px 40px rgba(0, 0, 0, 0.6);
   --shadow-pop: 0 24px 64px rgba(0, 0, 0, 0.7);
 }
@@ -382,4 +413,27 @@ main {
 @keyframes heroFloat {
   0%, 100% { transform: translateY(0px);    }
   50%       { transform: translateY(-10px); }
+}
+
+/* ── Phone header drawer, safe areas, reduced motion ─────────────────── */
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--gold-ink);
+}
+
+.drawer-right-enter {
+  animation: slideLeft 0.28s ease forwards;
+}
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.pb-safe { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-float, .hero-float-delay, .marquee-track, .animate-pulse { animation: none !important; }
 }
