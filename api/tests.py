@@ -249,3 +249,129 @@ class AuthAPITest(TestCase):
     def test_me_without_token_returns_401(self):
         response = self.client.get('/api/auth/me/')
         self.assertEqual(response.status_code, 401)
+
+
+class FashionShopFeaturesTest(TestCase):
+    """Clothes categories, service sales, per-shop analytics and the dashboard reset."""
+
+    def setUp(self):
+        from rest_framework.test import APIClient
+        self.admin = User.objects.create_user(username='boss', password='pass', is_staff=True)
+        self.client = APIClient()
+        self.client.force_authenticate(self.admin)
+        self.product = make_product(name='Cream', stock=10, cost=Decimal('300.00'))
+        self.handbag = Handbag.objects.create(
+            name='Clutch', description='t', price=Decimal('800'), image='',
+            stock_quantity=5, cost_price=Decimal('400'), reorder_level=3,
+        )
+
+    # --- categories CRUD ---
+    def test_seeded_categories_present(self):
+        names = [c['name'] for c in self.client.get('/api/clothes/categories/').json()]
+        self.assertEqual(names, ['Men', 'Women', 'Kids'])
+
+    def test_category_crud_and_delete_guard(self):
+        r = self.client.post('/api/admin/clothes-categories/', {'name': 'Teens'}, format='json')
+        self.assertEqual(r.status_code, 201)
+        self.assertEqual(r.json()['slug'], 'teens')
+        cid = r.json()['id']
+        self.assertEqual(self.client.post('/api/admin/clothes-categories/', {'name': 'teens'}, format='json').status_code, 400)
+        self.assertEqual(self.client.patch(f'/api/admin/clothes-categories/{cid}/', {'name': 'Teenagers'}, format='json').status_code, 200)
+
+        Clothes.objects.create(name='Hoodie', description='t', price=Decimal('900'), category_id=cid)
+        self.assertEqual(self.client.delete(f'/api/admin/clothes-categories/{cid}/').status_code, 409)
+        Clothes.objects.all().delete()
+        self.assertEqual(self.client.delete(f'/api/admin/clothes-categories/{cid}/').status_code, 204)
+
+    def test_clothes_filter_by_category(self):
+        from app1.models import ClothesCategory
+        men = ClothesCategory.objects.get(slug='men')
+        Clothes.objects.create(name='Shirt', description='t', price=Decimal('500'), category=men)
+        Clothes.objects.create(name='Dress', description='t', price=Decimal('900'),
+                               category=ClothesCategory.objects.get(slug='women'))
+        names = [c['name'] for c in self.client.get('/api/clothes/?category=men').json()['results']]
+        self.assertEqual(names, ['Shirt'])
+
+    def test_non_admin_cannot_manage_categories(self):
+        from rest_framework.test import APIClient
+        anon = APIClient()
+        self.assertIn(anon.post('/api/admin/clothes-categories/', {'name': 'X'}, format='json').status_code, (401, 403))
+
+    # --- service sales ---
+    def test_service_sale_creates_beauty_revenue_and_delete_removes_it(self):
+        from app1.models import Service
+        svc = Service.objects.create(name='Braids', short_description='s', full_description='f')
+        r = self.client.post('/api/admin/service-sales/',
+                             {'service': svc.id, 'amount': '1500', 'payment_method': 'mpesa'}, format='json')
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(r.json()['service_name'], 'Braids')
+        cf = CashFlow.objects.get(transaction_type='REVENUE', shop='beauty')
+        self.assertEqual(cf.amount, Decimal('1500'))
+
+        sid = r.json()['id']
+        self.client.patch(f'/api/admin/service-sales/{sid}/', {'amount': '2000'}, format='json')
+        self.assertEqual(CashFlow.objects.get(shop='beauty').amount, Decimal('2000'))
+
+        self.assertEqual(self.client.delete(f'/api/admin/service-sales/{sid}/').status_code, 204)
+        self.assertFalse(CashFlow.objects.filter(shop='beauty').exists())
+
+    def test_service_sale_validation(self):
+        self.assertEqual(self.client.post('/api/admin/service-sales/', {'amount': '100'}, format='json').status_code, 400)
+        self.assertEqual(self.client.post('/api/admin/service-sales/',
+                                          {'service_name': 'Cut', 'amount': '0'}, format='json').status_code, 400)
+
+    # --- per-shop analytics ---
+    def _seed_money(self):
+        from app1.inventory import record_sale, add_stock
+        from app1.models import ServiceSale
+        record_sale(self.product, 2, Decimal('500'), self.admin)       # beauty 1000
+        record_sale(self.handbag, 1, Decimal('800'), self.admin)       # fashion 800
+        ServiceSale.objects.create(service_name='Braids', amount=Decimal('1500'), created_by=self.admin)  # beauty 1500
+        add_stock(self.product, 10, Decimal('300'), self.admin)        # beauty expense 3000
+        add_stock(self.handbag, 2, Decimal('400'), self.admin)         # fashion expense 800
+
+    def test_summary_is_scoped_per_shop_and_combined(self):
+        self._seed_money()
+        beauty = self.client.get('/api/admin/analytics/summary/?shop=beauty').json()
+        fashion = self.client.get('/api/admin/analytics/summary/?shop=fashion').json()
+        both = self.client.get('/api/admin/analytics/summary/').json()
+        self.assertEqual((float(beauty['revenue']), float(beauty['expenses'])), (2500.0, 3000.0))
+        self.assertEqual((float(fashion['revenue']), float(fashion['expenses'])), (800.0, 800.0))
+        self.assertEqual((float(both['revenue']), float(both['expenses'])), (3300.0, 3800.0))
+
+    def test_expenses_breakdown_and_income_vs_expenses(self):
+        self._seed_money()
+        rows = self.client.get('/api/admin/analytics/expenses-breakdown/?shop=beauty').json()
+        self.assertEqual([(r['category'], float(r['total'])) for r in rows], [('Stock Purchase', 3000.0)])
+        trend = self.client.get('/api/admin/analytics/cash-flow/?period=month').json()
+        self.assertEqual(len(trend), 1)
+        self.assertEqual((float(trend[0]['revenue']), float(trend[0]['expenses'])), (3300.0, 3800.0))
+        yearly = self.client.get('/api/admin/analytics/cash-flow/?period=year').json()
+        self.assertRegex(yearly[0]['date'], r'^\d{4}-\d{2}$')
+
+    def test_shop_breakdown_has_no_luxury(self):
+        self._seed_money()
+        data = self.client.get('/api/admin/analytics/shop-breakdown/').json()
+        self.assertEqual(set(data['totals']), {'beauty', 'fashion'})
+        self.assertEqual(data['top_shop'], 'beauty')
+
+    def test_top_sellers_beauty_includes_services(self):
+        self._seed_money()
+        data = self.client.get('/api/admin/analytics/top-sellers/?shop=beauty').json()
+        self.assertEqual([s['name'] for s in data['services']], ['Braids'])
+        self.assertEqual(data['handbags'], [])
+
+    # --- reset ---
+    def test_reset_clears_dashboard_data_but_keeps_catalogue_and_stock(self):
+        from app1.models import ServiceSale
+        self._seed_money()
+        stock_before = Product.objects.get(pk=self.product.pk).stock_quantity
+        r = self.client.post('/api/admin/analytics/reset/', {'save': True}, format='json')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.json()['deleted']['service_sales'], 1)
+        self.assertIn('snapshot', r.json())
+        for model in (Sale, ServiceSale, Expense, CashFlow):
+            self.assertEqual(model.objects.count(), 0)
+        self.assertEqual(Product.objects.get(pk=self.product.pk).stock_quantity, stock_before)
+        summary = self.client.get('/api/admin/analytics/summary/').json()
+        self.assertEqual(float(summary['revenue']), 0.0)

@@ -1,6 +1,6 @@
-import { Scissors, Shirt, Gem, type LucideIcon } from 'lucide-react'
+import { Scissors, Shirt, type LucideIcon } from 'lucide-react'
 
-export type StoreId = 'beauty' | 'fashion' | 'luxury'
+export type StoreId = 'beauty' | 'fashion'
 
 export interface StoreDef {
   id: StoreId
@@ -13,12 +13,10 @@ export interface StoreDef {
 export const STORES: StoreDef[] = [
   { id: 'beauty', labelKey: 'store.beauty', shortKey: 'store.beautyShort', href: '/beauty', icon: Scissors },
   { id: 'fashion', labelKey: 'store.fashion', shortKey: 'store.fashion', href: '/fashion', icon: Shirt },
-  { id: 'luxury', labelKey: 'store.luxury', shortKey: 'store.luxuryShort', href: '/luxury', icon: Gem },
 ]
 
 /** Which storefront a public route belongs to; null on the shared home page and account pages. */
 export function storeForPath(pathname: string): StoreId | null {
-  if (pathname.startsWith('/luxury')) return 'luxury'
   if (/^\/(fashion|clothes|handbags)/.test(pathname)) return 'fashion'
   if (/^\/(beauty|products|services|reservation|gallery)/.test(pathname)) return 'beauty'
   return null

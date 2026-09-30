@@ -19,6 +19,7 @@ urlpatterns = [
     path('handbags/', views.handbag_list, name='api-handbag-list'),
     path('handbags/<int:pk>/', views.handbag_detail, name='api-handbag-detail'),
     path('clothes/', views.clothes_list, name='api-clothes-list'),
+    path('clothes/categories/', views.clothes_category_list, name='api-clothes-category-list'),
     path('clothes/<int:pk>/', views.clothes_detail, name='api-clothes-detail'),
 
     # --- 2. Home ---
@@ -53,6 +54,8 @@ urlpatterns = [
     path('admin/handbags/<int:pk>/', views.admin_handbag_detail, name='api-admin-handbag-detail'),
     path('admin/clothes/', views.admin_clothes_list, name='api-admin-clothes-list'),
     path('admin/clothes/<int:pk>/', views.admin_clothes_detail, name='api-admin-clothes-detail'),
+    path('admin/clothes-categories/', views.admin_clothes_category_list, name='api-admin-clothes-category-list'),
+    path('admin/clothes-categories/<int:pk>/', views.admin_clothes_category_detail, name='api-admin-clothes-category-detail'),
     path('admin/catalogue/<str:item_type>/<int:pk>/move/', views.admin_move_catalogue_item, name='api-admin-move-catalogue-item'),
 
     # --- 9. Admin Services / Gallery / Offers ---
@@ -70,6 +73,8 @@ urlpatterns = [
     path('admin/inventory/sales/', views.admin_sales_list, name='api-admin-sales'),
     path('admin/inventory/clear-sales/', views.admin_clear_sales, name='api-admin-clear-sales'),
     path('admin/expenses/', views.admin_add_expense, name='api-admin-expense'),
+    path('admin/service-sales/', views.admin_service_sale_list, name='api-admin-service-sale-list'),
+    path('admin/service-sales/<int:pk>/', views.admin_service_sale_detail, name='api-admin-service-sale-detail'),
     path('admin/cash-flow/', views.admin_cash_flow, name='api-admin-cash-flow'),
 
     # --- 11. Admin Users ---
@@ -127,15 +132,4 @@ urlpatterns = [
     path('orders/<int:pk>/cancel/', views.cancel_order, name='api-cancel-order'),
     path('admin/orders/', views.admin_order_list, name='api-admin-orders'),
     path('admin/orders/<int:pk>/', views.admin_order_detail, name='api-admin-order-detail'),
-
-    # --- 18. Luxury ---
-    path('luxury/', views.luxury_item_list, name='api-luxury-list'),
-    path('luxury/<int:pk>/', views.luxury_item_detail, name='api-luxury-detail'),
-    path('luxury/<int:pk>/inquire/', views.luxury_inquiry_create, name='api-luxury-inquire'),
-    path('luxury/inquiries/my/', views.my_luxury_inquiries, name='api-my-luxury-inquiries'),
-    path('admin/luxury/', views.admin_luxury_item_list, name='api-admin-luxury-list'),
-    path('admin/luxury/<int:pk>/', views.admin_luxury_item_detail, name='api-admin-luxury-detail'),
-    path('admin/luxury-inquiries/', views.admin_luxury_inquiry_list, name='api-admin-luxury-inquiry-list'),
-    path('admin/luxury-inquiries/<int:pk>/', views.admin_luxury_inquiry_detail, name='api-admin-luxury-inquiry-detail'),
-    path('admin/luxury-inquiries/<int:pk>/mark-sold/', views.admin_luxury_inquiry_mark_sold, name='api-admin-luxury-mark-sold'),
 ]

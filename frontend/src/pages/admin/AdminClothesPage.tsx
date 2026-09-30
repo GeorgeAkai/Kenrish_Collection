@@ -6,6 +6,7 @@ export default function AdminClothesPage() {
       title="Clothes"
       endpoint="/admin/clothes"
       itemType="clothes"
+      withCategories
       extraFields={[
         { name: 'size', label: 'Size' },
         { name: 'color', label: 'Color' },

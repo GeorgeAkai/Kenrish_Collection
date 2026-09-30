@@ -36,6 +36,8 @@ interface Props {
   /** Category this admin page manages — enables moving items to other categories. */
   itemType?: CategoryType
   extraFields?: Field[]
+  /** Clothes only: show a category picker and column (Men / Women / Kids / ...). */
+  withCategories?: boolean
 }
 
 const CATEGORY_LABELS: Record<CategoryType, string> = {
@@ -66,7 +68,9 @@ function StatusBadge({ published }: { published: boolean }) {
   )
 }
 
-export default function CatalogueAdmin({ title, endpoint, itemType, extraFields = [] }: Props) {
+interface CategoryOption { id: number; name: string }
+
+export default function CatalogueAdmin({ title, endpoint, itemType, extraFields = [], withCategories }: Props) {
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<Item | null>(null)
@@ -81,6 +85,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
   const [moving, setMoving] = useState<Item | null>(null)
   const [moveTarget, setMoveTarget] = useState<CategoryType | null>(null)
   const [moveLoading, setMoveLoading] = useState(false)
+  const [categories, setCategories] = useState<CategoryOption[]>([])
   const del = useConfirm<number>()
   const toast = useToast()
 
@@ -97,6 +102,10 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
   }
 
   useEffect(() => { fetch() }, [endpoint])
+  useEffect(() => {
+    if (!withCategories) return
+    api.get<CategoryOption[]>('/admin/clothes-categories/').then(r => setCategories(r.data)).catch(console.error)
+  }, [withCategories])
 
   function openCreate() {
     setEditing(null)
@@ -111,6 +120,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
     setEditing(item)
     const f: Record<string, string> = {}
     allFields.forEach(field => { f[field.name] = String(item[field.name] ?? '') })
+    if (withCategories) f.category = item.category ? String(item.category) : ''
     setForm(f)
     setIsPublished(item.is_published !== false)
     setImageFile(null)
@@ -173,6 +183,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
       const fd = new FormData()
       allFields.forEach(f => { if (form[f.name]) fd.append(f.name, form[f.name]) })
       fd.append('is_published', String(isPublished))
+      if (withCategories) fd.append('category', form.category ?? '')
       if (imageFile) fd.append('image', imageFile)
       const headers = { 'Content-Type': 'multipart/form-data' }
       if (editing) {
@@ -233,6 +244,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
               <thead className="bg-muted/60">
                 <tr>
                   <th className="text-left px-4 py-3 font-medium">Name</th>
+                  {withCategories && <th className="text-left px-4 py-3 font-medium">Category</th>}
                   <th className="text-left px-4 py-3 font-medium">Price</th>
                   <th className="text-left px-4 py-3 font-medium">Stock</th>
                   <th className="text-left px-4 py-3 font-medium">Rating</th>
@@ -251,6 +263,9 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
                         <span className="font-medium">{item.name}</span>
                       </div>
                     </td>
+                    {withCategories && (
+                      <td className="px-4 py-3 text-muted-foreground">{(item.category_name as string | null) ?? 'Uncategorised'}</td>
+                    )}
                     <td className="px-4 py-3 font-medium">{formatKES(item.price)}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${stockClass(item)}`}>
@@ -300,7 +315,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
                   </tr>
                 ))}
                 {items.length === 0 && (
-                  <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No items yet. Add your first one!</td></tr>
+                  <tr><td colSpan={withCategories ? 7 : 6} className="px-4 py-12 text-center text-muted-foreground">No items yet. Add your first one!</td></tr>
                 )}
               </tbody>
             </table>
@@ -315,6 +330,9 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
                   <div className="flex-1 min-w-0">
                     <p className="product-title font-semibold truncate">{item.name}</p>
                     <p className="product-price font-medium text-sm mt-0.5">{formatKES(item.price)}</p>
+                    {withCategories && (
+                      <p className="text-xs text-muted-foreground">{(item.category_name as string | null) ?? 'Uncategorised'}</p>
+                    )}
                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${stockClass(item)}`}>
                         {item.stock_quantity} in stock
@@ -391,6 +409,16 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
                   )}
                 </div>
               ))}
+              {withCategories && (
+                <div>
+                  <label className="block text-sm font-medium mb-1.5" htmlFor="cat-category">Category</label>
+                  <select id="cat-category" className="input-field" value={form.category ?? ''}
+                    onChange={e => setForm(prev => ({ ...prev, category: e.target.value }))}>
+                    <option value="">Uncategorised</option>
+                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium mb-1.5">Image</label>
                 <FileDropZone

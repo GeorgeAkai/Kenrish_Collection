@@ -26,6 +26,14 @@ export interface Handbag {
   updated_at?: string
 }
 
+export interface ClothesCategory {
+  id: number
+  name: string
+  slug: string
+  sort_order: number
+  item_count: number
+}
+
 export interface Clothes {
   id: number
   name: string
@@ -36,6 +44,9 @@ export interface Clothes {
   stock_quantity: number
   reorder_level: number
   cost_price?: string
+  category?: number | null
+  category_name?: string | null
+  category_slug?: string | null
   size?: string
   color?: string
   created_at?: string

@@ -21,18 +21,9 @@ const STATUS_BADGE: Record<OrderStatus, string> = {
   CANCELLED: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400',
 }
 
-type Shop = 'beauty' | 'fashion'
-
-function orderMatchesShop(order: Order, shop?: Shop) {
-  if (!shop) return true
-  return order.items.some(i =>
-    shop === 'beauty' ? i.item_type === 'product' : i.item_type === 'handbag' || i.item_type === 'clothes'
-  )
-}
-
-export default function AdminOrdersPage({ shop }: { shop?: Shop } = {}) {
-  const [ordersRaw, setOrders] = useState<Order[]>([])
-  const orders = ordersRaw.filter(o => orderMatchesShop(o, shop))
+// Orders can mix items from any shop, so this page is deliberately not shop-scoped.
+export default function AdminOrdersPage() {
+  const [orders, setOrders] = useState<Order[]>([])
   const [pendingCount, setPendingCount] = useState(0)
   const [tab, setTab] = useState<Tab>('')
   const [loading, setLoading] = useState(true)

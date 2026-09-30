@@ -1,25 +1,22 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { formatKES } from '@/lib/utils'
 
+interface ShopTotals { beauty: number | string; fashion: number | string }
+
 interface Props {
-  totals: { beauty: number; fashion: number; luxury: number }
+  totals: ShopTotals
+  expenses?: ShopTotals
   height?: number
 }
 
-const SHOP_COLORS: Record<string, string> = {
-  Beauty: 'var(--chart-1)',
-  Fashion: 'var(--chart-2)',
-  Luxury: 'var(--chart-3)',
-}
-
-export default function ShopBreakdownChart({ totals, height = 220 }: Props) {
+/** Income (and, when given, expenses) for Beauty next to Fashion. */
+export default function ShopBreakdownChart({ totals, expenses, height = 220 }: Props) {
   const data = [
-    { shop: 'Beauty', revenue: totals.beauty },
-    { shop: 'Fashion', revenue: totals.fashion },
-    { shop: 'Luxury', revenue: totals.luxury },
+    { shop: 'Beauty', Income: Number(totals.beauty), Expenses: Number(expenses?.beauty ?? 0) },
+    { shop: 'Fashion', Income: Number(totals.fashion), Expenses: Number(expenses?.fashion ?? 0) },
   ]
-  if (data.every(d => d.revenue === 0)) {
-    return <p className="text-center text-muted-foreground py-10">No shop revenue recorded for this period yet.</p>
+  if (data.every(d => d.Income === 0 && d.Expenses === 0)) {
+    return <p className="text-center text-muted-foreground py-10">No shop activity recorded for this period yet.</p>
   }
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -28,9 +25,9 @@ export default function ShopBreakdownChart({ totals, height = 220 }: Props) {
         <XAxis dataKey="shop" tick={{ fontSize: 11 }} />
         <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(Number(v) / 1000).toFixed(0)}k`} />
         <Tooltip formatter={(v) => formatKES(Number(v))} />
-        <Bar dataKey="revenue" radius={[4, 4, 0, 0]}>
-          {data.map(d => <Cell key={d.shop} fill={SHOP_COLORS[d.shop]} />)}
-        </Bar>
+        {expenses && <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />}
+        <Bar dataKey="Income" fill="var(--success)" radius={[4, 4, 0, 0]} />
+        {expenses && <Bar dataKey="Expenses" fill="var(--danger)" radius={[4, 4, 0, 0]} />}
       </BarChart>
     </ResponsiveContainer>
   )

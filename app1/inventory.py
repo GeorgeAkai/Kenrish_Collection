@@ -41,6 +41,7 @@ def add_stock(item, quantity, unit_cost, actor, notes='', new_price=None):
             description=f'Stock purchase: {item.name} (Qty: {quantity})',
             amount=Decimal(str(quantity)) * Decimal(str(unit_cost)),
             category='Stock Purchase',
+            shop='beauty' if isinstance(item, Product) else 'fashion',
             created_by=actor,
         )
         return tx

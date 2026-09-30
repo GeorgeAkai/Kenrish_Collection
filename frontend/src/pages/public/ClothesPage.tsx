@@ -5,7 +5,7 @@ import api from '@/lib/axios'
 import CatalogueCard from '@/components/CatalogueCard'
 import { useWishlist } from '@/hooks/useWishlist'
 import { useToast } from '@/contexts/ToastContext'
-import type { Clothes, PaginatedResponse } from '@/lib/types'
+import type { Clothes, ClothesCategory, PaginatedResponse } from '@/lib/types'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function ClothesPage() {
@@ -14,6 +14,8 @@ export default function ClothesPage() {
   const [params, setParams] = useSearchParams()
   const page = parseInt(params.get('page') || '1')
   const search = params.get('search') || ''
+  const category = params.get('category') || ''
+  const [categories, setCategories] = useState<ClothesCategory[]>([])
   const [searchInput, setSearchInput] = useState(search)
   const [data, setData] = useState<PaginatedResponse<Clothes> | null>(null)
   const [loading, setLoading] = useState(true)
@@ -26,6 +28,7 @@ export default function ClothesPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
     const query = new URLSearchParams({ page: String(page) })
     if (search) query.set('search', search)
+    if (category) query.set('category', category)
     api.get(`/clothes/?${query}`)
       .then(r => setData(r.data))
       .catch(() => {
@@ -33,16 +36,31 @@ export default function ClothesPage() {
         toast.error("Couldn't load clothes. Check your connection and try again.")
       })
       .finally(() => setLoading(false))
-  }, [page, search])
+  }, [page, search, category])
+
+  useEffect(() => {
+    api.get<ClothesCategory[]>('/clothes/categories/').then(r => setCategories(r.data)).catch(() => {})
+  }, [])
+
+  /** Keep the active search/category when paging or filtering. */
+  function go(next: { page?: number; search?: string; category?: string }) {
+    const q: Record<string, string> = {}
+    const sr = next.search ?? search
+    const cat = next.category ?? category
+    if (sr) q.search = sr
+    if (cat) q.category = cat
+    if (next.page && next.page > 1) q.page = String(next.page)
+    setParams(q)
+  }
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault()
-    setParams(searchInput ? { search: searchInput } : {})
+    go({ search: searchInput })
   }
 
   function clearSearch() {
     setSearchInput('')
-    setParams({})
+    go({ search: '' })
   }
 
   return (
@@ -77,6 +95,25 @@ export default function ClothesPage() {
               </button>
             )}
           </form>
+
+          {categories.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2 mt-5" role="group" aria-label="Category">
+              {[{ slug: '', name: 'All' }, ...categories].map(c => (
+                <button
+                  key={c.slug || 'all'}
+                  onClick={() => go({ category: c.slug })}
+                  aria-pressed={category === c.slug}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                    category === c.slug
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'border-border text-muted-foreground hover:text-foreground bg-background'
+                  }`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -118,7 +155,7 @@ export default function ClothesPage() {
               <div className="flex justify-center items-center gap-3 mt-10">
                 <button
                   disabled={!data.previous}
-                  onClick={() => setParams(search ? { page: String(page - 1), search } : { page: String(page - 1) })}
+                  onClick={() => go({ page: page - 1 })}
                   className="btn-modern btn-modern--secondary"
                 >
                   {t('common.previous')}
@@ -126,7 +163,7 @@ export default function ClothesPage() {
                 <span className="text-sm text-muted-foreground">{t('common.page')} {page}</span>
                 <button
                   disabled={!data.next}
-                  onClick={() => setParams(search ? { page: String(page + 1), search } : { page: String(page + 1) })}
+                  onClick={() => go({ page: page + 1 })}
                   className="btn-modern btn-modern--primary"
                 >
                   {t('common.next')}

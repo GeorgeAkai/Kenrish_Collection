@@ -3,7 +3,7 @@ import { STORES, type StoreId } from '@/lib/stores'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 /**
- * The three-store selector. `variant="bar"` is the desktop utility bar pill group;
+ * The two-store selector. `variant="bar"` is the desktop utility bar pill group;
  * `variant="tabs"` is the full-width, equal-width row under the phone header.
  */
 export default function StoreSwitcher({ active, variant = 'bar' }: { active: StoreId | null; variant?: 'bar' | 'tabs' }) {
@@ -13,7 +13,7 @@ export default function StoreSwitcher({ active, variant = 'bar' }: { active: Sto
     <nav
       aria-label="Stores"
       className={tabs
-        ? 'grid grid-cols-3 gap-1 p-1 rounded-full bg-secondary'
+        ? 'grid grid-cols-2 gap-1 p-1 rounded-full bg-secondary'
         : 'inline-flex gap-1 p-1 rounded-full bg-card border border-border'}
     >
       {STORES.map(({ id, labelKey, shortKey, href, icon: Icon }) => {

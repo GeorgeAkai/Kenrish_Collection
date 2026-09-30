@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import {
   Menu, X, Sun, Moon, Heart, MapPin, Phone, Clock, Search, ChevronRight, ChevronDown,
   UserRound, ClipboardList, KeyRound, LogOut, ShieldCheck, Wallet, CalendarDays,
-  ShoppingBag, Images, Info, Package, Shirt, Gem,
+  ShoppingBag, Images, Info, Package, Shirt,
 } from 'lucide-react'
 import api from '@/lib/axios'
 import { LOGO_URL } from '@/lib/brand'
@@ -205,11 +205,6 @@ function MobileDrawer({ onClose, wishCount, hasOffers }: { onClose: () => void; 
               <Link to="/orders" className={row}>
                 <ClipboardList size={18} strokeWidth={1.75} className="text-muted-foreground" />
                 <span className="flex-1">{t('nav.orders')}</span>
-                <ChevronRight size={16} className="text-muted-foreground" />
-              </Link>
-              <Link to="/luxury/inquiries" className={row}>
-                <Gem size={18} strokeWidth={1.75} className="text-muted-foreground" />
-                <span className="flex-1">{t('nav.luxuryInquiries')}</span>
                 <ChevronRight size={16} className="text-muted-foreground" />
               </Link>
               <Link to="/change-password" className={row}>
@@ -426,7 +421,6 @@ function SiteFooter({ hasOffers }: { hasOffers: boolean }) {
         { to: '/fashion', label: t('store.fashion') },
         { to: '/handbags', label: t('footer.handbags') },
         { to: '/clothes', label: t('footer.clothing') },
-        { to: '/luxury', label: t('store.luxury') },
         ...(hasOffers ? [{ to: '/offers', label: t('footer.currentOffers') }] : []),
       ],
     },

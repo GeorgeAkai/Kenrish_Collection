@@ -10,7 +10,7 @@ from app1.models import (
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
-    LuxuryItem, LuxuryInquiry,
+    ClothesCategory, ServiceSale,
 )
 
 
@@ -156,12 +156,35 @@ class HandbagAdminSerializer(serializers.ModelSerializer):
 # Clothes
 # ---------------------------------------------------------------------------
 
+class ClothesCategorySerializer(serializers.ModelSerializer):
+    item_count = serializers.IntegerField(source='clothes.count', read_only=True)
+
+    class Meta:
+        model = ClothesCategory
+        fields = ['id', 'name', 'slug', 'sort_order', 'item_count']
+        read_only_fields = ['slug']
+
+    def validate_name(self, value):
+        value = value.strip()
+        if not value:
+            raise serializers.ValidationError('Name is required.')
+        qs = ClothesCategory.objects.filter(name__iexact=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError('A category with this name already exists.')
+        return value
+
+
 class ClothesListSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
+    category_name = serializers.CharField(source='category.name', read_only=True, default=None)
+    category_slug = serializers.CharField(source='category.slug', read_only=True, default=None)
 
     class Meta:
         model = Clothes
-        fields = ['id', 'name', 'price', 'image', 'average_rating', 'stock_quantity', 'reorder_level']
+        fields = ['id', 'name', 'price', 'image', 'average_rating', 'stock_quantity', 'reorder_level',
+                  'category', 'category_name', 'category_slug']
 
     def get_image(self, obj):
         request = self.context.get('request')
@@ -172,6 +195,8 @@ class ClothesListSerializer(serializers.ModelSerializer):
 
 class ClothesDetailSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
+    category_name = serializers.CharField(source='category.name', read_only=True, default=None)
+    category_slug = serializers.CharField(source='category.slug', read_only=True, default=None)
 
     class Meta:
         model = Clothes
@@ -351,8 +376,37 @@ class InventoryItemSerializer(serializers.Serializer):
 class ExpenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Expense
-        fields = ['id', 'description', 'amount', 'category', 'created_at']
+        fields = ['id', 'description', 'amount', 'category', 'shop', 'created_at']
         read_only_fields = ['created_at']
+
+
+# ---------------------------------------------------------------------------
+# Service sales (Kenrish Beauty)
+# ---------------------------------------------------------------------------
+
+class ServiceSaleSerializer(serializers.ModelSerializer):
+    created_by_username = serializers.CharField(source='created_by.username', read_only=True)
+    payment_method_display = serializers.CharField(source='get_payment_method_display', read_only=True)
+
+    class Meta:
+        model = ServiceSale
+        fields = [
+            'id', 'service', 'service_name', 'amount', 'payment_method', 'payment_method_display',
+            'customer_name', 'customer_phone', 'notes', 'served_at', 'created_at', 'created_by_username',
+        ]
+        read_only_fields = ['created_at']
+        extra_kwargs = {'service_name': {'required': False}}
+
+    def validate(self, attrs):
+        service = attrs.get('service', getattr(self.instance, 'service', None))
+        name = attrs.get('service_name') or getattr(self.instance, 'service_name', '')
+        if not service and not name:
+            raise serializers.ValidationError({'service': 'Pick a service or enter a service name.'})
+        if service and not attrs.get('service_name') and 'service' in attrs:
+            attrs['service_name'] = service.name
+        if attrs.get('amount') is not None and attrs['amount'] <= 0:
+            raise serializers.ValidationError({'amount': 'Amount must be greater than zero.'})
+        return attrs
 
 
 # ---------------------------------------------------------------------------
@@ -543,77 +597,3 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['avatar', 'bio', 'phone']
-
-
-# ---------------------------------------------------------------------------
-# Luxury
-# ---------------------------------------------------------------------------
-
-class LuxuryItemListSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-
-    class Meta:
-        model = LuxuryItem
-        fields = ['id', 'name', 'price', 'image', 'availability', 'edition_size']
-
-    def get_image(self, obj):
-        request = self.context.get('request')
-        if obj.image and request:
-            return request.build_absolute_uri(obj.image.url)
-        return None
-
-
-class LuxuryItemDetailSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-
-    class Meta:
-        model = LuxuryItem
-        fields = '__all__'
-
-    def get_image(self, obj):
-        request = self.context.get('request')
-        if obj.image and request:
-            return request.build_absolute_uri(obj.image.url)
-        return None
-
-
-class LuxuryItemAdminSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(required=False)
-
-    class Meta:
-        model = LuxuryItem
-        fields = '__all__'
-        read_only_fields = ['created_at', 'updated_at']
-
-
-class LuxuryInquirySerializer(serializers.ModelSerializer):
-    item_name = serializers.CharField(source='item.name', read_only=True)
-    status_display = serializers.CharField(source='get_status_display', read_only=True)
-
-    class Meta:
-        model = LuxuryInquiry
-        fields = [
-            'id', 'item', 'item_name', 'phone', 'whatsapp', 'preferred_viewing_date',
-            'status', 'status_display', 'admin_notes', 'created_at',
-        ]
-        # `item` comes from the URL (see luxury_inquiry_create), not the request body.
-        read_only_fields = ['item', 'status', 'admin_notes', 'created_at']
-
-
-class LuxuryInquiryAdminSerializer(serializers.ModelSerializer):
-    item_name = serializers.CharField(source='item.name', read_only=True)
-    customer_username = serializers.CharField(source='customer.username', read_only=True)
-    customer_display = serializers.SerializerMethodField()
-    status_display = serializers.CharField(source='get_status_display', read_only=True)
-
-    class Meta:
-        model = LuxuryInquiry
-        fields = [
-            'id', 'item', 'item_name', 'customer', 'customer_username', 'customer_display',
-            'phone', 'whatsapp', 'preferred_viewing_date', 'status', 'status_display',
-            'admin_notes', 'created_at',
-        ]
-
-    def get_customer_display(self, obj):
-        full = obj.customer.get_full_name()
-        return full if full else obj.customer.username

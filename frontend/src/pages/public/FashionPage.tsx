@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import api from '@/lib/axios'
 import CatalogueCard from '@/components/CatalogueCard'
 import { useWishlist } from '@/hooks/useWishlist'
-import type { Handbag, Clothes, PaginatedResponse } from '@/lib/types'
+import type { Handbag, Clothes, ClothesCategory, PaginatedResponse } from '@/lib/types'
 
-type ChipKey = 'all' | 'handbags' | 'clothes'
+/** 'all', 'handbags', or a clothes category slug (men, women, kids, ...). */
+type ChipKey = string
 type WishlistType = 'handbags' | 'clothes'
 
 interface FashionItem {
@@ -16,34 +17,43 @@ interface FashionItem {
   stock_quantity: number
   type: WishlistType
   href: string
+  categorySlug?: string | null
+  categoryName?: string | null
 }
-
-const CHIPS: { key: ChipKey; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'handbags', label: 'Handbags' },
-  { key: 'clothes', label: 'Attire' },
-]
 
 export default function FashionPage() {
   const [items, setItems] = useState<FashionItem[]>([])
   const [loading, setLoading] = useState(true)
   const [chip, setChip] = useState<ChipKey>('all')
+  const [categories, setCategories] = useState<ClothesCategory[]>([])
   const { isInWishlist, toggle } = useWishlist()
 
   useEffect(() => {
     Promise.all([
-      api.get<PaginatedResponse<Handbag>>('/handbags/'),
-      api.get<PaginatedResponse<Clothes>>('/clothes/'),
-    ]).then(([handbags, clothes]) => {
+      api.get<PaginatedResponse<Handbag>>('/handbags/?page_size=100'),
+      api.get<PaginatedResponse<Clothes>>('/clothes/?page_size=100'),
+      api.get<ClothesCategory[]>('/clothes/categories/'),
+    ]).then(([handbags, clothes, cats]) => {
+      setCategories(cats.data)
       const merged: FashionItem[] = [
         ...handbags.data.results.map(h => ({ ...h, type: 'handbags' as const, href: `/handbags/${h.id}` })),
-        ...clothes.data.results.map(c => ({ ...c, type: 'clothes' as const, href: `/clothes/${c.id}` })),
+        ...clothes.data.results.map(c => ({
+          ...c, type: 'clothes' as const, href: `/clothes/${c.id}`,
+          categorySlug: c.category_slug, categoryName: c.category_name,
+        })),
       ]
       setItems(merged)
     }).catch(console.error).finally(() => setLoading(false))
   }, [])
 
-  const filtered = chip === 'all' ? items : items.filter(i => i.type === chip)
+  const chips: { key: ChipKey; label: string }[] = [
+    { key: 'all', label: 'All' },
+    { key: 'handbags', label: 'Handbags' },
+    ...categories.map(c => ({ key: c.slug, label: c.name })),
+  ]
+  const filtered = chip === 'all' ? items
+    : chip === 'handbags' ? items.filter(i => i.type === 'handbags')
+    : items.filter(i => i.type === 'clothes' && i.categorySlug === chip)
 
   return (
     <div className="max-w-6xl mx-auto px-5 py-12">
@@ -51,11 +61,11 @@ export default function FashionPage() {
         <h1 className="text-4xl font-semibold mb-3" style={{ fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: '-0.01em' }}>
           Fashion
         </h1>
-        <p className="text-muted-foreground max-w-lg">Handbags and attire — browse the full collection in one place.</p>
+        <p className="text-muted-foreground max-w-lg">Handbags and attire for men, women and kids — browse the full collection in one place.</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mb-8">
-        {CHIPS.map(({ key, label }) => (
+        {chips.map(({ key, label }) => (
           <button
             key={key}
             onClick={() => setChip(key)}
@@ -82,6 +92,7 @@ export default function FashionPage() {
               key={`${item.type}-${item.id}`}
               item={item}
               href={item.href}
+              category={item.categoryName ?? undefined}
               onWishlist={id => toggle(item.type, id)}
               inWishlist={isInWishlist(item.type, item.id)}
             />

@@ -31,8 +31,38 @@ class Product(models.Model):
         self.save()
 
 
+class ClothesCategory(models.Model):
+    """Admin-managed grouping for the Fashion shop's clothes (Men, Women, Kids, ...)."""
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=120, unique=True, blank=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['sort_order', 'name']
+        verbose_name_plural = 'clothes categories'
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            from django.utils.text import slugify
+            base = slugify(self.name) or 'category'
+            slug, n = base, 2
+            while ClothesCategory.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f'{base}-{n}'
+                n += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+
 # clothes model (now inventory-enabled)
 class Clothes(models.Model):
+    # PROTECT: a category that still has clothes can't be deleted out from under them.
+    category = models.ForeignKey(
+        ClothesCategory, on_delete=models.PROTECT, null=True, blank=True, related_name='clothes',
+    )
     name = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -187,6 +217,55 @@ class Service(models.Model):
         self.save()
 
 
+class ServiceSale(models.Model):
+    """A salon service that was performed and paid for (Kenrish Beauty revenue).
+
+    Saving (or editing) one keeps a single matching CashFlow revenue row in sync;
+    deleting it removes that row via the CASCADE on CashFlow.reference_service_sale.
+    """
+    PAYMENT_CHOICES = [
+        ('cash', 'Cash'),
+        ('mpesa', 'M-Pesa'),
+        ('card', 'Card'),
+        ('other', 'Other'),
+    ]
+
+    service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True, related_name='sales')
+    # Snapshot so the record survives the service being renamed or deleted.
+    service_name = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+    payment_method = models.CharField(max_length=10, choices=PAYMENT_CHOICES, default='cash')
+    customer_name = models.CharField(max_length=255, blank=True)
+    customer_phone = models.CharField(max_length=20, blank=True)
+    notes = models.TextField(blank=True)
+    served_at = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-served_at', '-id']
+
+    def save(self, *args, **kwargs):
+        if not self.service_name and self.service_id:
+            self.service_name = self.service.name
+        super().save(*args, **kwargs)
+        CashFlow.objects.update_or_create(
+            reference_service_sale=self,
+            defaults={
+                'transaction_type': 'REVENUE',
+                'shop': 'beauty',
+                'amount': self.amount,
+                'description': f'Service: {self.service_name}',
+                'created_by': self.created_by,
+            },
+        )
+        # created_at is auto_now_add, so backdate via update() to keep analytics on the day served.
+        CashFlow.objects.filter(reference_service_sale=self).update(created_at=self.served_at)
+
+    def __str__(self):
+        return f'{self.service_name} - Ksh {self.amount}'
+
+
 class GalleryImage(models.Model):
     SERVICE_CHOICES = [
         ('hairdressing', 'Hairdressing'),
@@ -198,7 +277,6 @@ class GalleryImage(models.Model):
     SHOP_CHOICES = [
         ('beauty', 'Beauty'),
         ('fashion', 'Fashion'),
-        ('luxury', 'Luxury'),
     ]
     service = models.CharField(max_length=20, choices=SERVICE_CHOICES, blank=True, null=True)
     shop = models.CharField(max_length=20, choices=SHOP_CHOICES, default='beauty')
@@ -354,7 +432,6 @@ class CashFlow(models.Model):
     SHOP_CHOICES = [
         ('beauty', 'Beauty'),
         ('fashion', 'Fashion'),
-        ('luxury', 'Luxury'),
     ]
 
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
@@ -364,6 +441,7 @@ class CashFlow(models.Model):
     # and are treated as legacy Fashion revenue by the analytics layer.
     shop = models.CharField(max_length=20, choices=SHOP_CHOICES, null=True, blank=True)
     reference_sale = models.ForeignKey(Sale, on_delete=models.CASCADE, null=True, blank=True)
+    reference_service_sale = models.ForeignKey('ServiceSale', on_delete=models.CASCADE, null=True, blank=True)
     reference_transaction = models.ForeignKey(InventoryTransaction, on_delete=models.CASCADE, null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -388,6 +466,8 @@ class Expense(models.Model):
     description = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.CharField(max_length=100, default='General')
+    # Null = shared/unattributed: counted in the Executive totals only.
+    shop = models.CharField(max_length=20, choices=[('beauty', 'Beauty'), ('fashion', 'Fashion')], null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -572,62 +652,3 @@ class PasswordChangeCode(models.Model):
 
     def is_expired(self):
         return timezone.now() > self.expires_at
-
-
-class LuxuryItem(models.Model):
-    """Kept as its own model rather than a fourth arm of the
-    Product/Handbag/Clothes polymorphism — Luxury has no cart, no stock, and
-    a different field shape (material/dimensions/provenance/edition), so
-    forcing it into that pattern would only add debt."""
-
-    AVAILABILITY_CHOICES = [
-        ('available', 'Available'),
-        ('reserved', 'Reserved'),
-        ('sold', 'Sold'),
-    ]
-
-    name = models.CharField(max_length=255)
-    description = models.TextField()
-    image = models.ImageField(upload_to="luxury_images/", null=True, blank=True)
-    material = models.CharField(max_length=255, blank=True)
-    dimensions = models.CharField(max_length=255, blank=True)
-    provenance = models.TextField(blank=True)
-    edition_size = models.PositiveIntegerField(null=True, blank=True)
-    price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # null = price on application
-    availability = models.CharField(max_length=20, choices=AVAILABILITY_CHOICES, default='available')
-    is_published = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return self.name
-
-
-class LuxuryInquiry(models.Model):
-    STATUS_PENDING = 'PENDING'
-    STATUS_CONTACTED = 'CONTACTED'
-    STATUS_CLOSED = 'CLOSED'
-    STATUS_CHOICES = [
-        (STATUS_PENDING, 'Pending'),
-        (STATUS_CONTACTED, 'Contacted'),
-        (STATUS_CLOSED, 'Closed'),
-    ]
-
-    item = models.ForeignKey(LuxuryItem, on_delete=models.CASCADE, related_name='inquiries')
-    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='luxury_inquiries')
-    phone = models.CharField(max_length=20)
-    whatsapp = models.CharField(max_length=20, blank=True)
-    preferred_viewing_date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    admin_notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.customer.username} — {self.item.name} ({self.status})"

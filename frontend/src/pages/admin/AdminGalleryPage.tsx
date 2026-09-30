@@ -16,7 +16,7 @@ function isVideoFile(file: File) {
   return file.type.startsWith('video/')
 }
 
-type Shop = 'beauty' | 'fashion' | 'luxury'
+type Shop = 'beauty' | 'fashion'
 
 export default function AdminGalleryPage({ shop }: { shop?: Shop } = {}) {
   const [items, setItems] = useState<GalleryImage[]>([])

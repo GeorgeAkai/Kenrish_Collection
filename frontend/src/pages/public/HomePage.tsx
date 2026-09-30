@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '@/lib/axios'
 import { formatKES } from '@/lib/utils'
-import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Truck, ShieldCheck, Headphones, Search, X, Shirt, Gem, ArrowRight } from 'lucide-react'
+import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Truck, ShieldCheck, Headphones, Search, X, Shirt, ArrowRight } from 'lucide-react'
 import type { Product, Handbag, Clothes, Offer, Service } from '@/lib/types'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { LOGO_URL } from '@/lib/brand'
@@ -284,11 +284,11 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ═══ THREE SHOPS ════════════════════════════════════════════════ */}
+      {/* ═══ TWO SHOPS ══════════════════════════════════════════════════ */}
       <section className="py-20 px-5 bg-background">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">One Boutique, Three Worlds</p>
+            <p className="text-xs font-semibold text-primary mb-2.5 tracking-[0.18em] uppercase">One Boutique, Two Worlds</p>
             <h2
               className="text-3xl lg:text-4xl font-semibold"
               style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
@@ -297,7 +297,7 @@ export default function HomePage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {[
               {
                 key: 'beauty', Icon: Scissors, title: 'Kenrish Beauty', href: '/beauty',
@@ -308,11 +308,6 @@ export default function HomePage() {
                 key: 'fashion', Icon: Shirt, title: 'Kenrish Fashion', href: '/fashion',
                 blurb: 'Handbags and attire, curated for every season.',
                 cta: 'Explore Fashion',
-              },
-              {
-                key: 'luxury', Icon: Gem, title: 'Kenrish Luxury', href: '/luxury',
-                blurb: 'Rare pieces, by inquiry only — provenance, materials and dimensions on every item.',
-                cta: 'Explore Luxury',
               },
             ].map(shop => (
               <div

@@ -8,7 +8,7 @@ import {
   Package, ShoppingBag, Shirt, Warehouse,
   Scissors, Image, Tag, Users, FileText, LogOut, Menu, X,
   Sun, Moon, ChevronRight, ChevronDown, CalendarCheck, ClipboardList, Settings2, PackagePlus,
-  Gem, MessageSquareText, TrendingUp, ArrowRight,
+  TrendingUp, ArrowRight, BarChart3, Receipt, Tags,
 } from 'lucide-react'
 
 interface NavLeaf { to: string; label: string; icon: LucideIcon; end?: boolean }
@@ -17,12 +17,15 @@ type NavEntry = ({ kind: 'leaf' } & NavLeaf) | ({ kind: 'group' } & NavGroup)
 
 const NAV: NavEntry[] = [
   { kind: 'leaf', to: '/admin/executive', label: 'Executive Dashboard', icon: TrendingUp, end: true },
+  // Orders can hold items from any shop, so it lives at the top level rather than under one store.
+  { kind: 'leaf', to: '/admin/orders', label: 'Orders', icon: ClipboardList },
   {
     kind: 'group', label: 'Kenrish Beauty Dashboard', icon: Scissors,
     children: [
+      { to: '/admin/beauty/analytics', label: 'Analytics', icon: BarChart3 },
       { to: '/admin/products', label: 'Products', icon: Package },
       { to: '/admin/services', label: 'Services', icon: Scissors },
-      { to: '/admin/beauty/orders', label: 'Orders', icon: ClipboardList },
+      { to: '/admin/beauty/service-sales', label: 'Service Sales', icon: Receipt },
       { to: '/admin/beauty/staging', label: 'Draft Products', icon: PackagePlus },
       { to: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
       { to: '/admin/beauty/gallery', label: 'Gallery', icon: Image },
@@ -32,21 +35,12 @@ const NAV: NavEntry[] = [
   {
     kind: 'group', label: 'Kenrish Fashion', icon: Shirt,
     children: [
+      { to: '/admin/fashion/analytics', label: 'Analytics', icon: BarChart3 },
       { to: '/admin/clothes', label: 'Clothes', icon: Shirt },
+      { to: '/admin/fashion/categories', label: 'Clothes Categories', icon: Tags },
       { to: '/admin/handbags', label: 'Handbags', icon: ShoppingBag },
       { to: '/admin/fashion/inventory', label: 'Inventory', icon: Warehouse },
       { to: '/admin/fashion/gallery', label: 'Gallery', icon: Image },
-    ],
-  },
-  {
-    kind: 'group', label: 'Kenrish Luxury', icon: Gem,
-    children: [
-      { to: '/admin/luxury/draft-products', label: 'Draft Products', icon: PackagePlus },
-      { to: '/admin/luxury/inventory', label: 'Inventory', icon: Warehouse },
-      { to: '/admin/luxury/gallery', label: 'Gallery', icon: Image },
-      // Not in the original spec, but dropping it would remove the concierge
-      // inquiry inbox from the admin UI entirely -- kept here instead.
-      { to: '/admin/luxury-inquiries', label: 'Inquiries', icon: MessageSquareText },
     ],
   },
   { kind: 'leaf', to: '/admin/offers', label: 'Offers', icon: Tag },
@@ -62,8 +56,6 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/products': 'Products',
   '/admin/handbags': 'Handbags',
   '/admin/clothes': 'Clothes',
-  '/admin/luxury': 'Luxury',
-  '/admin/luxury-inquiries': 'Luxury Inquiries',
   '/admin/inventory': 'Inventory',
   '/admin/staging': 'Draft Products',
   '/admin/orders': 'Orders',
@@ -74,15 +66,15 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/offers': 'Offers',
   '/admin/users': 'Users',
   '/admin/invoices': 'Invoices',
-  '/admin/beauty/orders': 'Beauty Orders',
+  '/admin/beauty/analytics': 'Beauty Analytics',
+  '/admin/beauty/service-sales': 'Service Sales',
   '/admin/beauty/staging': 'Beauty Draft Products',
   '/admin/beauty/gallery': 'Beauty Gallery',
   '/admin/beauty/inventory': 'Beauty Inventory',
+  '/admin/fashion/analytics': 'Fashion Analytics',
+  '/admin/fashion/categories': 'Clothes Categories',
   '/admin/fashion/inventory': 'Fashion Inventory',
   '/admin/fashion/gallery': 'Fashion Gallery',
-  '/admin/luxury/draft-products': 'Luxury Draft Products',
-  '/admin/luxury/inventory': 'Luxury Inventory',
-  '/admin/luxury/gallery': 'Luxury Gallery',
 }
 
 export function getAdminPageTitle(pathname: string): string {

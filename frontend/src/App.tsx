@@ -34,9 +34,6 @@ import ProfilePage from '@/pages/public/ProfilePage'
 import BeautyPage from '@/pages/public/BeautyPage'
 import BeautyServicesPage from '@/pages/public/BeautyServicesPage'
 import FashionPage from '@/pages/public/FashionPage'
-import LuxuryPage from '@/pages/public/LuxuryPage'
-import LuxuryDetailPage from '@/pages/public/LuxuryDetailPage'
-import MyLuxuryInquiriesPage from '@/pages/public/MyLuxuryInquiriesPage'
 
 // Admin
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
@@ -53,9 +50,10 @@ import AdminReservationsPage from '@/pages/admin/AdminReservationsPage'
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage'
 import AdminSlotConfigPage from '@/pages/admin/AdminSlotConfigPage'
 import AdminStagingPage from '@/pages/admin/AdminStagingPage'
-import AdminLuxuryPage from '@/pages/admin/AdminLuxuryPage'
-import AdminLuxuryInquiriesPage from '@/pages/admin/AdminLuxuryInquiriesPage'
 import AdminExecutiveDashboardPage from '@/pages/admin/AdminExecutiveDashboardPage'
+import AdminShopAnalyticsPage from '@/pages/admin/AdminShopAnalyticsPage'
+import AdminServiceSalesPage from '@/pages/admin/AdminServiceSalesPage'
+import AdminClothesCategoriesPage from '@/pages/admin/AdminClothesCategoriesPage'
 
 const NotFound = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
@@ -98,14 +96,11 @@ export default function App() {
             <Route path="reservations" element={<ReservationPage />} />
           </Route>
           <Route path="/fashion" element={<FashionPage />} />
-          <Route path="/luxury" element={<LuxuryPage />} />
-          <Route path="/luxury/:id" element={<LuxuryDetailPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/change-password" element={<ChangePasswordPage />} />
-            <Route path="/luxury/inquiries" element={<MyLuxuryInquiriesPage />} />
           </Route>
         </Route>
 
@@ -126,20 +121,19 @@ export default function App() {
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
             <Route path="/admin/slot-config" element={<AdminSlotConfigPage />} />
             <Route path="/admin/staging" element={<AdminStagingPage />} />
-            <Route path="/admin/luxury" element={<AdminLuxuryPage />} />
-            <Route path="/admin/luxury-inquiries" element={<AdminLuxuryInquiriesPage />} />
             <Route path="/admin/executive" element={<AdminExecutiveDashboardPage />} />
 
             {/* Shop-scoped admin views */}
-            <Route path="/admin/beauty/orders" element={<AdminOrdersPage shop="beauty" />} />
+            <Route path="/admin/beauty/orders" element={<Navigate to="/admin/orders" replace />} />
+            <Route path="/admin/beauty/analytics" element={<AdminShopAnalyticsPage shop="beauty" />} />
+            <Route path="/admin/beauty/service-sales" element={<AdminServiceSalesPage />} />
+            <Route path="/admin/fashion/analytics" element={<AdminShopAnalyticsPage shop="fashion" />} />
+            <Route path="/admin/fashion/categories" element={<AdminClothesCategoriesPage />} />
             <Route path="/admin/beauty/staging" element={<AdminStagingPage shop="beauty" />} />
             <Route path="/admin/beauty/gallery" element={<AdminGalleryPage shop="beauty" />} />
             <Route path="/admin/beauty/inventory" element={<AdminInventoryPage shop="beauty" />} />
             <Route path="/admin/fashion/inventory" element={<AdminInventoryPage shop="fashion" />} />
             <Route path="/admin/fashion/gallery" element={<AdminGalleryPage shop="fashion" />} />
-            <Route path="/admin/luxury/draft-products" element={<AdminLuxuryPage filter="drafts" />} />
-            <Route path="/admin/luxury/inventory" element={<AdminLuxuryPage filter="published" />} />
-            <Route path="/admin/luxury/gallery" element={<AdminGalleryPage shop="luxury" />} />
           </Route>
         </Route>
 
