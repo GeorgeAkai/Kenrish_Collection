@@ -142,7 +142,7 @@ export default function AdminReviewsPage() {
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium mb-1.5" htmlFor="rv-name">Customer name</label>
+                  <label className="block text-sm font-medium mb-1.5" htmlFor="rv-name">Customer name <span className="text-danger" aria-hidden="true">*</span></label>
                   <input id="rv-name" className="input-field" required maxLength={100} value={form.customer_name}
                     onChange={e => setForm(f => ({ ...f, customer_name: e.target.value }))} />
                 </div>
@@ -153,13 +153,13 @@ export default function AdminReviewsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5" htmlFor="rv-text">Review</label>
+                <label className="block text-sm font-medium mb-1.5" htmlFor="rv-text">Review <span className="text-danger" aria-hidden="true">*</span></label>
                 <textarea id="rv-text" className="input-field min-h-[110px]" required value={form.text}
                   onChange={e => setForm(f => ({ ...f, text: e.target.value }))} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <span className="block text-sm font-medium mb-1.5">Rating</span>
+                  <span className="block text-sm font-medium mb-1.5">Rating <span className="text-danger" aria-hidden="true">*</span></span>
                   <div className="flex gap-1" role="radiogroup" aria-label="Rating">
                     {[1, 2, 3, 4, 5].map(n => (
                       <button key={n} type="button" role="radio" aria-checked={form.rating === n} aria-label={`${n} star${n > 1 ? 's' : ''}`}
@@ -170,7 +170,7 @@ export default function AdminReviewsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5" htmlFor="rv-shop">About</label>
+                  <label className="block text-sm font-medium mb-1.5" htmlFor="rv-shop">About <span className="font-normal text-muted-foreground">(optional)</span></label>
                   <select id="rv-shop" className="input-field" value={form.shop}
                     onChange={e => setForm(f => ({ ...f, shop: e.target.value as Review['shop'] }))}>
                     <option value="">General</option>

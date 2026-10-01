@@ -18,7 +18,7 @@ type NavEntry = ({ kind: 'leaf' } & NavLeaf) | ({ kind: 'group' } & NavGroup)
 const NAV: NavEntry[] = [
   { kind: 'leaf', to: '/admin/executive', label: 'Executive Dashboard', icon: TrendingUp, end: true },
   // Orders can hold items from any shop, so it lives at the top level rather than under one store.
-  { kind: 'leaf', to: '/admin/orders', label: 'Orders', icon: ClipboardList },
+  { kind: 'leaf', to: '/admin/orders', label: 'Customer Orders', icon: ClipboardList },
   {
     kind: 'group', label: 'Kenrish Beauty Dashboard', icon: Scissors,
     children: [
@@ -46,7 +46,7 @@ const NAV: NavEntry[] = [
   { kind: 'leaf', to: '/admin/offers', label: 'Offers', icon: Tag },
   { kind: 'leaf', to: '/admin/reviews', label: 'Customer Reviews', icon: MessageSquareQuote },
   { kind: 'leaf', to: '/admin/invoices', label: 'Invoices', icon: FileText },
-  { kind: 'leaf', to: '/admin/slot-config', label: 'Schedule Settings', icon: Settings2 },
+  { kind: 'leaf', to: '/admin/slot-config', label: 'Service Time Settings', icon: Settings2 },
   {
     kind: 'group', label: 'Users', icon: Users,
     children: [
@@ -65,10 +65,10 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/clothes': 'Clothes',
   '/admin/inventory': 'Inventory',
   '/admin/staging': 'Draft Products',
-  '/admin/orders': 'Orders',
+  '/admin/orders': 'Customer Orders',
   '/admin/services': 'Services',
   '/admin/reservations': 'Reservations',
-  '/admin/slot-config': 'Schedule Settings',
+  '/admin/slot-config': 'Service Time Settings',
   '/admin/gallery': 'Gallery',
   '/admin/offers': 'Offers',
   '/admin/reviews': 'Customer Reviews',

@@ -148,7 +148,7 @@ export default function AdminSlotConfigPage() {
       <div className="flex items-start justify-between mb-6 flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-semibold flex items-center gap-2">
-            <Settings2 size={18} className="text-primary" /> Slot Configuration
+            <Settings2 size={18} className="text-primary" /> Service Time Settings
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">
             Set booking slots, worker capacity, and hours per service.
@@ -295,7 +295,7 @@ export default function AdminSlotConfigPage() {
               {/* Service */}
               {!editTarget && (
                 <div>
-                  <label className="block text-sm font-medium mb-1">Service</label>
+                  <label className="block text-sm font-medium mb-1">Service <span className="text-danger" aria-hidden="true">*</span></label>
                   <select
                     className="w-full border border-border rounded-xl px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                     value={form.service}
@@ -311,7 +311,7 @@ export default function AdminSlotConfigPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Workers <span className="text-xs font-normal text-muted-foreground">(simultaneous slots)</span>
+                    Workers <span className="text-xs font-normal text-muted-foreground">(simultaneous slots)</span> <span className="text-danger" aria-hidden="true">*</span>
                   </label>
                   <input
                     type="number" min="1" max="20"
@@ -321,7 +321,7 @@ export default function AdminSlotConfigPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Slot Duration</label>
+                  <label className="block text-sm font-medium mb-1">Slot Duration <span className="text-danger" aria-hidden="true">*</span></label>
                   <select
                     className="w-full border border-border rounded-xl px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                     value={form.slot_duration_minutes}
@@ -335,7 +335,7 @@ export default function AdminSlotConfigPage() {
               {/* Hours */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Opens at</label>
+                  <label className="block text-sm font-medium mb-1">Opens at <span className="text-danger" aria-hidden="true">*</span></label>
                   <input
                     type="time"
                     className="w-full border border-border rounded-xl px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -344,7 +344,7 @@ export default function AdminSlotConfigPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Closes at</label>
+                  <label className="block text-sm font-medium mb-1">Closes at <span className="text-danger" aria-hidden="true">*</span></label>
                   <input
                     type="time"
                     className="w-full border border-border rounded-xl px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -356,7 +356,7 @@ export default function AdminSlotConfigPage() {
 
               {/* Active days */}
               <div>
-                <label className="block text-sm font-medium mb-2">Active Days</label>
+                <label className="block text-sm font-medium mb-2">Active Days <span className="text-danger" aria-hidden="true">*</span></label>
                 <div className="flex gap-1.5 flex-wrap">
                   {DAYS.map((d, i) => (
                     <button

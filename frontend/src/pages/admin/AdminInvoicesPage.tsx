@@ -283,12 +283,12 @@ export default function AdminInvoicesPage() {
               {/* Customer */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Customer Name *</label>
+                  <label className="block text-sm font-medium mb-1">Customer Name <span className="text-danger" aria-hidden="true">*</span></label>
                   <input type="text" required className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                     value={customer.name} onChange={e => setCustomer(c => ({ ...c, name: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Phone (+254…)</label>
+                  <label className="block text-sm font-medium mb-1">Phone (+254…) <span className="font-normal text-muted-foreground">(optional)</span></label>
                   <input type="tel" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                     value={customer.phone} onChange={e => setCustomer(c => ({ ...c, phone: e.target.value }))} placeholder="+254700000000" />
                 </div>
@@ -304,7 +304,7 @@ export default function AdminInvoicesPage() {
                   {lines.map((line, i) => (
                     <div key={i} className="grid grid-cols-2 gap-2 sm:grid-cols-12 sm:gap-2 items-end">
                       <div className="col-span-1 sm:col-span-3">
-                        <label className="block text-xs text-muted-foreground mb-1">Type</label>
+                        <label className="block text-xs text-muted-foreground mb-1">Type <span className="text-danger" aria-hidden="true">*</span></label>
                         <select value={line.item_type} onChange={e => updateLine(i, 'item_type', e.target.value as LineItem['item_type'])}
                           className="w-full border rounded-md px-2 py-1.5 text-xs bg-background focus:outline-none focus:ring-2 focus:ring-ring">
                           <option value="product">Product</option>
@@ -313,7 +313,7 @@ export default function AdminInvoicesPage() {
                         </select>
                       </div>
                       <div className="col-span-1 sm:col-span-4">
-                        <label className="block text-xs text-muted-foreground mb-1">Item Name</label>
+                        <label className="block text-xs text-muted-foreground mb-1">Item Name <span className="text-danger" aria-hidden="true">*</span></label>
                         <select value={line.item_id} onChange={e => updateLine(i, 'item_id', e.target.value)}
                           className="w-full border rounded-md px-2 py-1.5 text-xs bg-background focus:outline-none focus:ring-2 focus:ring-ring">
                           <option value="">Select {line.item_type}…</option>
@@ -323,13 +323,13 @@ export default function AdminInvoicesPage() {
                         </select>
                       </div>
                       <div className="col-span-1 sm:col-span-2">
-                        <label className="block text-xs text-muted-foreground mb-1">No. of Items</label>
+                        <label className="block text-xs text-muted-foreground mb-1">No. of Items <span className="text-danger" aria-hidden="true">*</span></label>
                         <input type="number" min="1"
                           className="w-full border rounded-md px-2 py-1.5 text-xs bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                           value={line.quantity} onChange={e => updateLine(i, 'quantity', e.target.value)} />
                       </div>
                       <div className="col-span-1 sm:col-span-2">
-                        <label className="block text-xs text-muted-foreground mb-1">Price (KES)</label>
+                        <label className="block text-xs text-muted-foreground mb-1">Price (KES) <span className="text-danger" aria-hidden="true">*</span></label>
                         <input type="number" step="any"
                           className="w-full border rounded-md px-2 py-1.5 text-xs bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                           value={line.unit_price} onChange={e => updateLine(i, 'unit_price', e.target.value)} />

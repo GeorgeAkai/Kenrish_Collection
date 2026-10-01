@@ -60,7 +60,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1.5">Email or Username</label>
+              <label className="block text-sm font-medium mb-1.5">Email or Username <span className="text-danger" aria-hidden="true">*</span></label>
               <input
                 type="text"
                 required
@@ -72,7 +72,7 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1.5">Password</label>
+              <label className="block text-sm font-medium mb-1.5">Password <span className="text-danger" aria-hidden="true">*</span></label>
               <div className="relative">
                 <input
                   type={showPw ? 'text' : 'password'}

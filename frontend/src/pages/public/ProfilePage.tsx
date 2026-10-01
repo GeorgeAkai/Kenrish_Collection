@@ -125,7 +125,7 @@ export default function ProfilePage() {
         <h2 className="font-semibold mb-4 flex items-center gap-2"><User size={16} /> Profile Details</h2>
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">Bio</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Bio <span className="font-normal text-muted-foreground">(optional)</span></label>
             <textarea
               value={bio}
               onChange={e => setBio(e.target.value)}
@@ -136,7 +136,7 @@ export default function ProfilePage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-muted-foreground mb-1">Phone</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Phone <span className="font-normal text-muted-foreground">(optional)</span></label>
             <input
               type="tel"
               value={phone}

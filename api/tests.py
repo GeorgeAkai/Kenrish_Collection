@@ -361,6 +361,26 @@ class FashionShopFeaturesTest(TestCase):
         self.assertEqual([s['name'] for s in data['services']], ['Braids'])
         self.assertEqual(data['handbags'], [])
 
+    def test_stock_breakdown_per_shop(self):
+        data = self.client.get('/api/admin/analytics/stock-breakdown/?shop=beauty').json()
+        self.assertEqual([i['name'] for i in data['items']], ['Cream'])
+        item = data['items'][0]
+        self.assertEqual((item['units'], float(item['cost_price']), float(item['value'])), (10, 300.0, 3000.0))
+        both = self.client.get('/api/admin/analytics/stock-breakdown/').json()
+        self.assertEqual(both['total_units'], 15)
+        self.assertEqual(float(both['total_value']), 3000.0 + 5 * 400.0)
+        self.assertEqual(both['items'][0]['name'], 'Cream')  # largest value first
+
+    def test_transactions_rows_and_totals(self):
+        self._seed_money()
+        inc = self.client.get('/api/admin/analytics/transactions/?type=income&shop=beauty').json()
+        self.assertEqual(float(inc['total']), 2500.0)
+        self.assertEqual(sorted(r['category'] for r in inc['rows']), ['Product sale', 'Service'])
+        exp = self.client.get('/api/admin/analytics/transactions/?type=expense').json()
+        self.assertEqual((exp['count'], float(exp['total'])), (2, 3800.0))
+        self.assertEqual({r['shop'] for r in exp['rows']}, {'beauty', 'fashion'})
+        self.assertEqual(self.client.get('/api/admin/analytics/transactions/?type=nope').status_code, 400)
+
     # --- reset ---
     def test_reset_clears_dashboard_data_but_keeps_catalogue_and_stock(self):
         from app1.models import ServiceSale

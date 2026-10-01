@@ -354,7 +354,7 @@ export default function AdminReservationsPage() {
             </div>
             <form onSubmit={handleAdd} className="p-5 space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Customer</label>
+                <label className="block text-sm font-medium mb-1">Customer <span className="text-danger" aria-hidden="true">*</span></label>
                 <select
                   required
                   className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -367,7 +367,7 @@ export default function AdminReservationsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Service</label>
+                <label className="block text-sm font-medium mb-1">Service <span className="font-normal text-muted-foreground">(optional)</span></label>
                 <select
                   className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                   value={addForm.service}
@@ -380,7 +380,7 @@ export default function AdminReservationsPage() {
 
               <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Date</label>
+                  <label className="block text-sm font-medium mb-1">Date <span className="text-danger" aria-hidden="true">*</span></label>
                   <input
                     type="date" required
                     className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -389,7 +389,7 @@ export default function AdminReservationsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Time</label>
+                  <label className="block text-sm font-medium mb-1">Time <span className="text-danger" aria-hidden="true">*</span></label>
                   <input
                     type="time" required
                     className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -419,7 +419,7 @@ export default function AdminReservationsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Admin Notes <span className="font-normal text-muted-foreground">(internal)</span></label>
+                <label className="block text-sm font-medium mb-1">Admin Notes <span className="font-normal text-muted-foreground">(internal, optional)</span></label>
                 <textarea rows={2} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
                   value={addForm.admin_notes} onChange={e => setAddForm(f => ({ ...f, admin_notes: e.target.value }))} />
               </div>

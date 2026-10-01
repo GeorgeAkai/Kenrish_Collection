@@ -108,7 +108,7 @@ export default function BookingModal({
         ) : (
           <form onSubmit={handleSubmit} className="p-5 space-y-4 overflow-y-auto flex-1">
             <div>
-              <label className="block text-sm font-medium mb-1">Stylist / service</label>
+              <label className="block text-sm font-medium mb-1">Stylist / service <span className="font-normal text-muted-foreground">(optional)</span></label>
               <select
                 className="input-field"
                 value={form.service}
@@ -120,7 +120,7 @@ export default function BookingModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Date</label>
+              <label className="block text-sm font-medium mb-1">Date <span className="text-danger" aria-hidden="true">*</span></label>
               <input
                 type="date"
                 required
@@ -132,7 +132,7 @@ export default function BookingModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Time slot</label>
+              <label className="block text-sm font-medium mb-2">Time slot <span className="text-danger" aria-hidden="true">*</span></label>
               {!form.reservation_date ? (
                 <p className="text-sm text-muted-foreground py-2">Choose a date first.</p>
               ) : slotsLoading ? (

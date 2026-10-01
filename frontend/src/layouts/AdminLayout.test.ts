@@ -23,8 +23,8 @@ describe('getAdminPageTitle', () => {
     expect(getAdminPageTitle('/admin/inventory')).toBe('Inventory')
   })
 
-  it('returns "Orders" for /admin/orders', () => {
-    expect(getAdminPageTitle('/admin/orders')).toBe('Orders')
+  it('returns "Customer Orders" for /admin/orders', () => {
+    expect(getAdminPageTitle('/admin/orders')).toBe('Customer Orders')
   })
 
   it('returns "Services" for /admin/services', () => {
@@ -35,8 +35,8 @@ describe('getAdminPageTitle', () => {
     expect(getAdminPageTitle('/admin/reservations')).toBe('Reservations')
   })
 
-  it('returns "Schedule Settings" for /admin/slot-config (renamed label)', () => {
-    expect(getAdminPageTitle('/admin/slot-config')).toBe('Schedule Settings')
+  it('returns "Service Time Settings" for /admin/slot-config (renamed label)', () => {
+    expect(getAdminPageTitle('/admin/slot-config')).toBe('Service Time Settings')
   })
 
   it('returns "Gallery" for /admin/gallery', () => {

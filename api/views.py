@@ -52,7 +52,8 @@ from api.analytics import (
     sales_trend as _sales_trend, cash_flow_trend as _cash_flow_trend,
     expenses_breakdown as _expenses_breakdown,
     shop_breakdown as _shop_breakdown, active_bookings_count as _active_bookings_count,
-    clean_shop as _clean_shop,
+    clean_shop as _clean_shop, stock_breakdown as _stock_breakdown,
+    transactions as _transactions,
 )
 
 from .serializers import (
@@ -1429,6 +1430,23 @@ def analytics_inventory_alerts(request):
 @permission_classes([IsAdminUser])
 def analytics_stock_value(request):
     return Response({'total_value': _stock_value(_clean_shop(request.query_params.get('shop')))})
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def analytics_transactions(request):
+    """?type=income|expense, plus period and shop: the rows behind the Income / Expenses cards."""
+    kind = request.query_params.get('type')
+    if kind not in ('income', 'expense'):
+        return Response({'detail': 'type must be income or expense.'}, status=status.HTTP_400_BAD_REQUEST)
+    period, shop = _analytics_args(request)
+    return Response(_transactions(kind, period, shop))
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def analytics_stock_breakdown(request):
+    return Response(_stock_breakdown(_clean_shop(request.query_params.get('shop'))))
 
 
 @api_view(['GET'])

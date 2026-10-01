@@ -118,6 +118,53 @@ def stock_value(shop=None):
     return total
 
 
+TRANSACTION_LIMIT = 500
+
+
+def transactions(kind, period='month', shop=None):
+    """Individual income or expense rows behind the dashboard totals, newest first.
+    The total always covers every row; `rows` is capped at TRANSACTION_LIMIT."""
+    if kind == 'income':
+        qs = _revenue_qs(period, shop).order_by('-created_at', '-id')
+        row = lambda r: {
+            'id': r.id, 'date': r.created_at, 'description': r.description,
+            'category': 'Service' if r.reference_service_sale_id else 'Product sale',
+            'shop': r.shop or 'fashion', 'amount': r.amount,
+        }
+    else:
+        qs = _expense_qs(period, shop).order_by('-created_at', '-id')
+        row = lambda r: {
+            'id': r.id, 'date': r.created_at, 'description': r.description,
+            'category': r.category, 'shop': r.shop or '', 'amount': r.amount,
+        }
+    return {
+        'rows': [row(r) for r in qs[:TRANSACTION_LIMIT]],
+        'count': qs.count(),
+        'total': _total(qs, 'amount'),
+        'limit': TRANSACTION_LIMIT,
+    }
+
+
+def stock_breakdown(shop=None):
+    """Every stocked item with units, cost/selling price and value at cost, biggest value first."""
+    rows = []
+    models = [m for s in (SHOPS if shop is None else (shop,)) for m in SHOP_MODELS[s]]
+    for model, label in models:
+        for item in model.objects.filter(stock_quantity__gt=0):
+            cost = Decimal(str(item.cost_price))
+            rows.append({
+                'id': item.id, 'name': item.name, 'type': label,
+                'units': item.stock_quantity, 'cost_price': cost, 'price': Decimal(str(item.price)),
+                'value': cost * item.stock_quantity,
+            })
+    rows.sort(key=lambda r: r['value'], reverse=True)
+    return {
+        'items': rows,
+        'total_units': sum(r['units'] for r in rows),
+        'total_value': sum((r['value'] for r in rows), Decimal('0')),
+    }
+
+
 def sales_trend(period='month', shop=None):
     trend = (
         _revenue_qs(period, shop)

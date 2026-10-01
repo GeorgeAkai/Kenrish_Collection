@@ -580,7 +580,7 @@ export default function ReservationPage() {
 
               {/* Service */}
               <div>
-                <label className="block text-sm font-medium mb-1">{t('res.serviceLabel')}</label>
+                <label className="block text-sm font-medium mb-1">{t('res.serviceLabel')} <span className="font-normal text-muted-foreground">(optional)</span></label>
                 <select
                   className="w-full border border-border rounded-xl px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                   value={form.service}
@@ -593,7 +593,7 @@ export default function ReservationPage() {
 
               {/* Date */}
               <div>
-                <label className="block text-sm font-medium mb-1">{t('res.dateLabel')}</label>
+                <label className="block text-sm font-medium mb-1">{t('res.dateLabel')} <span className="text-danger" aria-hidden="true">*</span></label>
                 <input
                   type="date"
                   required
@@ -607,7 +607,7 @@ export default function ReservationPage() {
               {/* Time slot grid */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  {t('res.timeLabel')}
+                  {t('res.timeLabel')} <span className="text-danger" aria-hidden="true">*</span>
                   {form.service && services.find(s => String(s.id) === form.service) && (
                     <span className="ml-1.5 font-normal text-muted-foreground text-xs">
                       · {services.find(s => String(s.id) === form.service)?.name}

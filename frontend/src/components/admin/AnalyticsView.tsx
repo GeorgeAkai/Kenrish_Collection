@@ -7,6 +7,8 @@ import SalesTrendChart from '@/components/admin/charts/SalesTrendChart'
 import ExpensesPieChart, { type ExpenseRow } from '@/components/admin/charts/ExpensesPieChart'
 import IncomeExpenseChart, { type IncomeExpensePoint } from '@/components/admin/charts/IncomeExpenseChart'
 import ShopBreakdownChart from '@/components/admin/charts/ShopBreakdownChart'
+import StockBreakdownModal from '@/components/admin/StockBreakdownModal'
+import FinanceDetailModal, { type FinanceKind } from '@/components/admin/FinanceDetailModal'
 
 export type Scope = 'all' | 'beauty' | 'fashion'
 type Period = 'today' | 'week' | 'month' | 'quarter' | 'year'
@@ -65,6 +67,8 @@ export default function AnalyticsView({ scope, title, actions }: { scope: Scope;
   const [shopData, setShopData] = useState<ShopBreakdown | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [showStock, setShowStock] = useState(false)
+  const [finance, setFinance] = useState<FinanceKind | null>(null)
 
   useEffect(() => {
     setLoading(true)
@@ -97,11 +101,11 @@ export default function AnalyticsView({ scope, title, actions }: { scope: Scope;
   const net = summary?.net_profit ?? 0
   const margin = summary && summary.revenue > 0 ? `${Math.round((net / Number(summary.revenue)) * 100)}% margin` : undefined
 
-  let fourth: { label: string; value: string; icon: typeof Wallet }
+  let fourth: { label: string; value: string; icon: typeof Wallet; onClick?: () => void }
   if (scope === 'beauty') {
     fourth = { label: 'Active salon bookings', value: String(shopData?.active_bookings ?? 0), icon: CalendarCheck }
   } else if (scope === 'fashion') {
-    fourth = { label: 'Stock value (at cost)', value: formatKESWhole(stockValue), icon: Boxes }
+    fourth = { label: 'Stock value (at cost)', value: formatKESWhole(stockValue), icon: Boxes, onClick: () => setShowStock(true) }
   } else {
     fourth = {
       label: 'Top performing shop',
@@ -138,18 +142,19 @@ export default function AnalyticsView({ scope, title, actions }: { scope: Scope;
       ) : (
         <div className="space-y-5 lg:space-y-7">
           <div className={`grid grid-cols-2 gap-3 lg:gap-4 ${scope === 'beauty' ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
-            <KpiCard accent icon={Wallet} label="Income" value={formatKESWhole(summary?.revenue ?? 0)} />
-            <KpiCard icon={Receipt} label="Expenses" value={formatKESWhole(summary?.expenses ?? 0)} hint="Stock purchases & other costs" />
+            <KpiCard accent icon={Wallet} label="Income" value={formatKESWhole(summary?.revenue ?? 0)} hint="Click for details" onClick={() => setFinance('income')} />
+            <KpiCard icon={Receipt} label="Expenses" value={formatKESWhole(summary?.expenses ?? 0)} hint="Click for details" onClick={() => setFinance('expense')} />
             <KpiCard
               icon={net < 0 ? TrendingDown : TrendingUp}
               label="Net profit"
               value={formatKESWhole(net)}
               tone={net >= 0 ? 'up' : 'down'}
-              hint={margin}
+              hint={margin ? `${margin} · click for details` : 'Click for details'}
+              onClick={() => setFinance('net')}
             />
-            <KpiCard icon={fourth.icon} label={fourth.label} value={fourth.value} />
+            <KpiCard icon={fourth.icon} label={fourth.label} value={fourth.value} onClick={fourth.onClick} hint={fourth.onClick ? 'Click for breakdown' : undefined} />
             {scope === 'beauty' && (
-              <KpiCard icon={Boxes} label="Stock value (at cost)" value={formatKESWhole(stockValue)} hint="Beauty products on hand" />
+              <KpiCard icon={Boxes} label="Stock value (at cost)" value={formatKESWhole(stockValue)} hint="Click for breakdown" onClick={() => setShowStock(true)} />
             )}
           </div>
 
@@ -233,6 +238,13 @@ export default function AnalyticsView({ scope, title, actions }: { scope: Scope;
             )}
           </div>
         </div>
+      )}
+      {finance && (
+        <FinanceDetailModal kind={finance} scope={scope} period={period} summary={summary} cashFlow={cashFlow}
+          shopData={shopData} onClose={() => setFinance(null)} />
+      )}
+      {showStock && scope !== 'all' && (
+        <StockBreakdownModal shop={scope} title={`${SCOPE_LABEL[scope]} stock`} onClose={() => setShowStock(false)} />
       )}
     </div>
   )

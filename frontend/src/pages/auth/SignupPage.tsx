@@ -77,7 +77,7 @@ export default function SignupPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Username */}
           <div>
-            <label className="block text-sm font-medium mb-1.5">Username</label>
+            <label className="block text-sm font-medium mb-1.5">Username <span className="text-danger" aria-hidden="true">*</span></label>
             <input type="text" required autoComplete="username"
               className={`input-field ${errors.username ? 'border-destructive' : ''}`}
               value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))}
@@ -87,7 +87,7 @@ export default function SignupPage() {
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium mb-1.5">Email</label>
+            <label className="block text-sm font-medium mb-1.5">Email <span className="text-danger" aria-hidden="true">*</span></label>
             <input type="email" required autoComplete="email"
               className={`input-field ${errors.email ? 'border-destructive' : ''}`}
               value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
@@ -97,7 +97,7 @@ export default function SignupPage() {
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium mb-1.5">Password</label>
+            <label className="block text-sm font-medium mb-1.5">Password <span className="text-danger" aria-hidden="true">*</span></label>
             <div className="relative">
               <input type={showPw ? 'text' : 'password'} required autoComplete="new-password"
                 className={`input-field pr-10 ${errors.password ? 'border-destructive' : ''}`}
@@ -122,7 +122,7 @@ export default function SignupPage() {
 
           {/* Confirm */}
           <div>
-            <label className="block text-sm font-medium mb-1.5">Confirm Password</label>
+            <label className="block text-sm font-medium mb-1.5">Confirm Password <span className="text-danger" aria-hidden="true">*</span></label>
             <div className="relative">
               <input type={showPw ? 'text' : 'password'} required autoComplete="new-password"
                 className={`input-field pr-10 ${errors.confirm ? 'border-destructive' : ''}`}

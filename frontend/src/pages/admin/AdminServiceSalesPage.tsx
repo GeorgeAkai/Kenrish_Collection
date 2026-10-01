@@ -270,7 +270,7 @@ export default function AdminServiceSalesPage() {
             </div>
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1.5" htmlFor="ss-service">Service</label>
+                <label className="block text-sm font-medium mb-1.5" htmlFor="ss-service">Service <span className="text-danger" aria-hidden="true">*</span></label>
                 <select id="ss-service" className="input-field" value={form.service} onChange={e => pickService(e.target.value)}>
                   <option value="">Other / not listed…</option>
                   {services.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -278,19 +278,19 @@ export default function AdminServiceSalesPage() {
               </div>
               {!form.service && (
                 <div>
-                  <label className="block text-sm font-medium mb-1.5" htmlFor="ss-name">Service name</label>
+                  <label className="block text-sm font-medium mb-1.5" htmlFor="ss-name">Service name <span className="text-danger" aria-hidden="true">*</span></label>
                   <input id="ss-name" className="input-field" value={form.service_name} required
                     onChange={e => setForm(f => ({ ...f, service_name: e.target.value }))} />
                 </div>
               )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium mb-1.5" htmlFor="ss-amount">Amount (KES)</label>
+                  <label className="block text-sm font-medium mb-1.5" htmlFor="ss-amount">Amount (KES) <span className="text-danger" aria-hidden="true">*</span></label>
                   <input id="ss-amount" type="number" min="1" step="any" className="input-field" value={form.amount} required
                     onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5" htmlFor="ss-pay">Payment</label>
+                  <label className="block text-sm font-medium mb-1.5" htmlFor="ss-pay">Payment <span className="text-danger" aria-hidden="true">*</span></label>
                   <select id="ss-pay" className="input-field" value={form.payment_method}
                     onChange={e => setForm(f => ({ ...f, payment_method: e.target.value }))}>
                     {PAYMENT_METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
@@ -298,7 +298,7 @@ export default function AdminServiceSalesPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5" htmlFor="ss-when">Date &amp; time served</label>
+                <label className="block text-sm font-medium mb-1.5" htmlFor="ss-when">Date &amp; time served <span className="text-danger" aria-hidden="true">*</span></label>
                 <input id="ss-when" type="datetime-local" className="input-field" value={form.served_at} required
                   onChange={e => setForm(f => ({ ...f, served_at: e.target.value }))} />
               </div>

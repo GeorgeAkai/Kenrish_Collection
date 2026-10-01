@@ -389,7 +389,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               {allFields.map(f => (
                 <div key={f.name}>
-                  <label className="block text-sm font-medium mb-1.5">{f.label}</label>
+                  <label className="block text-sm font-medium mb-1.5">{f.label}{f.required ? <> <span className="text-danger" aria-hidden="true">*</span></> : <> <span className="font-normal text-muted-foreground">(optional)</span></>}</label>
                   {f.type === 'textarea' ? (
                     <textarea
                       className="input-field min-h-[80px]"
@@ -411,7 +411,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
               ))}
               {withCategories && (
                 <div>
-                  <label className="block text-sm font-medium mb-1.5" htmlFor="cat-category">Category</label>
+                  <label className="block text-sm font-medium mb-1.5" htmlFor="cat-category">Category <span className="font-normal text-muted-foreground">(optional)</span></label>
                   <select id="cat-category" className="input-field" value={form.category ?? ''}
                     onChange={e => setForm(prev => ({ ...prev, category: e.target.value }))}>
                     <option value="">Uncategorised</option>
@@ -420,7 +420,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium mb-1.5">Image</label>
+                <label className="block text-sm font-medium mb-1.5">Image <span className="font-normal text-muted-foreground">(optional)</span></label>
                 <FileDropZone
                   file={imageFile}
                   onFileChange={setImageFile}

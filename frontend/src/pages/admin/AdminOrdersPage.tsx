@@ -92,7 +92,7 @@ export default function AdminOrdersPage() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-semibold">Orders</h2>
+          <h2 className="text-xl font-semibold">Customer Orders</h2>
           {pendingCount > 0 && (
             <p className="text-sm text-amber-600 dark:text-amber-400 mt-0.5 flex items-center gap-1">
               <Clock size={13} /> {pendingCount} pending confirmation

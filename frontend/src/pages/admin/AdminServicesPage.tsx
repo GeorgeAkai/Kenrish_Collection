@@ -121,13 +121,13 @@ export default function AdminServicesPage() {
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Name</label>
+                <label className="block text-sm font-medium mb-1">Name <span className="text-danger" aria-hidden="true">*</span></label>
                 <input type="text" required
                   className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                   value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Short Description</label>
+                <label className="block text-sm font-medium mb-1">Short Description <span className="text-danger" aria-hidden="true">*</span></label>
                 <input type="text" required
                   className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                   value={form.short_description} onChange={e => setForm(f => ({ ...f, short_description: e.target.value }))} />
@@ -141,7 +141,7 @@ export default function AdminServicesPage() {
                 </div>
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="block text-xs font-medium mb-1 text-muted-foreground uppercase tracking-wide">From</label>
+                    <label className="block text-xs font-medium mb-1 text-muted-foreground uppercase tracking-wide">From <span className="font-normal text-muted-foreground">(optional)</span></label>
                     <input type="number" step="any" min="0" placeholder="e.g. 500"
                       className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                       value={form.price_from} onChange={e => setForm(f => ({ ...f, price_from: e.target.value }))} />
@@ -168,12 +168,12 @@ export default function AdminServicesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Full Description</label>
+                <label className="block text-sm font-medium mb-1">Full Description <span className="text-danger" aria-hidden="true">*</span></label>
                 <textarea rows={4} className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                   value={form.full_description} onChange={e => setForm(f => ({ ...f, full_description: e.target.value }))} />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5">Image</label>
+                <label className="block text-sm font-medium mb-1.5">Image <span className="font-normal text-muted-foreground">(optional)</span></label>
                 <FileDropZone
                   file={imageFile}
                   onFileChange={setImageFile}

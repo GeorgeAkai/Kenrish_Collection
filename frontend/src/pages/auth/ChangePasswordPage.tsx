@@ -86,7 +86,7 @@ export default function ChangePasswordPage() {
         {step === 'form' ? (
           <form onSubmit={handleRequestCode} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1.5">Current Password</label>
+              <label className="block text-sm font-medium mb-1.5">Current Password <span className="text-danger" aria-hidden="true">*</span></label>
               <div className="relative">
                 <input
                   type={showCurrent ? 'text' : 'password'}
@@ -104,7 +104,7 @@ export default function ChangePasswordPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5">New Password</label>
+              <label className="block text-sm font-medium mb-1.5">New Password <span className="text-danger" aria-hidden="true">*</span></label>
               <div className="relative">
                 <input
                   type={showNew ? 'text' : 'password'}
@@ -131,7 +131,7 @@ export default function ChangePasswordPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5">Confirm New Password</label>
+              <label className="block text-sm font-medium mb-1.5">Confirm New Password <span className="text-danger" aria-hidden="true">*</span></label>
               <input
                 type={showNew ? 'text' : 'password'}
                 required
@@ -163,7 +163,7 @@ export default function ChangePasswordPage() {
             )}
 
             <div>
-              <label className="block text-sm font-medium mb-1.5">Verification Code</label>
+              <label className="block text-sm font-medium mb-1.5">Verification Code <span className="text-danger" aria-hidden="true">*</span></label>
               <input
                 type="text"
                 required

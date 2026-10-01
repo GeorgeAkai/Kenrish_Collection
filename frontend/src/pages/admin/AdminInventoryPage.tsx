@@ -514,7 +514,7 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
         <div className="max-w-md">
           <form onSubmit={handleAddStock} className="space-y-4">
             <div ref={stockSearchRef} className="relative">
-              <label className="block text-sm font-medium mb-1">Item Name</label>
+              <label className="block text-sm font-medium mb-1">Item Name <span className="text-danger" aria-hidden="true">*</span></label>
               <input
                 type="text"
                 className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
@@ -560,12 +560,12 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Quantity</label>
+              <label className="block text-sm font-medium mb-1">Quantity <span className="text-danger" aria-hidden="true">*</span></label>
               <input type="number" required min="1" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                 value={stockForm.quantity} onChange={e => setStockForm(f => ({ ...f, quantity: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Buying Price per Unit (KES)</label>
+              <label className="block text-sm font-medium mb-1">Buying Price per Unit (KES) <span className="text-danger" aria-hidden="true">*</span></label>
               <input type="number" required step="any" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                 value={stockForm.cost_price} onChange={e => setStockForm(f => ({ ...f, cost_price: e.target.value }))} />
             </div>
@@ -581,7 +581,7 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
         <div className="max-w-md">
           <form onSubmit={handleRecordSale} className="space-y-4">
             <div ref={saleSearchRef} className="relative">
-              <label className="block text-sm font-medium mb-1">Item Name</label>
+              <label className="block text-sm font-medium mb-1">Item Name <span className="text-danger" aria-hidden="true">*</span></label>
               <input
                 type="text"
                 className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
@@ -628,22 +628,22 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Quantity</label>
+              <label className="block text-sm font-medium mb-1">Quantity <span className="text-danger" aria-hidden="true">*</span></label>
               <input type="number" required min="1" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                 value={saleForm.quantity} onChange={e => setSaleForm(f => ({ ...f, quantity: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Unit Price (KES)</label>
+              <label className="block text-sm font-medium mb-1">Unit Price (KES) <span className="text-danger" aria-hidden="true">*</span></label>
               <input type="number" required step="any" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                 value={saleForm.unit_price} onChange={e => setSaleForm(f => ({ ...f, unit_price: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Customer Name</label>
+              <label className="block text-sm font-medium mb-1">Customer Name <span className="font-normal text-muted-foreground">(optional)</span></label>
               <input type="text" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                 value={saleForm.customer_name} onChange={e => setSaleForm(f => ({ ...f, customer_name: e.target.value }))} />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Customer Phone (+254…)</label>
+              <label className="block text-sm font-medium mb-1">Customer Phone (+254…) <span className="font-normal text-muted-foreground">(optional)</span></label>
               <input type="tel" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                 value={saleForm.customer_phone} onChange={e => setSaleForm(f => ({ ...f, customer_phone: e.target.value }))} placeholder="+254700000000" />
             </div>
