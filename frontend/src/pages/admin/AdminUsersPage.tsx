@@ -161,9 +161,9 @@ export default function AdminUsersPage() {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">{formatDate(u.date_joined)}</td>
-                <td className="px-4 py-3 text-muted-foreground">{u.last_login ? formatDate(u.last_login) : '—'}</td>
+                <td className="px-4 py-3 text-muted-foreground">{u.last_login ? formatDate(u.last_login) : '-'}</td>
                 <td className="px-4 py-3">{u.login_count}</td>
-                <td className="px-4 py-3 text-muted-foreground">{u.added_by || '—'}</td>
+                <td className="px-4 py-3 text-muted-foreground">{u.added_by || '-'}</td>
                 <td className="px-4 py-3">
                   {confirming?.id === u.id ? (
                     <InlineConfirm

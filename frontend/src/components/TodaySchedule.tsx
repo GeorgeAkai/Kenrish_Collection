@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import api from '@/lib/axios'
 import { Link } from 'react-router-dom'
 import { CalendarCheck, CalendarDays, ChevronRight, Phone } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -13,8 +14,11 @@ import { formatSlotTime, type PublicSlot } from '@/lib/slots'
  * `onBook` receives the picked service and time; the page opens BookingModal
  * preset to them.
  */
-export default function TodaySchedule({ slots, services, dateLabel, onBook, calendarHref = '/beauty/reservations', bare = false }: {
+export default function TodaySchedule({ slots: anySlots, dateKey, services, dateLabel, onBook, calendarHref = '/beauty/reservations', bare = false }: {
+  /** Openings across all services (shown for "Any service"). */
   slots: PublicSlot[]
+  /** YYYY-MM-DD of the day shown; used to load a chosen service's own time blocks. */
+  dateKey: string
   services: Service[]
   dateLabel: string
   onBook: (b: { serviceId: number | null; time: string }) => void
@@ -26,10 +30,36 @@ export default function TodaySchedule({ slots, services, dateLabel, onBook, cale
   const [serviceId, setServiceId] = useState<number | null>(null)
   const [time, setTime] = useState<string | null>(null)
 
+  // A chosen service has its own hours, slot length and capacity, so load its blocks
+  // (and refresh every minute so booked/past slots stay current).
+  const [serviceSlots, setServiceSlots] = useState<PublicSlot[] | null>(null)
+  useEffect(() => {
+    if (serviceId === null) { setServiceSlots(null); return }
+    let cancelled = false
+    const load = () => api.get<PublicSlot[]>(`/reservations/public-slots/?date=${dateKey}&service=${serviceId}`)
+      .then(r => { if (!cancelled) setServiceSlots(r.data) }).catch(() => {})
+    setServiceSlots(null)
+    load()
+    const id = setInterval(load, 60_000)
+    return () => { cancelled = true; clearInterval(id) }
+  }, [serviceId, dateKey])
+
+  const loadingService = serviceId !== null && serviceSlots === null
+  const slots = serviceId === null ? anySlots : (serviceSlots ?? [])
+
+  // Drop a picked time that doesn't exist in the newly chosen service's blocks.
+  useEffect(() => {
+    if (time && !loadingService && !slots.some(s => s.time === time && s.available)) setTime(null)
+  }, [slots, loadingService, time])
+
   const visible = slots.filter(s => !s.past)
   const open = visible.filter(s => s.available).length
   const booked = visible.filter(s => s.booked).length
   const service = services.find(s => s.id === serviceId)
+  const lengths = new Set(visible.map(s => s.duration_minutes ?? null))
+  const slotLengthLabel = visible.length === 0 ? '' : lengths.size === 1 && !lengths.has(null)
+    ? t('home.slotLengthN', { n: [...lengths][0] as number })
+    : t('home.slotsVary')
 
   function book() {
     if (time) onBook({ serviceId, time })
@@ -67,11 +97,13 @@ export default function TodaySchedule({ slots, services, dateLabel, onBook, cale
         )}
       </div>
 
-      {slots.length === 0 ? (
+      {loadingService ? (
+        <p className="flex-1 px-4 sm:px-6 py-10 text-center text-sm text-muted-foreground">…</p>
+      ) : slots.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-10">
           <CalendarDays size={32} className="text-muted-foreground/40 mb-3" />
-          <p className="text-sm font-semibold">{t('home.closedSunday')}</p>
-          <p className="text-sm text-muted-foreground mt-1">{t('home.checkBackDays')}</p>
+          <p className="text-sm font-semibold">{serviceId !== null ? t('home.noOpeningsService') : t('home.closedSunday')}</p>
+          <p className="text-sm text-muted-foreground mt-1">{serviceId !== null ? t('home.tryAnotherService') : t('home.checkBackDays')}</p>
           <Link to={calendarHref} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-gold-ink hover:underline">
             {t('home.browseFuture')} <ChevronRight size={14} />
           </Link>
@@ -80,7 +112,7 @@ export default function TodaySchedule({ slots, services, dateLabel, onBook, cale
         <>
           <p className="px-4 sm:px-6 text-[13px] text-muted-foreground mb-3">
             <span className="font-semibold text-success">{t('home.openCount', { n: open })}</span>
-            {' · '}{t('home.bookedCount', { n: booked })}{' · '}{t('home.slotLength')}
+            {' · '}{t('home.bookedCount', { n: booked })}{slotLengthLabel && ` · ${slotLengthLabel}`}
           </p>
           {visible.length === 0 ? (
             <p className="px-4 sm:px-6 pb-4 text-sm text-muted-foreground">{t('home.noMoreToday')}</p>
@@ -106,7 +138,7 @@ export default function TodaySchedule({ slots, services, dateLabel, onBook, cale
         </>
       )}
 
-      {/* Sticky CTA — stays in the thumb zone while the grid scrolls */}
+      {/* Sticky CTA, stays in the thumb zone while the grid scrolls */}
       <div className="sticky lg:static bottom-0 mt-auto bg-card/95 backdrop-blur rounded-b-2xl lg:rounded-b-[20px] border-t border-border px-4 sm:px-6 pt-3 pb-3 pb-safe">
         <button type="button" onClick={book} disabled={!time}
           className="w-full h-12 rounded-full bg-primary text-primary-foreground font-semibold text-[15px] flex items-center justify-center gap-2 transition-colors hover:bg-gold-deep disabled:opacity-50 disabled:cursor-not-allowed">

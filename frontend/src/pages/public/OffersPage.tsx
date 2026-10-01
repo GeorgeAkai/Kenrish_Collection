@@ -15,7 +15,7 @@ export default function OffersPage() {
     api.get('/offers/').then(r => setOffers(r.data)).catch(console.error).finally(() => setLoading(false))
   }, [])
 
-  // /offers/ already returns only active (non-expired) offers — no active
+  // /offers/ already returns only active (non-expired) offers, no active
   // offers means the section is disabled, not just empty.
   if (!loading && offers.length === 0) {
     return <Navigate to="/" replace />

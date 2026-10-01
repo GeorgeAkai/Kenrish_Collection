@@ -1,3 +1,4 @@
+import { nairobiDateKey } from '@/lib/utils'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, CalendarDays } from 'lucide-react'
@@ -33,9 +34,9 @@ export default function BookingModal({
 }: {
   services: Service[]
   initialServiceId?: number
-  /** YYYY-MM-DD — preset from "Today's openings". */
+  /** YYYY-MM-DD: preset from "Today's openings". */
   initialDate?: string
-  /** HH:MM — preset from "Today's openings". */
+  /** HH:MM: preset from "Today's openings". */
   initialTime?: string
   onClose: () => void
   onBooked?: () => void
@@ -102,7 +103,7 @@ export default function BookingModal({
           <div className="p-6 text-center">
             <CalendarDays size={32} className="mx-auto mb-3 text-primary" />
             <p className="text-sm text-foreground mb-1">Your appointment request has been sent.</p>
-            <p className="text-xs text-muted-foreground mb-5">We'll confirm your slot shortly — track it under My Bookings.</p>
+            <p className="text-xs text-muted-foreground mb-5">We'll confirm your slot shortly. Track it under My Bookings.</p>
             <button onClick={onClose} className="btn-primary w-full">Done</button>
           </div>
         ) : (
@@ -124,7 +125,7 @@ export default function BookingModal({
               <input
                 type="date"
                 required
-                min={new Date().toISOString().split('T')[0]}
+                min={nairobiDateKey()}
                 className="input-field"
                 value={form.reservation_date}
                 onChange={e => setForm(f => ({ ...f, reservation_date: e.target.value, reservation_time: '' }))}

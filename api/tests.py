@@ -33,7 +33,7 @@ class AdminInventoryAPITest(TestCase):
     def _auth(self):
         return {'HTTP_AUTHORIZATION': f'Bearer {self.token}'}
 
-    # --- Cycle C1-1: add_stock is atomic — Expense failure must not leave stock changed ---
+    # --- Cycle C1-1: add_stock is atomic, Expense failure must not leave stock changed ---
     def test_admin_add_stock_rolls_back_on_expense_failure(self):
         original = Expense.objects.create
 
@@ -57,7 +57,7 @@ class AdminInventoryAPITest(TestCase):
         self.assertEqual(self.product.stock_quantity, 10)
         self.assertEqual(InventoryTransaction.objects.count(), 0)
 
-    # --- Cycle C1-2: record_sale is atomic — CashFlow failure must not leave stock decremented ---
+    # --- Cycle C1-2: record_sale is atomic, CashFlow failure must not leave stock decremented ---
     def test_admin_record_sale_rolls_back_on_cashflow_failure(self):
         original = CashFlow.objects.create
 
@@ -502,3 +502,72 @@ class CustomerReviewTest(TestCase):
         self.assertEqual(self.client.post('/api/admin/reviews/', {'customer_name': ' ', 'text': 'x'}, format='json').status_code, 400)
         self.assertIn(self.APIClient().post('/api/admin/reviews/', {}, format='json').status_code, (401, 403))
 
+
+class PublicSlotsPerServiceTest(TestCase):
+    def setUp(self):
+        from datetime import date, timedelta
+        from app1.models import Service, SlotConfiguration
+        self.hair = Service.objects.create(name='Hairdressing', short_description='s', full_description='f')
+        self.nails = Service.objects.create(name='Nails', short_description='s', full_description='f')
+        SlotConfiguration.objects.create(service=self.hair, slot_duration_minutes=120, worker_count=2, start_time='09:00', end_time='15:00')
+        SlotConfiguration.objects.create(service=self.nails, slot_duration_minutes=45, worker_count=1, start_time='09:00', end_time='11:15')
+        d = date.today() + timedelta(days=3)
+        while d.weekday() == 6:
+            d += timedelta(days=1)
+        self.day = d.isoformat()
+
+    def test_service_param_returns_that_services_own_blocks(self):
+        data = self.client.get(f'/api/reservations/public-slots/?date={self.day}&service={self.hair.id}').json()
+        self.assertEqual([s['time'] for s in data], ['09:00', '11:00', '13:00'])
+        self.assertEqual({s['duration_minutes'] for s in data}, {120})
+        self.assertEqual(data[0]['total_capacity'], 2)
+
+    def test_other_services_bookings_do_not_affect_this_service(self):
+        from app1.models import Reservation
+        user = User.objects.create_user(username='c', password='p')
+        Reservation.objects.create(customer=user, service=self.nails, reservation_date=self.day, reservation_time='09:00', status='APPROVED')
+        data = self.client.get(f'/api/reservations/public-slots/?date={self.day}&service={self.hair.id}').json()
+        self.assertTrue(data[0]['available'])
+        nails = self.client.get(f'/api/reservations/public-slots/?date={self.day}&service={self.nails.id}').json()
+        self.assertFalse(nails[0]['available'])
+        self.assertEqual([s['time'] for s in nails], ['09:00', '09:45', '10:30'])
+
+    def test_all_services_view_marks_mixed_durations(self):
+        data = self.client.get(f'/api/reservations/public-slots/?date={self.day}').json()
+        by_time = {s['time']: s for s in data}
+        self.assertIsNone(by_time['09:00']['duration_minutes'])     # hair 120 + nails 45
+        self.assertEqual(by_time['11:00']['duration_minutes'], 120)  # only hair
+
+
+
+class NairobiTimeTest(TestCase):
+    """21:30 UTC on 30 Sep is already 00:30 on 1 Oct in Nairobi."""
+
+    def setUp(self):
+        from datetime import datetime, timezone as dtz
+        from unittest import mock
+        self.fake_now = datetime(2026, 9, 30, 21, 30, tzinfo=dtz.utc)
+        patcher = mock.patch('django.utils.timezone.now', return_value=self.fake_now)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_today_is_the_nairobi_date(self):
+        from django.utils import timezone
+        self.assertEqual(str(timezone.localdate()), '2026-10-01')
+
+    def test_public_slots_treat_yesterday_as_past_and_today_as_open(self):
+        from app1.models import Service, SlotConfiguration
+        svc = Service.objects.create(name='Hair', short_description='s', full_description='f')
+        SlotConfiguration.objects.create(service=svc, slot_duration_minutes=60, start_time='00:00', end_time='03:00')
+        today = self.client.get('/api/reservations/public-slots/?date=2026-10-01&service=%d' % svc.id).json()
+        self.assertEqual([(s['time'], s['past']) for s in today], [('00:00', True), ('01:00', False), ('02:00', False)])
+        yesterday = self.client.get('/api/reservations/public-slots/?date=2026-09-30&service=%d' % svc.id).json()
+        self.assertTrue(all(s['past'] for s in yesterday))
+
+    def test_sale_after_midnight_nairobi_counts_as_today(self):
+        from django.contrib.auth.models import User as U
+        from app1.models import ServiceSale
+        from api.analytics import sales_summary
+        admin = U.objects.create_user(username='a', password='p', is_staff=True)
+        ServiceSale.objects.create(service_name='Braids', amount=Decimal('1000'), created_by=admin)
+        self.assertEqual(sales_summary('today')['revenue'], Decimal('1000'))

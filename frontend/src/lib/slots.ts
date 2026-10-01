@@ -1,4 +1,11 @@
-export interface PublicSlot { time: string; available: boolean; booked: boolean; past: boolean }
+export interface PublicSlot {
+  time: string
+  available: boolean
+  booked: boolean
+  past: boolean
+  /** Length of this block; null when services of different lengths share the time. */
+  duration_minutes?: number | null
+}
 
 /** "14:30" → "2:30 PM" */
 export function formatSlotTime(t: string) {

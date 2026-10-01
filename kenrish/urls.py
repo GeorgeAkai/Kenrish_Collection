@@ -30,7 +30,7 @@ urlpatterns = [
     # ---------- Chatbot ----------
     path("chatbot/", include("chatbot.urls")),
 
-    # ---------- Password reset (no React equivalent — needs Django/email) ----------
+    # ---------- Password reset (no React equivalent, needs Django/email) ----------
     path("password-reset/", PasswordResetView.as_view(), name="password_reset"),
     path("password-reset/done/", PasswordResetDoneView.as_view(), name="password_reset_done"),
     path("password-reset/confirm/<str:uidb64>/<str:token>/",
@@ -112,5 +112,5 @@ def react_index(request):
         return FileResponse(open(index, 'rb'))
     return HttpResponseNotFound('React build not found.')
 
-# Excludes api/, django-admin/, media/, static/ — everything else goes to React
+# Excludes api/, django-admin/, media/, static/, everything else goes to React
 urlpatterns += [re_path(r'^(?!api/|django-admin/|media/|static/).*$', react_index)]

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { Eye, Users, ShoppingBag, LogIn, ShieldAlert, MousePointerClick, Trash2 } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import api from '@/lib/axios'
-import { formatChartDate, formatPeriodRange } from '@/lib/utils'
+import { formatChartDate, formatPeriodRange, NAIROBI_TZ } from '@/lib/utils'
 import KpiCard from '@/components/admin/KpiCard'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useToast } from '@/contexts/ToastContext'
@@ -55,7 +55,7 @@ const panel = 'bg-card border border-border rounded-[20px] p-4 lg:p-6 shadow-car
 const heading = 'font-heading text-lg lg:text-xl font-semibold mb-4'
 const th = 'text-left px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground'
 
-const fmtWhen = (iso: string) => new Date(iso).toLocaleString('en-KE', { dateStyle: 'medium', timeStyle: 'medium' })
+const fmtWhen = (iso: string) => new Date(iso).toLocaleString('en-KE', { dateStyle: 'medium', timeStyle: 'medium', timeZone: NAIROBI_TZ })
 
 /** Every event carries a word, never colour alone. */
 function EventBadge({ event, label }: { event: string; label: string }) {
@@ -225,8 +225,8 @@ export default function AdminActivityLogsPage() {
                       {stats.recent_failed_logins.map((f, i) => (
                         <tr key={i} className="border-t border-border">
                           <td className="px-4 py-2.5 whitespace-nowrap">{fmtWhen(f.at)}</td>
-                          <td className="px-4 py-2.5 font-semibold">{f.username || '—'}</td>
-                          <td className="px-4 py-2.5 text-muted-foreground tabular-nums">{f.ip ?? '—'}</td>
+                          <td className="px-4 py-2.5 font-semibold">{f.username || '-'}</td>
+                          <td className="px-4 py-2.5 text-muted-foreground tabular-nums">{f.ip ?? '-'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -270,7 +270,7 @@ export default function AdminActivityLogsPage() {
                       {describe(r)}
                       {r.event === 'action' && <span className="block text-xs text-muted-foreground">{r.method} {r.path} · {r.status_code}</span>}
                     </td>
-                    <td className="px-4 py-2.5 text-muted-foreground tabular-nums whitespace-nowrap" title={r.user_agent}>{r.ip_address ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-muted-foreground tabular-nums whitespace-nowrap" title={r.user_agent}>{r.ip_address ?? '-'}</td>
                   </tr>
                 ))}
               </tbody>

@@ -36,7 +36,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[80vh] flex">
-      {/* Left decorative panel — hidden on small screens */}
+      {/* Left decorative panel, hidden on small screens */}
       <div className="hidden lg:flex w-1/2 bg-primary items-center justify-center relative overflow-hidden">
         <div className="relative text-center text-primary-foreground px-12">
           <Sparkles size={40} className="text-primary-foreground/80 mx-auto mb-6" />

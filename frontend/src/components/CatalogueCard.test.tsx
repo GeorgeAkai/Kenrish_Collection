@@ -67,7 +67,7 @@ describe('CatalogueCard', () => {
     expect(screen.getByText('View Details')).toBeInTheDocument()
   })
 
-  // ── Swahili strings (RED — CatalogueCard currently ignores lang) ───
+  // ── Swahili strings (RED, CatalogueCard currently ignores lang) ───
   it('shows "Hakuna picha" in Swahili when image is null', () => {
     renderCard(itemNoImage, 'sw')
     expect(screen.getByText('Hakuna picha')).toBeInTheDocument()

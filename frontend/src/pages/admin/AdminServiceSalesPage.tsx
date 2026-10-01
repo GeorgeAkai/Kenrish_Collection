@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, type FormEvent } from 'react'
 import { Plus, Pencil, Trash2, X } from 'lucide-react'
 import api from '@/lib/axios'
-import { formatKES } from '@/lib/utils'
+import { formatKES, NAIROBI_TZ, toNairobiInput, fromNairobiInput } from '@/lib/utils'
 import type { Service, PaginatedResponse } from '@/lib/types'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -30,16 +30,9 @@ const PAYMENT_METHODS = [
   { value: 'other', label: 'Other' },
 ]
 
-/** <input type="datetime-local"> wants local "YYYY-MM-DDTHH:mm". */
-function toLocalInput(iso?: string) {
-  const d = iso ? new Date(iso) : new Date()
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
-
 const emptyForm = () => ({
   service: '', service_name: '', amount: '', payment_method: 'cash',
-  customer_name: '', customer_phone: '', notes: '', served_at: toLocalInput(),
+  customer_name: '', customer_phone: '', notes: '', served_at: toNairobiInput(),
 })
 
 const suggestedPrice = (s: Service) => s.price ?? s.price_from ?? ''
@@ -89,7 +82,7 @@ export default function AdminServiceSalesPage() {
     setForm({
       service: s.service ? String(s.service) : '', service_name: s.service_name, amount: s.amount,
       payment_method: s.payment_method, customer_name: s.customer_name, customer_phone: s.customer_phone,
-      notes: s.notes, served_at: toLocalInput(s.served_at),
+      notes: s.notes, served_at: toNairobiInput(s.served_at),
     })
     setError('')
     setShowForm(true)
@@ -118,7 +111,7 @@ export default function AdminServiceSalesPage() {
       customer_name: form.customer_name,
       customer_phone: form.customer_phone,
       notes: form.notes,
-      served_at: new Date(form.served_at).toISOString(),
+      served_at: fromNairobiInput(form.served_at),
     }
     try {
       if (editing) await api.patch(`/admin/service-sales/${editing.id}/`, body)
@@ -153,7 +146,7 @@ export default function AdminServiceSalesPage() {
     }
   }
 
-  const fmtDate = (iso: string) => new Date(iso).toLocaleString('en-KE', { dateStyle: 'medium', timeStyle: 'short' })
+  const fmtDate = (iso: string) => new Date(iso).toLocaleString('en-KE', { dateStyle: 'medium', timeStyle: 'short', timeZone: NAIROBI_TZ })
 
   const rowActions = (s: ServiceSale) => (
     <div className="flex justify-end items-center gap-2">
@@ -227,7 +220,7 @@ export default function AdminServiceSalesPage() {
                   <tr key={s.id} className="border-t hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3 font-medium">{s.service_name}</td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {s.customer_name || '—'}{s.customer_phone && <span className="block text-xs">{s.customer_phone}</span>}
+                      {s.customer_name || '-'}{s.customer_phone && <span className="block text-xs">{s.customer_phone}</span>}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{fmtDate(s.served_at)}</td>
                     <td className="px-4 py-3">{s.payment_method_display}</td>

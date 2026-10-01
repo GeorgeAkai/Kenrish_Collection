@@ -1,4 +1,4 @@
-# Secrets — never bake into image
+# Secrets, never bake into image
 .env
 .env.*
 
@@ -16,11 +16,11 @@ env/
 # Django generated dirs
 staticfiles/
 
-# Node — stage 1 installs its own
+# Node, stage 1 installs its own
 node_modules/
 frontend/node_modules/
 
-# Frontend build — stage 1 produces a fresh one
+# Frontend build, stage 1 produces a fresh one
 frontend/dist/
 
 # Git & IDE

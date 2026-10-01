@@ -250,13 +250,13 @@ export default function AdminReservationsPage() {
                       <p className="font-medium">{r.customer_display ?? r.customer_username}</p>
                       <p className="text-xs text-muted-foreground">@{r.customer_username}</p>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{r.service_name ?? '—'}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{r.service_name ?? '-'}</td>
                     <td className="px-4 py-3">
                       <p>{new Date(r.reservation_date + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                       <p className="text-xs text-muted-foreground">{r.reservation_time.slice(0, 5)}</p>
                     </td>
                     <td className="px-4 py-3 max-w-[180px]">
-                      <p className="text-muted-foreground truncate">{r.notes || '—'}</p>
+                      <p className="text-muted-foreground truncate">{r.notes || '-'}</p>
                       {r.admin_notes && <p className="text-xs text-muted-foreground italic truncate">Admin: {r.admin_notes}</p>}
                     </td>
                     <td className="px-4 py-3">
@@ -361,7 +361,7 @@ export default function AdminReservationsPage() {
                   value={addForm.customer}
                   onChange={e => setAddForm(f => ({ ...f, customer: e.target.value }))}
                 >
-                  <option value="">— Select customer —</option>
+                  <option value="">Select customer</option>
                   {users.map(u => <option key={u.id} value={u.id}>{u.username}</option>)}
                 </select>
               </div>
@@ -373,7 +373,7 @@ export default function AdminReservationsPage() {
                   value={addForm.service}
                   onChange={e => setAddForm(f => ({ ...f, service: e.target.value }))}
                 >
-                  <option value="">— General Appointment —</option>
+                  <option value="">General Appointment</option>
                   {services.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
               </div>

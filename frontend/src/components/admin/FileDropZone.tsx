@@ -71,7 +71,7 @@ export default function FileDropZone({ file, onFileChange, accept = 'image/*,.he
       {currentUrl && (
         <div className="flex items-center gap-2">
           <img src={currentUrl} alt="current" className="w-14 h-14 object-cover rounded-lg border" />
-          <p className="text-xs text-muted-foreground">Current image — drop below to replace</p>
+          <p className="text-xs text-muted-foreground">Current image: drop below to replace</p>
         </div>
       )}
       <div

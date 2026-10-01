@@ -81,7 +81,7 @@ function ShopWishlistSection({
         label: 'Undo',
         onClick: async () => {
           try { await api.post(`/wishlist/${type}/${id}/`); onChanged() }
-          catch { toast.error("Couldn't undo — please add the item again.") }
+          catch { toast.error("Couldn't undo. Please add the item again.") }
         },
       })
     } catch {
@@ -286,7 +286,7 @@ export default function WishlistPage() {
         My Wishlist{totalItems > 0 && <span className="text-muted-foreground font-normal text-lg ml-2">({totalItems} items)</span>}
       </h1>
       <p className="text-sm text-muted-foreground mb-6">
-        Beauty and Fashion are separate stores — each has its own wishlist and its own order.
+        Beauty and Fashion are separate stores, each has its own wishlist and its own order.
       </p>
 
       {totalItems === 0 ? (

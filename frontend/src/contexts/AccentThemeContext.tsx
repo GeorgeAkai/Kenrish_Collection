@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
+import { syncThemeColor } from '@/lib/themeColor'
 
 export type Accent = 'gold' | 'pink' | 'mauve' | 'green' | 'blue'
 
@@ -38,6 +39,7 @@ export function AccentThemeProvider({ children }: { children: ReactNode }) {
       document.documentElement.dataset.accent = accent
     }
     try { localStorage.setItem(STORAGE_KEY, accent) } catch { /* ignore */ }
+    syncThemeColor()
   }, [accent])
 
   return (

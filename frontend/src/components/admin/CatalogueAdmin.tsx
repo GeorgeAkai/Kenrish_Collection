@@ -33,7 +33,7 @@ type CategoryType = 'product' | 'handbag' | 'clothes'
 interface Props {
   title: string
   endpoint: string
-  /** Category this admin page manages — enables moving items to other categories. */
+  /** Category this admin page manages, enables moving items to other categories. */
   itemType?: CategoryType
   extraFields?: Field[]
   /** Clothes only: show a category picker and column (Men / Women / Kids / ...). */
@@ -278,7 +278,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
                           <Star size={12} className="text-amber-400" fill="currentColor" />
                           <span className="text-muted-foreground">{(item.average_rating as number).toFixed(1)}</span>
                         </div>
-                      ) : '—'}
+                      ) : '-'}
                     </td>
                     <td className="px-4 py-3">
                       <button
@@ -433,7 +433,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
                 <div>
                   <p className="text-sm font-medium">Published</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {isPublished ? 'Visible to customers' : 'Hidden — saved as draft'}
+                    {isPublished ? 'Visible to customers' : 'Hidden, saved as draft'}
                   </p>
                 </div>
                 <button

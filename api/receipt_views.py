@@ -62,7 +62,7 @@ def _call_vision_api(image_data: bytes, mime_type: str) -> list:
         resp.raise_for_status()
     except requests.HTTPError as exc:
         body = exc.response.text[:500] if exc.response is not None else ''
-        raise requests.RequestException(f"{exc} — {body}") from exc
+        raise requests.RequestException(f"{exc}: {body}") from exc
 
     content = resp.json()['choices'][0]['message']['content'].strip()
     if content.startswith('```'):

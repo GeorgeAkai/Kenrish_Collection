@@ -284,7 +284,7 @@ export default function AdminSlotConfigPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-background rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col">
             <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
-              <h3 className="font-semibold">{editTarget ? `Edit — ${editTarget.service_name}` : 'New Slot Configuration'}</h3>
+              <h3 className="font-semibold">{editTarget ? `Edit: ${editTarget.service_name}` : 'New Slot Configuration'}</h3>
               <button onClick={() => setShowForm(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted">
                 <X size={16} />
               </button>
@@ -301,7 +301,7 @@ export default function AdminSlotConfigPage() {
                     value={form.service}
                     onChange={e => setForm(f => ({ ...f, service: e.target.value }))}
                   >
-                    <option value="">— Select service —</option>
+                    <option value="">Select service</option>
                     {serviceOptions.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </div>

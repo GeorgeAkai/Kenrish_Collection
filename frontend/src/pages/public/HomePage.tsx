@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '@/lib/axios'
-import { formatKES } from '@/lib/utils'
+import { formatKES, nairobiDateKey, nairobiDayLabel } from '@/lib/utils'
 import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Truck, ShieldCheck, Headphones, Search, X, Shirt, ArrowRight } from 'lucide-react'
 import type { Product, Handbag, Clothes, Offer, Service } from '@/lib/types'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { LOGO_URL } from '@/lib/brand'
 import TodaySchedule from '@/components/TodaySchedule'
+import ShopStatusWatch from '@/components/ShopStatusWatch'
 import BookingModal from '@/components/beauty/BookingModal'
 import type { PublicSlot } from '@/lib/slots'
 
@@ -105,8 +106,8 @@ export default function HomePage() {
   const [search, setSearch] = useState('')
   const [todaySlots, setTodaySlots] = useState<PublicSlot[]>([])
 
-  const todayKey = new Date().toISOString().split('T')[0]
-  const todayLabel = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
+  const todayKey = nairobiDateKey()
+  const todayLabel = nairobiDayLabel()
 
   const TABS: { key: Tab; labelKey: string }[] = [
     { key: 'products', labelKey: 'home.tabBeauty' },
@@ -189,13 +190,14 @@ export default function HomePage() {
 
   return (
     <div className="overflow-hidden">
+      <ShopStatusWatch />
 
       {/* ═══ HERO ════════════════════════════════════════════════════════ */}
       <section className="relative min-h-[90vh] flex items-center gradient-hero overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-5 py-16 sm:py-24 w-full">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
 
-            {/* Left — copy */}
+            {/* Left, copy */}
             <div className="max-w-xl">
               <img src={LOGO_URL} alt="Kenrish Collection" className="hidden lg:block h-40 w-auto object-contain mb-6" />
 
@@ -228,7 +230,7 @@ export default function HomePage() {
 
             </div>
 
-            {/* Right — image mosaic (tablet + desktop) */}
+            {/* Right, image mosaic (tablet + desktop) */}
             <div className="hidden md:grid grid-cols-2 gap-3 h-[440px] lg:h-[560px]">
               {heroImages.length >= 2 ? (
                 <>
@@ -284,9 +286,9 @@ export default function HomePage() {
         <div className="absolute bottom-0 inset-x-0 h-28 pointer-events-none hero-fade-bottom" />
       </section>
 
-      {/* ═══ TODAY'S OPENINGS — phones get it right under the hero ═════════ */}
+      {/* ═══ TODAY'S OPENINGS, phones get it right under the hero ═════════ */}
       <section className="lg:hidden px-4 pt-2 pb-12">
-        <TodaySchedule slots={todaySlots} services={allServices} dateLabel={todayLabel} onBook={setBooking} />
+        <TodaySchedule dateKey={todayKey} slots={todaySlots} services={allServices} dateLabel={todayLabel} onBook={setBooking} />
       </section>
 
       {/* ═══ PROMO STRIP ════════════════════════════════════════════════ */}
@@ -316,7 +318,7 @@ export default function HomePage() {
             {[
               {
                 key: 'beauty', Icon: Scissors, title: 'Kenrish Beauty', href: '/beauty',
-                blurb: 'Hairdressing, barbering, nails and manicures — plus the beauty products to keep it up at home.',
+                blurb: 'Hairdressing, barbering, nails and manicures, plus the beauty products to keep it up at home.',
                 cta: 'Explore Beauty',
               },
               {
@@ -350,7 +352,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══ COLLECTIONS — tabbed ══════════════════════════════════════ */}
+      {/* ═══ COLLECTIONS, tabbed ══════════════════════════════════════ */}
       {(data?.featured_products?.length || data?.featured_handbags?.length || data?.featured_clothes?.length) ? (
         <section className="py-20 max-w-7xl mx-auto px-5">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
@@ -663,7 +665,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="rounded-3xl overflow-hidden border border-border grid grid-cols-1 lg:grid-cols-2 shadow-2xl shadow-primary/10">
 
-            {/* Left — copy */}
+            {/* Left, copy */}
             <div
               className="relative p-10 lg:p-14 overflow-hidden bg-primary text-primary-foreground"
               style={{ background: 'linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)' }}
@@ -717,9 +719,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right — today's openings */}
+            {/* Right, today's openings */}
             <div className="bg-card">
-              <TodaySchedule bare slots={todaySlots} services={allServices} dateLabel={todayLabel} onBook={setBooking} />
+              <TodaySchedule bare dateKey={todayKey} slots={todaySlots} services={allServices} dateLabel={todayLabel} onBook={setBooking} />
             </div>
 
           </div>

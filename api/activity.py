@@ -120,7 +120,7 @@ PERIOD_DAYS = {'today': 0, 'week': 7, 'month': 30, 'quarter': 90, 'year': 365}
 
 
 def _in_period(period):
-    today = timezone.now().date()
+    today = timezone.localdate()
     days = PERIOD_DAYS.get(period, PERIOD_DAYS['month'])
     if period == 'today':
         return ActivityLog.objects.filter(created_at__date=today)

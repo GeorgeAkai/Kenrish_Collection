@@ -170,7 +170,7 @@
 
 /* ── Accent palettes ───────────────────────────────────────────────────
    Set via [data-accent] on <html> by AccentThemeContext (Profile > Theme).
-   Gold is the default and needs no override block — it IS :root/.dark. */
+   Gold is the default and needs no override block, it IS :root/.dark. */
 
 [data-accent="pink"] {
   --background: #fdf2f7; --foreground: #2a1420;
@@ -201,7 +201,7 @@
   --sidebar-primary: #ec6fa0; --sidebar-ring: #ec6fa0;
 }
 
-/* Mauve — the original Kenrish plum/mauve palette, kept as a picker option. */
+/* Mauve, the original Kenrish plum/mauve palette, kept as a picker option. */
 [data-accent="mauve"] {
   --background: #F9F6FB; --foreground: #1A1220;
   --card: #FDFAFF; --card-foreground: #1A1220;
@@ -306,7 +306,7 @@
 
 /* ── Utilities ───────────────────────────────────────────────────────── */
 @layer utilities {
-  /* Hero background gradient — follows the active accent theme */
+  /* Hero background gradient, follows the active accent theme */
   .gradient-hero {
     background: linear-gradient(135deg, var(--secondary) 0%, var(--background) 100%);
   }
@@ -314,7 +314,7 @@
     background: linear-gradient(135deg, var(--card) 0%, var(--background) 60%, var(--secondary) 100%);
   }
 
-  /* Hero bottom fade — transitions the hero into the section below */
+  /* Hero bottom fade, transitions the hero into the section below */
   .hero-fade-bottom {
     background: linear-gradient(to bottom, transparent 0%, var(--background) 100%);
   }
@@ -328,7 +328,7 @@
     animation-delay: -3.5s;
   }
 
-  /* Accent gradient text — uses gold-ink (a readable text-weight tone of the
+  /* Accent gradient text, uses gold-ink (a readable text-weight tone of the
      active theme's primary), not primary itself, which is a fill-only color
      on light canvases per the design system's contrast rules. */
   .text-gradient-plum,

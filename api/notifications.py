@@ -17,7 +17,7 @@ def _build_html(customer_name, customer_email, service_name, res_date, res_time)
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>New Reservation — Kenrish Collection</title>
+  <title>New Reservation | Kenrish Collection</title>
 </head>
 <body style="margin:0;padding:0;background:#F9F6FB;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#F9F6FB;padding:40px 16px;">
@@ -111,7 +111,7 @@ def _send(reservation) -> None:
         res_time = reservation.reservation_time.strftime('%I:%M %p')
         customer_email = customer.email or 'N/A'
 
-        subject = f'[Kenrish] New Booking — {service_name} on {res_date} at {res_time}'
+        subject = f'[Kenrish] New Booking: {service_name} on {res_date} at {res_time}'
 
         plain = (
             f'Hi Elizabeth,\n\n'
@@ -122,7 +122,7 @@ def _send(reservation) -> None:
             f'  Date     : {res_date}\n'
             f'  Time     : {res_time}\n\n'
             f'Log in to the admin panel to approve or manage the booking.\n\n'
-            f'— Kenrish Collection'
+            f'Kenrish Collection'
         )
 
         html = _build_html(customer.username, customer_email, service_name, res_date, res_time)

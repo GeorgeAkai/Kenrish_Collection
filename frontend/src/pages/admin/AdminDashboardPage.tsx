@@ -64,7 +64,7 @@ export default function AdminDashboardPage() {
   const [topLiked, setTopLiked] = useState<GalleryImage[]>([])
   const [engagementLoading, setEngagementLoading] = useState(true)
 
-  // Main analytics — period-dependent
+  // Main analytics, period-dependent
   useEffect(() => {
     setLoading(true)
     const p = `?period=${period}`
@@ -90,7 +90,7 @@ export default function AdminDashboardPage() {
     }).catch(console.error).finally(() => setLoading(false))
   }, [period])
 
-  // Engagement data — period-independent, fetched once
+  // Engagement data, period-independent, fetched once
   useEffect(() => {
     setEngagementLoading(true)
     Promise.all([
@@ -308,7 +308,7 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {/* Engagement — Most Wishlisted & Most Liked */}
+          {/* Engagement, Most Wishlisted & Most Liked */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Customer Engagement</h3>
             {engagementLoading ? (

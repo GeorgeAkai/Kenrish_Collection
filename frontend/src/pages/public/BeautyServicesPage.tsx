@@ -18,7 +18,7 @@ export default function BeautyServicesPage() {
     <div className="max-w-6xl mx-auto px-5 py-12">
       <div className="mb-8">
         <h1 className="section-heading mb-2">Beauty Services</h1>
-        <p className="text-muted-foreground max-w-lg">Hairdressing, barbering, nails and manicures — book in minutes.</p>
+        <p className="text-muted-foreground max-w-lg">Hairdressing, barbering, nails and manicures, book in minutes.</p>
       </div>
 
       {loading ? (

@@ -87,7 +87,7 @@ class StandardPagination(PageNumberPagination):
 
 
 def _period_filter(qs, period, date_field='created_at'):
-    today = timezone.now().date()
+    today = timezone.localdate()
     if period == 'today':
         return qs.filter(**{f'{date_field}__date': today})
     elif period == 'week':
@@ -98,7 +98,7 @@ def _period_filter(qs, period, date_field='created_at'):
 
 
 # ---------------------------------------------------------------------------
-# Auth endpoints (already existed — keep compatible)
+# Auth endpoints (already existed, keep compatible)
 # ---------------------------------------------------------------------------
 
 @api_view(['POST'])
@@ -170,14 +170,14 @@ def change_password_request(request):
     )
 
     send_mail(
-        subject='Kenrish Collection — Password Change Code',
+        subject='Kenrish Collection: Password Change Code',
         message=(
             f'Hi {user.username},\n\n'
             f'Your password change verification code is:\n\n'
             f'  {code}\n\n'
             f'This code expires in 10 minutes.\n\n'
             f'If you did not request this, please ignore this email.\n\n'
-            f'— Kenrish Collection'
+            f'Kenrish Collection'
         ),
         from_email=None,
         recipient_list=[user.email],
@@ -235,7 +235,7 @@ def delete_account(request):
     Right-to-be-Forgotten pipeline:
       - Scrubs all personal identity data from the User and UserProfile rows.
       - Deletes personal activity (wishlist, ratings, likes).
-      - Preserves Orders, Reservations, and Sale records — the FK now points
+      - Preserves Orders, Reservations, and Sale records, the FK now points
         to an anonymised User stub so revenue analytics remain intact.
     Admin accounts are blocked from self-deleting via this endpoint.
     """
@@ -722,7 +722,7 @@ def admin_clothes_detail(request, pk):
 
 
 # ---------------------------------------------------------------------------
-# 8a. Admin — clothes categories (Men / Women / Kids / ...)
+# 8a. Admin, clothes categories (Men / Women / Kids / ...)
 # ---------------------------------------------------------------------------
 
 @api_view(['GET', 'POST'])
@@ -764,7 +764,7 @@ def admin_clothes_category_detail(request, pk):
 
 
 # ---------------------------------------------------------------------------
-# 8b. Admin — move a catalogue item between categories
+# 8b. Admin, move a catalogue item between categories
 # ---------------------------------------------------------------------------
 
 _CATALOGUE_MODEL_MAP = {'product': Product, 'handbag': Handbag, 'clothes': Clothes}
@@ -784,7 +784,7 @@ def admin_move_catalogue_item(request, item_type, pk):
 
     Copies the shared catalogue fields (name, description, pricing, stock,
     rating, image) into a fresh row of the target model, then deletes the
-    original. The stored image file is reused — Django keeps the file on
+    original. The stored image file is reused, Django keeps the file on
     delete, so the new row points at the same media path.
 
     Note: category-specific history tied to the source row (ratings, past
@@ -1306,7 +1306,7 @@ def admin_invoice_list(request):
         page = paginator.paginate_queryset(qs, request)
         return paginator.get_paginated_response(InvoiceListSerializer(page, many=True).data)
 
-    # POST — create invoice
+    # POST, create invoice
     customer_name = request.data.get('customer_name')
     customer_phone = request.data.get('customer_phone')
     items_data = request.data.get('items', [])
@@ -1834,7 +1834,10 @@ def public_slots(request):
     """
     Capacity-aware public slot view.
     With SlotConfigurations: aggregates available spots across all active services.
+    With ?service=<id> and an active config for it: that service's own time blocks
+    (its hours, slot length and worker count) and only its bookings.
     Without: falls back to combined-booking 30-min display (backwards compat).
+    Every slot carries `duration_minutes` (null when services of different lengths overlap).
     """
     from datetime import datetime as dt, date as ddate, datetime, timedelta
     from collections import defaultdict, Counter
@@ -1847,9 +1850,37 @@ def public_slots(request):
     except ValueError:
         return Response({'detail': 'Invalid date format.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    today = ddate.today()
-    now_time = datetime.now().time() if target_date == today else None
+    today = timezone.localdate()
+    now_time = timezone.localtime().time() if target_date == today else None
     weekday = target_date.weekday()
+
+    service_id = request.query_params.get('service') or None
+    if service_id:
+        cfg = SlotConfiguration.objects.filter(service_id=service_id, is_active=True).first()
+        if cfg:
+            counts = Counter(
+                str(r)[:5] for r in Reservation.objects.filter(
+                    service_id=service_id, reservation_date=target_date,
+                    status__in=[Reservation.STATUS_PENDING, Reservation.STATUS_APPROVED],
+                ).values_list('reservation_time', flat=True)
+            )
+            own = []
+            for t in cfg.generate_slots(target_date):
+                sh, sm = int(t[:2]), int(t[3:])
+                is_past = target_date < today or (
+                    now_time is not None and (sh * 60 + sm) <= (now_time.hour * 60 + now_time.minute)
+                )
+                spots = max(0, cfg.worker_count - counts.get(t, 0))
+                own.append({
+                    'time': t,
+                    'available': spots > 0 and not is_past,
+                    'booked': spots == 0,
+                    'past': is_past,
+                    'available_spots': spots,
+                    'total_capacity': cfg.worker_count,
+                    'duration_minutes': cfg.slot_duration_minutes,
+                })
+            return Response(own)
 
     active_configs = [
         c for c in SlotConfiguration.objects.filter(is_active=True).select_related('service')
@@ -1857,7 +1888,7 @@ def public_slots(request):
     ]
 
     if not active_configs:
-        # Fallback: old behaviour — Sunday closed, 30-min unified slots
+        # Fallback: old behaviour, Sunday closed, 30-min unified slots
         if weekday == 6:
             return Response([])
         slots = []
@@ -1888,6 +1919,7 @@ def public_slots(request):
                 'past': is_past,
                 'available_spots': 0 if s in booked_times else 1,
                 'total_capacity': 1,
+                'duration_minutes': 30,
             })
         return Response(result)
 
@@ -1915,10 +1947,12 @@ def public_slots(request):
         )
         total_cap = 0
         total_booked = 0
+        durations = set()
         for cfg in active_configs:
             if t in cfg.generate_slots(target_date):
                 total_cap += cfg.worker_count
                 total_booked += booking_counts[cfg.service_id].get(t, 0)
+                durations.add(cfg.slot_duration_minutes)
         available_spots = max(0, total_cap - total_booked)
         result.append({
             'time': t,
@@ -1927,6 +1961,7 @@ def public_slots(request):
             'past': is_past,
             'available_spots': available_spots,
             'total_capacity': total_cap,
+            'duration_minutes': next(iter(durations)) if len(durations) == 1 else None,
         })
     return Response(result)
 

@@ -941,7 +941,7 @@ def reservation_calendar(request):
     for r in reservations:
         label = r.service.name if r.service else 'Reservation'
         if request.user.is_staff:
-            label = f"{label} — {r.customer.get_full_name() or r.customer.username}"
+            label = f"{label}: {r.customer.get_full_name() or r.customer.username}"
         events.append({
             'id': r.pk,
             'title': label,

@@ -1,4 +1,4 @@
-/* Modern Cosmetics — shared CSS utilities for product cards, buttons, and layout.
+/* Modern Cosmetics, shared CSS utilities for product cards, buttons, and layout.
    Reads its tokens directly from index.css (no local --mc-* overrides) so the
    active [data-accent] and light/dark .class both apply here for free.
 */
@@ -22,7 +22,7 @@
   .product-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
-/* ── Product card — Figma rounded-2xl with lift hover ─────────── */
+/* ── Product card, Figma rounded-2xl with lift hover ─────────── */
 .product-card {
   background: var(--card);
   border-radius: var(--radius-xl);
@@ -38,7 +38,7 @@
   box-shadow: 0 16px 40px rgba(124, 48, 96, 0.14);
 }
 
-/* ── Product image — portrait aspect ratio (4:5) ─────────────── */
+/* ── Product image, portrait aspect ratio (4:5) ─────────────── */
 .product-image {
   position: relative;
   overflow: hidden;
@@ -150,7 +150,7 @@
 }
 
 /* Dark mode: .product-card/.hero-section above already read --card/--background/
-   etc, which index.css redefines under .dark — no separate overrides needed here. */
+   etc, which index.css redefines under .dark, no separate overrides needed here. */
 .dark .product-card:hover {
   box-shadow: 0 16px 40px rgba(212, 142, 192, 0.12);
 }

@@ -225,7 +225,7 @@ export default function AdminStagingPage({ shop }: { shop?: Shop } = {}) {
         <div>
           <h2 className="text-xl font-semibold">Draft Products</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Add details and publish when ready — unpublished products are hidden from customers.
+            Add details and publish when ready, unpublished products are hidden from customers.
           </p>
         </div>
         <Link to="/admin/inventory" className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2">

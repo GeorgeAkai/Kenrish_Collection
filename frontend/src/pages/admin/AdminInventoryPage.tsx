@@ -122,7 +122,7 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
           )}
           {createdCount > 0 && (
             <p className="text-sm text-green-700 dark:text-green-400">
-              {createdCount} new draft product{createdCount !== 1 ? 's' : ''} created — complete their details before publishing.
+              {createdCount} new draft product{createdCount !== 1 ? 's' : ''} created, complete their details before publishing.
             </p>
           )}
         </div>
@@ -199,7 +199,7 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
                       type="number"
                       step="any"
                       value={it.price}
-                      placeholder="—"
+                      placeholder="-"
                       onChange={e => updateItem(i, 'price', e.target.value)}
                       className="w-24 border rounded px-2 py-1 text-sm bg-background"
                     />
@@ -210,7 +210,7 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
                       onChange={e => updateItem(i, 'linkedKey', e.target.value)}
                       className="w-full border rounded px-2 py-1 text-sm bg-background"
                     >
-                      <option value="">— create new draft —</option>
+                      <option value="">Create new draft</option>
                       {inventory.map(inv => (
                         <option
                           key={`${inv.item_type}:${inv.id}`}
@@ -698,7 +698,7 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
                       <td className="px-4 py-3">{s.quantity}</td>
                       <td className="px-4 py-3">{formatKES(s.unit_price)}</td>
                       <td className="px-4 py-3 font-semibold">{formatKES(s.total_amount)}</td>
-                      <td className="px-4 py-3">{s.customer_name || '—'}</td>
+                      <td className="px-4 py-3">{s.customer_name || '-'}</td>
                       <td className="px-4 py-3 text-muted-foreground">{formatDateTime(s.created_at)}</td>
                     </tr>
                   ))}

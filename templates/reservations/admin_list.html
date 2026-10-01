@@ -66,13 +66,13 @@
             <span class="fw-semibold">{{ r.customer.get_full_name|default:r.customer.username }}</span>
             <br><small class="text-muted">@{{ r.customer.username }}</small>
           </td>
-          <td>{{ r.service.name|default:"—" }}</td>
+          <td>{{ r.service.name|default:"-" }}</td>
           <td>
             {{ r.reservation_date|date:"d M Y" }}<br>
             <small class="text-muted">{{ r.reservation_time|time:"H:i" }}</small>
           </td>
           <td>
-            <small class="text-muted">{{ r.notes|truncatechars:50|default:"—" }}</small>
+            <small class="text-muted">{{ r.notes|truncatechars:50|default:"-" }}</small>
           </td>
           <td>
             {% if r.status == 'APPROVED' %}
@@ -128,7 +128,7 @@
               </div>
             </div>
             {% else %}
-            <span class="text-muted small">—</span>
+            <span class="text-muted small">-</span>
             {% endif %}
           </td>
         </tr>

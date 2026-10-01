@@ -61,7 +61,7 @@ export default function FashionPage() {
         <h1 className="text-4xl font-semibold mb-3" style={{ fontFamily: "'Playfair Display', Georgia, serif", letterSpacing: '-0.01em' }}>
           Fashion
         </h1>
-        <p className="text-muted-foreground max-w-lg">Handbags and attire for men, women and kids — browse the full collection in one place.</p>
+        <p className="text-muted-foreground max-w-lg">Handbags and attire for men, women and kids, browse the full collection in one place.</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 mb-8">

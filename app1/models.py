@@ -488,9 +488,9 @@ class Invoice(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.invoice_number:
-            from datetime import date
-            today = date.today().strftime('%Y%m%d')
-            count = Invoice.objects.filter(created_at__date=date.today()).count() + 1
+            local_today = timezone.localdate()
+            today = local_today.strftime('%Y%m%d')
+            count = Invoice.objects.filter(created_at__date=local_today).count() + 1
             self.invoice_number = f'KRC-{today}-{count:04d}'
         super().save(*args, **kwargs)
 
@@ -540,7 +540,7 @@ class SlotConfiguration(models.Model):
         ordering = ['service__name']
 
     def __str__(self):
-        return f'{self.service.name} — {self.worker_count} worker(s), {self.slot_duration_minutes}min slots'
+        return f'{self.service.name}: {self.worker_count} worker(s), {self.slot_duration_minutes}min slots'
 
     def is_day_active(self, date):
         if not self.active_days:

@@ -1,3 +1,4 @@
+import { nairobiDateKey } from '@/lib/utils'
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -187,7 +188,9 @@ export default function ReservationPage() {
   const { t, days: DAYS, months: MONTHS } = useLanguage()
   const navigate = useNavigate()
 
-  const today = new Date()
+  // "Today" is the Nairobi calendar day, not the device's.
+  const [ny, nm, nd] = nairobiDateKey().split('-').map(Number)
+  const today = new Date(ny, nm - 1, nd)
   const todayKey = toDateKey(today.getFullYear(), today.getMonth(), today.getDate())
 
   const [year, setYear] = useState(today.getFullYear())
@@ -384,7 +387,7 @@ export default function ReservationPage() {
       {/* ── Main grid ──────────────────────────────────────────────────── */}
       <div className={`grid gap-5 ${selectedDate ? 'grid-cols-1 lg:grid-cols-[1fr_320px]' : 'grid-cols-1'}`}>
 
-        {/* Left — calendar + my reservations */}
+        {/* Left, calendar + my reservations */}
         <div className="space-y-5">
 
           {/* Month calendar */}
@@ -532,7 +535,7 @@ export default function ReservationPage() {
           )}
         </div>
 
-        {/* Right — day schedule */}
+        {/* Right, day schedule */}
         {selectedDate && (
           <div ref={scheduleRef} className="flex flex-col gap-4 scroll-mt-4">
             <button
@@ -597,7 +600,7 @@ export default function ReservationPage() {
                 <input
                   type="date"
                   required
-                  min={new Date().toISOString().split('T')[0]}
+                  min={nairobiDateKey()}
                   className="w-full border border-border rounded-xl px-3 py-2.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
                   value={form.reservation_date}
                   onChange={e => setForm(f => ({ ...f, reservation_date: e.target.value, reservation_time: '' }))}

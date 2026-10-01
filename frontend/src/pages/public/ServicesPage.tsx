@@ -100,7 +100,7 @@ export default function ServicesPage() {
                       ) : (
                         <p className="text-sm text-muted-foreground italic">Price on request</p>
                       )}
-                      <p className="text-xs text-muted-foreground mt-0.5">Price range — varies by complexity</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Price range, varies by complexity</p>
                     </div>
                     <Link
                       to="/reservation"

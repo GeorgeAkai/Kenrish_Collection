@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
+import { syncThemeColor } from '@/lib/themeColor'
+
 type Theme = 'light' | 'dark'
 
 const ThemeContext = createContext<{ theme: Theme; toggle: () => void } | null>(null)
@@ -14,6 +16,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
     localStorage.setItem('theme', theme)
+    syncThemeColor()
   }, [theme])
 
   const toggle = () => setTheme(t => (t === 'light' ? 'dark' : 'light'))

@@ -81,7 +81,7 @@ export default function CatalogueCard({ item, href, onWishlist, inWishlist, cate
             <StockBadge stock={item.stock_quantity} />
           </div>
 
-          {/* "View Details" bar — slides up on hover and on keyboard focus */}
+          {/* "View Details" bar, slides up on hover and on keyboard focus */}
           <div className="absolute bottom-0 inset-x-0 px-3 pb-3 translate-y-full group-hover:translate-y-0 group-focus-within:translate-y-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-all duration-300">
             <div className="w-full h-10 flex items-center justify-center bg-inverse text-inverse-foreground text-[13px] font-semibold rounded-full shadow-lg">
               {t('common.viewDetails')}

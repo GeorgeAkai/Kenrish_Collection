@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Scissors, CalendarDays, Sparkles, ArrowRight, Clock } from 'lucide-react'
 import api from '@/lib/axios'
-import { formatKES } from '@/lib/utils'
+import { formatKES, nairobiDateKey, nairobiDayLabel } from '@/lib/utils'
 import { formatSlotTime, type PublicSlot } from '@/lib/slots'
 import { useLanguage } from '@/contexts/LanguageContext'
 import TodaySchedule from '@/components/TodaySchedule'
@@ -20,8 +20,8 @@ export default function BeautyPage() {
   const [slots, setSlots] = useState<PublicSlot[]>([])
   const [booking, setBooking] = useState<{ serviceId: number | null; time?: string } | null>(null)
 
-  const todayKey = new Date().toISOString().split('T')[0]
-  const todayLabel = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
+  const todayKey = nairobiDateKey()
+  const todayLabel = nairobiDayLabel()
 
   useEffect(() => {
     api.get<Service[]>('/services/').then(r => setServices(r.data)).catch(() => {})
@@ -42,7 +42,7 @@ export default function BeautyPage() {
               Beauty, <em className="italic text-gold-ink">booked in Nakuru.</em>
             </h1>
             <p className="text-[17px] leading-7 text-muted-foreground mb-8">
-              Walk in polished, walk out radiant. Hairdressing, barbering, nails and manicures — plus the products to keep it up at home.
+              Walk in polished, walk out radiant. Hairdressing, barbering, nails and manicures, plus the products to keep it up at home.
             </p>
             <div className="flex flex-col sm:flex-row sm:flex-wrap items-start gap-3 mb-10">
               <button onClick={() => setBooking({ serviceId: null })}
@@ -108,7 +108,7 @@ export default function BeautyPage() {
       {/* ── Today's openings + services ──────────────────────────────── */}
       <section className="max-w-6xl mx-auto px-4 lg:px-5 pb-16 lg:pb-24 grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-8 lg:gap-10 items-start">
         <div className="lg:order-2">
-          <TodaySchedule slots={slots} services={services} dateLabel={todayLabel} onBook={setBooking} />
+          <TodaySchedule dateKey={todayKey} slots={slots} services={services} dateLabel={todayLabel} onBook={setBooking} />
         </div>
 
         <div className="lg:order-1">

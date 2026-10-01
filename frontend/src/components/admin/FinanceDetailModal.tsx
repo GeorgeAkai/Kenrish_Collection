@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '@/lib/axios'
-import { formatKES, formatChartDate, formatPeriodRange } from '@/lib/utils'
+import { formatKES, formatChartDate, formatPeriodRange, NAIROBI_TZ } from '@/lib/utils'
 import ModalShell from '@/components/admin/ModalShell'
 
 export type FinanceKind = 'income' | 'expense' | 'net'
@@ -14,7 +14,7 @@ interface Summary { revenue: number | string; expenses: number | string; net_pro
 
 const th = 'px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground'
 const SHOP_LABEL: Record<string, string> = { beauty: 'Beauty', fashion: 'Fashion', '': 'Shared' }
-const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })
+const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric', timeZone: NAIROBI_TZ })
 const signed = (n: number) => (n < 0 ? 'text-danger' : 'text-success')
 
 const SCOPE_NAME: Record<Scope, string> = { all: 'All shops', beauty: 'Kenrish Beauty', fashion: 'Kenrish Fashion' }

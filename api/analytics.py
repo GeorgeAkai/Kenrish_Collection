@@ -26,7 +26,7 @@ def clean_shop(value):
 
 
 def _period_qs(qs, period, date_field='created_at'):
-    today = timezone.now().date()
+    today = timezone.localdate()
     if period == 'today':
         return qs.filter(**{f'{date_field}__date': today})
     # Unrecognized period (previously fell through and returned unfiltered
@@ -209,5 +209,5 @@ def shop_breakdown(period='month'):
 
 def active_bookings_count():
     """Approved, upcoming salon reservations."""
-    today = timezone.now().date()
+    today = timezone.localdate()
     return Reservation.objects.filter(status=Reservation.STATUS_APPROVED, reservation_date__gte=today).count()
