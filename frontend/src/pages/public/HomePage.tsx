@@ -120,6 +120,21 @@ export default function HomePage() {
     { nameKey: 'home.t3Name', roleKey: 'home.t3Role', textKey: 'home.t3Text', initials: 'MW', color: 'bg-gold-tint text-gold-ink' },
   ]
 
+  // Reviews added by the admin; the built-in samples above show until there is at least one.
+  const [reviews, setReviews] = useState<{ id: number; customer_name: string; customer_label: string; text: string; rating: number }[]>([])
+  useEffect(() => { api.get('/reviews/').then(r => setReviews(r.data)).catch(() => {}) }, [])
+  const REVIEW_COLORS = ['bg-primary text-primary-foreground', 'bg-inverse text-inverse-foreground', 'bg-gold-tint text-gold-ink']
+  const initialsOf = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('')
+  const shownReviews = reviews.length > 0
+    ? reviews.slice(0, 6).map((r, i) => ({
+        key: `r${r.id}`, name: r.customer_name, role: r.customer_label, text: r.text, rating: r.rating,
+        initials: initialsOf(r.customer_name), color: REVIEW_COLORS[i % REVIEW_COLORS.length],
+      }))
+    : TESTIMONIALS.map(x => ({
+        key: x.nameKey, name: t(x.nameKey), role: t(x.roleKey), text: t(x.textKey), rating: 5,
+        initials: x.initials, color: x.color,
+      }))
+
   useEffect(() => {
     Promise.all([
       api.get('/home/').then(r => r.data),
@@ -615,26 +630,26 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map(testimonial => (
+            {shownReviews.map(testimonial => (
               <div
-                key={testimonial.nameKey}
+                key={testimonial.key}
                 className="rounded-2xl p-7 border border-border bg-card hover:shadow-xl hover:shadow-primary/8 hover:-translate-y-1 transition-all duration-300"
               >
                 <div className="flex gap-1 mb-5">
                   {[1,2,3,4,5].map(i => (
-                    <Star key={i} size={13} className="text-gold" fill="currentColor" />
+                    <Star key={i} size={13} className={i <= testimonial.rating ? 'text-gold' : 'text-muted-foreground/40'} fill={i <= testimonial.rating ? 'currentColor' : 'none'} />
                   ))}
                 </div>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-6 italic">
-                  &ldquo;{t(testimonial.textKey)}&rdquo;
+                  &ldquo;{testimonial.text}&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-full ${testimonial.color} flex items-center justify-center text-xs font-bold shrink-0`}>
                     {testimonial.initials}
                   </div>
                   <div>
-                    <div className="font-semibold text-foreground text-sm">{t(testimonial.nameKey)}</div>
-                    <div className="text-xs text-muted-foreground">{t(testimonial.roleKey)}</div>
+                    <div className="font-semibold text-foreground text-sm">{testimonial.name}</div>
+                    {testimonial.role && <div className="text-xs text-muted-foreground">{testimonial.role}</div>}
                   </div>
                 </div>
               </div>

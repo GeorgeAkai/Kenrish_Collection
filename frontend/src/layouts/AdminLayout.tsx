@@ -8,7 +8,7 @@ import {
   Package, ShoppingBag, Shirt, Warehouse,
   Scissors, Image, Tag, Users, FileText, LogOut, Menu, X,
   Sun, Moon, ChevronRight, ChevronDown, CalendarCheck, ClipboardList, Settings2, PackagePlus,
-  TrendingUp, ArrowRight, BarChart3, Receipt, Tags,
+  TrendingUp, ArrowRight, BarChart3, Receipt, Tags, Activity, MessageSquareQuote,
 } from 'lucide-react'
 
 interface NavLeaf { to: string; label: string; icon: LucideIcon; end?: boolean }
@@ -44,9 +44,16 @@ const NAV: NavEntry[] = [
     ],
   },
   { kind: 'leaf', to: '/admin/offers', label: 'Offers', icon: Tag },
+  { kind: 'leaf', to: '/admin/reviews', label: 'Customer Reviews', icon: MessageSquareQuote },
   { kind: 'leaf', to: '/admin/invoices', label: 'Invoices', icon: FileText },
   { kind: 'leaf', to: '/admin/slot-config', label: 'Schedule Settings', icon: Settings2 },
-  { kind: 'leaf', to: '/admin/users', label: 'Users', icon: Users },
+  {
+    kind: 'group', label: 'Users', icon: Users,
+    children: [
+      { to: '/admin/users', label: 'All Users', icon: Users, end: true },
+      { to: '/admin/users/activity', label: 'Activity Logs', icon: Activity },
+    ],
+  },
 ]
 
 const PAGE_TITLES: Record<string, string> = {
@@ -64,7 +71,9 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/slot-config': 'Schedule Settings',
   '/admin/gallery': 'Gallery',
   '/admin/offers': 'Offers',
+  '/admin/reviews': 'Customer Reviews',
   '/admin/users': 'Users',
+  '/admin/users/activity': 'Activity Logs',
   '/admin/invoices': 'Invoices',
   '/admin/beauty/analytics': 'Beauty Analytics',
   '/admin/beauty/service-sales': 'Service Sales',

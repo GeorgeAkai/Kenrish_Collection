@@ -51,6 +51,9 @@ import AdminOrdersPage from '@/pages/admin/AdminOrdersPage'
 import AdminSlotConfigPage from '@/pages/admin/AdminSlotConfigPage'
 import AdminStagingPage from '@/pages/admin/AdminStagingPage'
 import AdminExecutiveDashboardPage from '@/pages/admin/AdminExecutiveDashboardPage'
+import AdminActivityLogsPage from '@/pages/admin/AdminActivityLogsPage'
+import AdminReviewsPage from '@/pages/admin/AdminReviewsPage'
+import PageTracker from '@/components/PageTracker'
 import AdminShopAnalyticsPage from '@/pages/admin/AdminShopAnalyticsPage'
 import AdminServiceSalesPage from '@/pages/admin/AdminServiceSalesPage'
 import AdminClothesCategoriesPage from '@/pages/admin/AdminClothesCategoriesPage'
@@ -115,7 +118,9 @@ export default function App() {
             <Route path="/admin/services" element={<AdminServicesPage />} />
             <Route path="/admin/gallery" element={<AdminGalleryPage />} />
             <Route path="/admin/offers" element={<AdminOffersPage />} />
+            <Route path="/admin/reviews" element={<AdminReviewsPage />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/users/activity" element={<AdminActivityLogsPage />} />
             <Route path="/admin/invoices" element={<AdminInvoicesPage />} />
             <Route path="/admin/reservations" element={<AdminReservationsPage />} />
             <Route path="/admin/orders" element={<AdminOrdersPage />} />
@@ -139,6 +144,7 @@ export default function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <PageTracker />
       <InstallPrompt />
     </AuthProvider>
     </ToastProvider>

@@ -40,9 +40,10 @@ from app1.models import (
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
-    PasswordChangeCode, ClothesCategory, ServiceSale,
+    PasswordChangeCode, ClothesCategory, ServiceSale, ActivityLog, CustomerReview,
 )
 
+from api.activity import log_event, activity_stats, client_ip
 from app1.inventory import add_stock, record_sale as _record_sale, InsufficientStockError
 from chatbot.ai_service import build_system_prompt
 from api.analytics import (
@@ -69,7 +70,8 @@ from .serializers import (
     OrderSerializer, OrderCreateSerializer,
     SlotConfigurationSerializer,
     UserProfileSerializer, UserProfileUpdateSerializer,
-    ClothesCategorySerializer, ServiceSaleSerializer,
+    ClothesCategorySerializer, ServiceSaleSerializer, ActivityLogSerializer,
+    CustomerReviewSerializer,
 )
 
 
@@ -108,8 +110,11 @@ def login_view(request):
         password=request.data.get('password'),
     )
     if user is None:
+        log_event(request, 'login_failed', path=request.path, method='POST', status_code=401,
+                  detail=f"tried: {str(request.data.get('username', ''))[:100]}")
         return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
     user_logged_in.send(sender=user.__class__, request=request, user=user)
+    log_event(request, 'login', user=user, path=request.path, method='POST', status_code=200)
     refresh = RefreshToken.for_user(user)
     return Response({'access': str(refresh.access_token), 'refresh': str(refresh)})
 
@@ -122,6 +127,7 @@ def register_view(request):
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     user = serializer.save()
+    log_event(request, 'register', user=user, path=request.path, method='POST', status_code=201)
     refresh = RefreshToken.for_user(user)
     return Response(
         {'access': str(refresh.access_token), 'refresh': str(refresh), 'user': UserSerializer(user).data},
@@ -304,6 +310,7 @@ def product_detail(request, pk):
         obj = Product.objects.get(pk=pk)
     except Product.DoesNotExist:
         return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+    log_event(request, 'product_view', path=request.path, object_type='product', object_id=obj.id, object_name=obj.name)
     return Response(ProductDetailSerializer(obj, context={'request': request}).data)
 
 
@@ -327,6 +334,7 @@ def handbag_detail(request, pk):
         obj = Handbag.objects.get(pk=pk)
     except Handbag.DoesNotExist:
         return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+    log_event(request, 'product_view', path=request.path, object_type='handbag', object_id=obj.id, object_name=obj.name)
     return Response(HandbagDetailSerializer(obj, context={'request': request}).data)
 
 
@@ -359,6 +367,7 @@ def clothes_detail(request, pk):
         obj = Clothes.objects.get(pk=pk)
     except Clothes.DoesNotExist:
         return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+    log_event(request, 'product_view', path=request.path, object_type='clothes', object_id=obj.id, object_name=obj.name)
     return Response(ClothesDetailSerializer(obj, context={'request': request}).data)
 
 
@@ -400,6 +409,7 @@ def service_detail(request, pk):
         obj = Service.objects.get(pk=pk)
     except Service.DoesNotExist:
         return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+    log_event(request, 'product_view', path=request.path, object_type='service', object_id=obj.id, object_name=obj.name)
     return Response(ServiceSerializer(obj, context={'request': request}).data)
 
 
@@ -1493,6 +1503,120 @@ def analytics_reset(request):
     if snapshot:
         result['snapshot'] = snapshot
     return Response(result)
+
+
+# ---------------------------------------------------------------------------
+# 13a. Customer reviews (testimonials)
+# ---------------------------------------------------------------------------
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def review_list(request):
+    qs = CustomerReview.objects.filter(is_published=True)[:12]
+    return Response(CustomerReviewSerializer(qs, many=True).data)
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAdminUser])
+def admin_review_list(request):
+    if request.method == 'GET':
+        return Response(CustomerReviewSerializer(CustomerReview.objects.all(), many=True).data)
+    serializer = CustomerReviewSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', 'PATCH', 'DELETE'])
+@permission_classes([IsAdminUser])
+def admin_review_detail(request, pk):
+    try:
+        obj = CustomerReview.objects.get(pk=pk)
+    except CustomerReview.DoesNotExist:
+        return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        return Response(CustomerReviewSerializer(obj).data)
+    if request.method == 'PATCH':
+        serializer = CustomerReviewSerializer(obj, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data)
+    obj.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ---------------------------------------------------------------------------
+# 13b. Activity log (page tracking + admin monitoring)
+# ---------------------------------------------------------------------------
+
+class TrackRateThrottle(AnonRateThrottle):
+    rate = '120/min'
+    scope = 'track'
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@throttle_classes([TrackRateThrottle])
+def activity_track(request):
+    """Called by the SPA on every public route change."""
+    from urllib.parse import parse_qs
+    path = str(request.data.get('path', ''))
+    if not path.startswith('/') or path.startswith('/admin'):
+        return Response(status=status.HTTP_204_NO_CONTENT)  # admin screens aren't tracked as visits
+    pathname, _, query = path.partition('?')
+    search = (parse_qs(query).get('search') or [''])[0].strip()
+    log_event(
+        request, 'page_view', path=pathname[:500], method='GET',
+        client_id=str(request.data.get('client_id', ''))[:64],
+        detail=f'search: {search[:200]}' if search else '',
+    )
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_activity_list(request):
+    qs = ActivityLog.objects.all()
+    p = request.query_params
+    if p.get('event'):
+        qs = qs.filter(event=p['event'])
+    if p.get('user'):
+        qs = qs.filter(username__icontains=p['user'])
+    if p.get('ip'):
+        qs = qs.filter(ip_address=p['ip'])
+    if p.get('date_from'):
+        qs = qs.filter(created_at__date__gte=p['date_from'])
+    if p.get('date_to'):
+        qs = qs.filter(created_at__date__lte=p['date_to'])
+    q = p.get('q', '').strip()
+    if q:
+        qs = qs.filter(Q(path__icontains=q) | Q(object_name__icontains=q) | Q(detail__icontains=q))
+    paginator = StandardPagination()
+    paginator.page_size = 50
+    page = paginator.paginate_queryset(qs, request)
+    return paginator.get_paginated_response(ActivityLogSerializer(page, many=True).data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_activity_stats(request):
+    return Response(activity_stats(request.query_params.get('period', 'month')))
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def admin_activity_purge(request):
+    """Delete log rows older than ?days=N (minimum 1)."""
+    try:
+        days = int(request.query_params.get('days', 90))
+    except ValueError:
+        days = 0
+    if days < 1:
+        return Response({'detail': 'days must be 1 or more.'}, status=status.HTTP_400_BAD_REQUEST)
+    deleted, _ = ActivityLog.objects.filter(created_at__lt=timezone.now() - timedelta(days=days)).delete()
+    return Response({'deleted': deleted})
 
 
 # ---------------------------------------------------------------------------

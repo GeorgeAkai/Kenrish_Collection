@@ -375,3 +375,110 @@ class FashionShopFeaturesTest(TestCase):
         self.assertEqual(Product.objects.get(pk=self.product.pk).stock_quantity, stock_before)
         summary = self.client.get('/api/admin/analytics/summary/').json()
         self.assertEqual(float(summary['revenue']), 0.0)
+
+
+class ActivityLogTest(TestCase):
+    def setUp(self):
+        from rest_framework.test import APIClient
+        self.APIClient = APIClient
+        self.admin = User.objects.create_user(username='boss', password='pass', is_staff=True)
+        self.shopper = User.objects.create_user(username='amina', password='pass')
+        self.admin_client = APIClient()
+        self.admin_client.force_authenticate(self.admin)
+        self.product = make_product(name='Cream')
+
+    def _logs(self, **kw):
+        from app1.models import ActivityLog
+        return ActivityLog.objects.filter(**kw)
+
+    def test_track_records_page_view_and_search_but_not_admin_pages(self):
+        c = self.APIClient()
+        r = c.post('/api/activity/track/', {'path': '/products?search=shea', 'client_id': 'abc'}, format='json')
+        self.assertEqual(r.status_code, 204)
+        log = self._logs(event='page_view').get()
+        self.assertEqual((log.path, log.detail, log.client_id), ('/products', 'search: shea', 'abc'))
+        c.post('/api/activity/track/', {'path': '/admin/users'}, format='json')
+        self.assertEqual(self._logs(event='page_view').count(), 1)
+
+    def test_product_detail_logs_a_product_view_with_user(self):
+        c = self.APIClient()
+        c.force_authenticate(self.shopper)
+        c.get(f'/api/products/{self.product.id}/')
+        log = self._logs(event='product_view').get()
+        self.assertEqual((log.username, log.object_name, log.object_type), ('amina', 'Cream', 'product'))
+
+    def test_login_success_and_failure_are_logged(self):
+        c = self.APIClient()
+        c.post('/api/auth/login/', {'username': 'amina', 'password': 'wrong'}, format='json')
+        c.post('/api/auth/login/', {'username': 'amina', 'password': 'pass'}, format='json')
+        self.assertEqual(self._logs(event='login_failed').get().detail, 'tried: amina')
+        self.assertEqual(self._logs(event='login').get().username, 'amina')
+
+    def test_middleware_logs_admin_writes_with_label(self):
+        from rest_framework_simplejwt.tokens import RefreshToken
+        token = str(RefreshToken.for_user(self.admin).access_token)
+        c = self.APIClient()
+        c.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        c.post('/api/admin/clothes-categories/', {'name': 'Teens'}, format='json')
+        log = self._logs(event='action').get()
+        self.assertEqual((log.username, log.method, log.status_code), ('boss', 'POST', 201))
+        self.assertEqual(log.detail, 'Admin: created')
+
+    def test_admin_list_stats_and_purge(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        from app1.models import ActivityLog
+        c = self.APIClient()
+        c.post('/api/activity/track/', {'path': '/', 'client_id': 'v1'}, format='json')
+        c.post('/api/activity/track/', {'path': '/', 'client_id': 'v2'}, format='json')
+        c.get(f'/api/products/{self.product.id}/')
+        old = ActivityLog.objects.create(event='page_view', path='/old')
+        ActivityLog.objects.filter(pk=old.pk).update(created_at=timezone.now() - timedelta(days=200))
+
+        stats = self.admin_client.get('/api/admin/activity/stats/?period=month').json()
+        self.assertEqual(stats['totals']['page_views'], 2)
+        self.assertEqual(stats['totals']['product_views'], 1)
+        self.assertEqual(stats['top_pages'][0], {'path': '/', 'views': 2})
+        self.assertEqual(stats['top_products'][0]['name'], 'Cream')
+        self.assertEqual(stats['daily'][0]['visitors'], 2)
+
+        listing = self.admin_client.get('/api/admin/activity/?event=product_view').json()
+        self.assertEqual(listing['count'], 1)
+
+        self.assertEqual(self.admin_client.delete('/api/admin/activity/purge/?days=90').json(), {'deleted': 1})
+        self.assertEqual(self.admin_client.delete('/api/admin/activity/purge/?days=0').status_code, 400)
+
+    def test_non_admin_cannot_read_logs(self):
+        c = self.APIClient()
+        c.force_authenticate(self.shopper)
+        self.assertEqual(c.get('/api/admin/activity/').status_code, 403)
+        self.assertIn(self.APIClient().get('/api/admin/activity/stats/').status_code, (401, 403))
+
+
+class CustomerReviewTest(TestCase):
+    def setUp(self):
+        from rest_framework.test import APIClient
+        self.APIClient = APIClient
+        self.admin = User.objects.create_user(username='boss', password='pass', is_staff=True)
+        self.client = APIClient()
+        self.client.force_authenticate(self.admin)
+
+    def test_admin_crud_and_public_only_sees_published(self):
+        body = {'customer_name': 'Amina', 'customer_label': 'Braids client', 'text': 'Loved it!', 'rating': 5}
+        r = self.client.post('/api/admin/reviews/', body, format='json')
+        self.assertEqual(r.status_code, 201)
+        rid = r.json()['id']
+        self.client.post('/api/admin/reviews/', {**body, 'customer_name': 'Hidden', 'is_published': False}, format='json')
+
+        public = self.APIClient().get('/api/reviews/').json()
+        self.assertEqual([x['customer_name'] for x in public], ['Amina'])
+
+        self.assertEqual(self.client.patch(f'/api/admin/reviews/{rid}/', {'rating': 4}, format='json').json()['rating'], 4)
+        self.assertEqual(self.client.delete(f'/api/admin/reviews/{rid}/').status_code, 204)
+
+    def test_validation_and_permissions(self):
+        bad = self.client.post('/api/admin/reviews/', {'customer_name': 'A', 'text': 'x', 'rating': 9}, format='json')
+        self.assertEqual(bad.status_code, 400)
+        self.assertEqual(self.client.post('/api/admin/reviews/', {'customer_name': ' ', 'text': 'x'}, format='json').status_code, 400)
+        self.assertIn(self.APIClient().post('/api/admin/reviews/', {}, format='json').status_code, (401, 403))
+

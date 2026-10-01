@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Scissors, Shirt, TrendingUp, TrendingDown, CalendarCheck, Wallet, Receipt, Boxes } from 'lucide-react'
 import api from '@/lib/axios'
-import { formatKESWhole } from '@/lib/utils'
+import { formatKESWhole, formatPeriodRange } from '@/lib/utils'
 import KpiCard from '@/components/admin/KpiCard'
 import SalesTrendChart from '@/components/admin/charts/SalesTrendChart'
 import ExpensesPieChart, { type ExpenseRow } from '@/components/admin/charts/ExpensesPieChart'
@@ -116,6 +116,7 @@ export default function AnalyticsView({ scope, title, actions }: { scope: Scope;
         <div>
           <p className="eyebrow mb-1.5">{SCOPE_LABEL[scope]}</p>
           <h2 className="font-heading text-[26px] lg:text-4xl font-semibold leading-tight">{title}</h2>
+          <p className="text-sm text-muted-foreground mt-1.5 tabular-nums">{formatPeriodRange(period)}</p>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <div role="radiogroup" aria-label="Period" className="grid grid-cols-5 p-1 rounded-full bg-secondary border border-border">
@@ -136,7 +137,7 @@ export default function AnalyticsView({ scope, title, actions }: { scope: Scope;
         <div className="flex items-center justify-center h-64 text-danger">Couldn’t load analytics. Please refresh.</div>
       ) : (
         <div className="space-y-5 lg:space-y-7">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          <div className={`grid grid-cols-2 gap-3 lg:gap-4 ${scope === 'beauty' ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
             <KpiCard accent icon={Wallet} label="Income" value={formatKESWhole(summary?.revenue ?? 0)} />
             <KpiCard icon={Receipt} label="Expenses" value={formatKESWhole(summary?.expenses ?? 0)} hint="Stock purchases & other costs" />
             <KpiCard
@@ -147,6 +148,9 @@ export default function AnalyticsView({ scope, title, actions }: { scope: Scope;
               hint={margin}
             />
             <KpiCard icon={fourth.icon} label={fourth.label} value={fourth.value} />
+            {scope === 'beauty' && (
+              <KpiCard icon={Boxes} label="Stock value (at cost)" value={formatKESWhole(stockValue)} hint="Beauty products on hand" />
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">

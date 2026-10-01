@@ -39,3 +39,25 @@ export function formatKESWhole(amount: string | number): string {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount
   return `KES ${Math.round(num || 0).toLocaleString('en-KE')}`
 }
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+/** Chart bucket label -> readable date: "2026-09-12" -> "12 Sep 2026", "2026-09" -> "Sep 2026". */
+export function formatChartDate(bucket: string): string {
+  const [y, m, d] = bucket.split('-')
+  if (!y || !m) return bucket
+  const month = MONTHS[Number(m) - 1] ?? m
+  return d ? `${Number(d)} ${month} ${y}` : `${month} ${y}`
+}
+
+const PERIOD_DAYS: Record<string, number> = { today: 0, week: 7, month: 30, quarter: 90, year: 365 }
+
+/** The dates an analytics period covers, matching the server's window: "1 Sep 2026 – 30 Sep 2026". */
+export function formatPeriodRange(period: string, now = new Date()): string {
+  const fmt = (d: Date) => `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`
+  const days = PERIOD_DAYS[period] ?? 30
+  if (days === 0) return fmt(now)
+  const start = new Date(now)
+  start.setDate(start.getDate() - days)
+  return `${fmt(start)} – ${fmt(now)}`
+}

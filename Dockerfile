@@ -9,20 +9,18 @@ COPY frontend/ .
 RUN npm run build
 
 # Stage 2: Django runtime
-FROM python:alpine
-# Upgrade base packages, then add:
-#   libpq        – psycopg2 runtime dependency
-#   gcc/musl-dev/postgresql-dev – needed to compile psycopg2 from source (no musl wheel)
-RUN apk --no-cache upgrade && \
-    apk add --no-cache libpq gcc musl-dev postgresql-dev
+# Pinned to 3.12 (matches runtime.txt) so a new Python release can't change the build underneath us.
+FROM python:3.12-alpine
+# libpq is the psycopg2 runtime dependency. psycopg2-binary ships a musl wheel, so no compiler is needed.
+RUN apk --no-cache upgrade && apk add --no-cache libpq
 WORKDIR /app
 
-RUN pip install --upgrade pip setuptools
-
 COPY requirements-prod.txt ./
+# pip/setuptools aren't needed at runtime; removing them also drops the copies of
+# msgpack/setuptools they vendor, which scanners flag.
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements-prod.txt && \
-    apk del gcc musl-dev postgresql-dev
+    pip uninstall -y pip setuptools wheel
 
 COPY . .
 # Overwrite with freshly built frontend (takes precedence over any local dist)

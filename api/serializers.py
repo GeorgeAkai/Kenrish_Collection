@@ -10,7 +10,7 @@ from app1.models import (
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
-    ClothesCategory, ServiceSale,
+    ClothesCategory, ServiceSale, ActivityLog, CustomerReview,
 )
 
 
@@ -597,3 +597,45 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['avatar', 'bio', 'phone']
+
+
+# ---------------------------------------------------------------------------
+# Activity log
+# ---------------------------------------------------------------------------
+
+class ActivityLogSerializer(serializers.ModelSerializer):
+    event_display = serializers.CharField(source='get_event_display', read_only=True)
+
+    class Meta:
+        model = ActivityLog
+        fields = [
+            'id', 'user', 'username', 'event', 'event_display', 'path', 'method', 'status_code',
+            'object_type', 'object_id', 'object_name', 'detail', 'ip_address', 'user_agent', 'created_at',
+        ]
+
+
+# ---------------------------------------------------------------------------
+# Customer reviews (admin-added testimonials)
+# ---------------------------------------------------------------------------
+
+class CustomerReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerReview
+        fields = ['id', 'customer_name', 'customer_label', 'text', 'rating', 'shop', 'is_published', 'created_at']
+        read_only_fields = ['created_at']
+
+    def validate_customer_name(self, value):
+        if not value.strip():
+            raise serializers.ValidationError('Name is required.')
+        return value.strip()
+
+    def validate_text(self, value):
+        if not value.strip():
+            raise serializers.ValidationError('Review text is required.')
+        return value.strip()
+
+    def validate_rating(self, value):
+        if not 1 <= value <= 5:
+            raise serializers.ValidationError('Rating must be between 1 and 5.')
+        return value
+

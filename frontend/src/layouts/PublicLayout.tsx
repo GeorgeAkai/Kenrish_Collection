@@ -5,7 +5,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import {
   Menu, X, Sun, Moon, Heart, MapPin, Phone, Clock, Search, ChevronRight, ChevronDown,
-  UserRound, ClipboardList, KeyRound, LogOut, ShieldCheck, Wallet, CalendarDays,
+  UserRound, ClipboardList, KeyRound, LogOut, ShieldCheck, CalendarDays,
   ShoppingBag, Images, Info, Package, Shirt,
 } from 'lucide-react'
 import api from '@/lib/axios'
@@ -223,7 +223,7 @@ function MobileDrawer({ onClose, wishCount, hasOffers }: { onClose: () => void; 
           <p className={group}>{t('nav.preferences')}</p>
           <div className="grid grid-cols-2 gap-2 px-1">
             <Segmented label="Language" value={lang} onChange={setLang}
-              options={[{ value: 'en', label: 'EN' }, { value: 'sw', label: 'SW' }]} />
+              options={[{ value: 'en', label: 'English' }, { value: 'sw', label: 'Swahili' }]} />
             <Segmented label="Appearance" value={theme} onChange={v => { if (v !== theme) toggleTheme() }}
               options={[
                 { value: 'light', label: t('nav.light'), icon: <Sun size={14} /> },
@@ -306,7 +306,7 @@ export default function PublicLayout() {
             <button onClick={() => setLang(lang === 'en' ? 'sw' : 'en')}
               className="h-8 px-3 rounded-full hover:bg-card font-semibold text-foreground"
               aria-label={lang === 'en' ? 'Switch to Swahili' : 'Switch to English'}>
-              {lang === 'en' ? 'SW' : 'EN'}
+              {lang === 'en' ? 'Swahili' : 'English'}
             </button>
             <button onClick={toggleTheme} className="w-8 h-8 rounded-full hover:bg-card flex items-center justify-center text-foreground" aria-label="Toggle theme">
               {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
@@ -328,9 +328,6 @@ export default function PublicLayout() {
           </Link>
           <div className="flex-1 max-w-2xl"><SearchForm /></div>
           <div className="flex items-center gap-2 ml-auto">
-            <span className="h-10 px-3.5 rounded-full border border-border flex items-center gap-1.5 text-[13px] font-bold" title="Prices in Kenyan Shillings">
-              <Wallet size={15} strokeWidth={1.75} /> KES
-            </span>
             <Link to="/wishlist" className={iconBtn} aria-label={`${t('nav.wishlist')}${wishCount ? `, ${wishCount}` : ''}`}>
               <Heart size={19} strokeWidth={1.75} />
               <CountBubble n={wishCount} />

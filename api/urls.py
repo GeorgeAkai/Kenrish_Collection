@@ -101,6 +101,17 @@ urlpatterns = [
     path('admin/analytics/expenses-breakdown/', views.analytics_expenses_breakdown, name='api-analytics-expenses-breakdown'),
     path('admin/analytics/shop-breakdown/', views.analytics_shop_breakdown, name='api-analytics-shop-breakdown'),
 
+    # --- 13a. Customer reviews ---
+    path('reviews/', views.review_list, name='api-review-list'),
+    path('admin/reviews/', views.admin_review_list, name='api-admin-review-list'),
+    path('admin/reviews/<int:pk>/', views.admin_review_detail, name='api-admin-review-detail'),
+
+    # --- 13b. Activity log ---
+    path('activity/track/', views.activity_track, name='api-activity-track'),
+    path('admin/activity/', views.admin_activity_list, name='api-admin-activity-list'),
+    path('admin/activity/stats/', views.admin_activity_stats, name='api-admin-activity-stats'),
+    path('admin/activity/purge/', views.admin_activity_purge, name='api-admin-activity-purge'),
+
     # --- 14. Chatbot streaming ---
     path('chatbot/stream/', views.chatbot_stream, name='api-chatbot-stream'),
 

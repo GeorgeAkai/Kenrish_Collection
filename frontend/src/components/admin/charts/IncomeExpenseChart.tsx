@@ -1,5 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { formatKES } from '@/lib/utils'
+import { formatKES, formatChartDate } from '@/lib/utils'
 
 export interface IncomeExpensePoint { date: string; revenue: number | string; expenses: number | string }
 
@@ -13,9 +13,9 @@ export default function IncomeExpenseChart({ data, height = 260 }: { data: Incom
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={rows}>
         <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-        <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+        <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={formatChartDate} minTickGap={28} />
         <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(Number(v) / 1000).toFixed(0)}k`} />
-        <Tooltip formatter={(v) => formatKES(Number(v))} />
+        <Tooltip formatter={(v) => formatKES(Number(v))} labelFormatter={l => formatChartDate(String(l))} />
         <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
         <Bar dataKey="Income" fill="var(--success)" radius={[4, 4, 0, 0]} />
         <Bar dataKey="Expenses" fill="var(--danger)" radius={[4, 4, 0, 0]} />
