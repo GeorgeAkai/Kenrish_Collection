@@ -8,7 +8,7 @@ import {
   Package, ShoppingBag, Shirt, Warehouse,
   Scissors, Image, Tag, Users, FileText, LogOut, Menu, X,
   Sun, Moon, ChevronRight, ChevronDown, CalendarCheck, ClipboardList, Settings2, PackagePlus,
-  TrendingUp, ArrowRight, BarChart3, Receipt, Tags, Activity, MessageSquareQuote,
+  TrendingUp, ArrowRight, BarChart3, Receipt, Tags, Activity, MessageSquareQuote, Wallet,
 } from 'lucide-react'
 
 interface NavLeaf { to: string; label: string; icon: LucideIcon; end?: boolean }
@@ -17,6 +17,7 @@ type NavEntry = ({ kind: 'leaf' } & NavLeaf) | ({ kind: 'group' } & NavGroup)
 
 const NAV: NavEntry[] = [
   { kind: 'leaf', to: '/admin/executive', label: 'Executive Dashboard', icon: TrendingUp, end: true },
+  { kind: 'leaf', to: '/admin/expenses', label: 'All Expenses', icon: Wallet },
   // Orders can hold items from any shop, so it lives at the top level rather than under one store.
   { kind: 'leaf', to: '/admin/orders', label: 'Customer Orders', icon: ClipboardList },
   {
@@ -30,6 +31,7 @@ const NAV: NavEntry[] = [
       { to: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
       { to: '/admin/beauty/gallery', label: 'Gallery', icon: Image },
       { to: '/admin/beauty/inventory', label: 'Inventory', icon: Warehouse },
+      { to: '/admin/beauty/expenses', label: 'Expenses', icon: Wallet },
     ],
   },
   {
@@ -41,6 +43,7 @@ const NAV: NavEntry[] = [
       { to: '/admin/handbags', label: 'Handbags', icon: ShoppingBag },
       { to: '/admin/fashion/inventory', label: 'Inventory', icon: Warehouse },
       { to: '/admin/fashion/gallery', label: 'Gallery', icon: Image },
+      { to: '/admin/fashion/expenses', label: 'Expenses', icon: Wallet },
     ],
   },
   { kind: 'leaf', to: '/admin/offers', label: 'Offers', icon: Tag },
@@ -59,6 +62,9 @@ const NAV: NavEntry[] = [
 const PAGE_TITLES: Record<string, string> = {
   '/admin': 'Dashboard',
   '/admin/executive': 'Executive Dashboard',
+  '/admin/expenses': 'All Expenses',
+  '/admin/beauty/expenses': 'Beauty Expenses',
+  '/admin/fashion/expenses': 'Fashion Expenses',
   '/admin/dashboard-legacy': 'Dashboard (Legacy)',
   '/admin/products': 'Products',
   '/admin/handbags': 'Handbags',

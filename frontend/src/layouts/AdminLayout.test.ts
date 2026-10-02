@@ -7,6 +7,12 @@ describe('getAdminPageTitle', () => {
   })
 
   // All known routes
+  it('titles the expenses pages for each shop and for all shops', () => {
+    expect(getAdminPageTitle('/admin/beauty/expenses')).toBe('Beauty Expenses')
+    expect(getAdminPageTitle('/admin/fashion/expenses')).toBe('Fashion Expenses')
+    expect(getAdminPageTitle('/admin/expenses')).toBe('All Expenses')
+  })
+
   it('returns "Products" for /admin/products', () => {
     expect(getAdminPageTitle('/admin/products')).toBe('Products')
   })

@@ -126,9 +126,35 @@ export interface InventoryItem {
 export interface Expense {
   id: number
   description: string
-  amount: string
+  /** null = a recurring bill still awaiting its amount */
+  amount: string | null
   category: string
+  /** null = shared between both shops */
+  shop: 'beauty' | 'fashion' | null
+  /** YYYY-MM-DD, when the money was spent */
+  date_purchased: string
+  note: string
+  is_pending: boolean
+  recurring: number | null
   created_at: string
+}
+
+export interface RecurringExpense {
+  id: number
+  name: string
+  category: string
+  shop: 'beauty' | 'fashion' | null
+  kind: 'fixed' | 'variable'
+  amount: string | null
+  start_date: string
+  active: boolean
+}
+
+export interface ExpenseList {
+  results: Expense[]
+  count: number
+  total: string
+  pending_count: number
 }
 
 export interface AdminUser {

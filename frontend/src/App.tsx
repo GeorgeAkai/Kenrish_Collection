@@ -41,6 +41,7 @@ import AdminProductsPage from '@/pages/admin/AdminProductsPage'
 import AdminHandbagsPage from '@/pages/admin/AdminHandbagsPage'
 import AdminClothesPage from '@/pages/admin/AdminClothesPage'
 import AdminInventoryPage from '@/pages/admin/AdminInventoryPage'
+import AdminExpensesPage from '@/pages/admin/AdminExpensesPage'
 import AdminServicesPage from '@/pages/admin/AdminServicesPage'
 import AdminGalleryPage from '@/pages/admin/AdminGalleryPage'
 import AdminOffersPage from '@/pages/admin/AdminOffersPage'
@@ -127,6 +128,7 @@ export default function App() {
             <Route path="/admin/slot-config" element={<AdminSlotConfigPage />} />
             <Route path="/admin/staging" element={<AdminStagingPage />} />
             <Route path="/admin/executive" element={<AdminExecutiveDashboardPage />} />
+            <Route path="/admin/expenses" element={<AdminExpensesPage />} />
 
             {/* Shop-scoped admin views */}
             <Route path="/admin/beauty/orders" element={<Navigate to="/admin/orders" replace />} />
@@ -138,6 +140,8 @@ export default function App() {
             <Route path="/admin/beauty/gallery" element={<AdminGalleryPage shop="beauty" />} />
             <Route path="/admin/beauty/inventory" element={<AdminInventoryPage shop="beauty" />} />
             <Route path="/admin/fashion/inventory" element={<AdminInventoryPage shop="fashion" />} />
+            <Route path="/admin/beauty/expenses" element={<AdminExpensesPage shop="beauty" />} />
+            <Route path="/admin/fashion/expenses" element={<AdminExpensesPage shop="fashion" />} />
             <Route path="/admin/fashion/gallery" element={<AdminGalleryPage shop="fashion" />} />
           </Route>
         </Route>
