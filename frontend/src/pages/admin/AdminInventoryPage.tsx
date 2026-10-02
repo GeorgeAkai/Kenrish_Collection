@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ScanLine } from 'lucide-react'
 import api from '@/lib/axios'
 import { formatKES, formatDateTime } from '@/lib/utils'
+import ItemPicker from '@/components/admin/ItemPicker'
 import type { InventoryItem, Sale } from '@/lib/types'
 
 type Tab = 'inventory' | 'add-stock' | 'record-sale' | 'sales' | 'scan-receipt'
@@ -356,10 +357,7 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
   const [saleForm, setSaleForm] = useState({ item_type: 'product', item_id: '', quantity: '1', unit_price: '', customer_name: '', customer_phone: '' })
   const [saleSaving, setSaleSaving] = useState(false)
   const [saleMsg, setSaleMsg] = useState('')
-  const [saleSearch, setSaleSearch] = useState('')
   const [saleSelected, setSaleSelected] = useState<InventoryItem | null>(null)
-  const [showSaleDropdown, setShowSaleDropdown] = useState(false)
-  const saleSearchRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (tab === 'inventory') {
@@ -414,7 +412,6 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
       })
       setSaleMsg('Sale recorded successfully!')
       setSaleForm({ item_type: 'product', item_id: '', quantity: '1', unit_price: '', customer_name: '', customer_phone: '' })
-      setSaleSearch('')
       setSaleSelected(null)
     } catch (err: unknown) {
       const response = (err as { response?: { data?: Record<string, string[]> } }).response
@@ -580,47 +577,16 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
       {tab === 'record-sale' && (
         <div className="max-w-md">
           <form onSubmit={handleRecordSale} className="space-y-4">
-            <div ref={saleSearchRef} className="relative">
-              <label className="block text-sm font-medium mb-1">Item Name <span className="text-danger" aria-hidden="true">*</span></label>
-              <input
-                type="text"
-                className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-                placeholder="Search by name…"
-                value={saleSearch}
-                autoComplete="off"
-                onChange={e => {
-                  setSaleSearch(e.target.value)
-                  setSaleSelected(null)
-                  setShowSaleDropdown(true)
+            <div>
+              <label className="block text-sm font-medium mb-1">Item <span className="text-danger" aria-hidden="true">*</span></label>
+              <ItemPicker
+                items={inventory}
+                selected={saleSelected}
+                onSelect={item => {
+                  setSaleSelected(item)
+                  if (item) setSaleForm(f => ({ ...f, unit_price: item.price ?? '' }))
                 }}
-                onFocus={() => setShowSaleDropdown(true)}
-                onBlur={() => setTimeout(() => setShowSaleDropdown(false), 150)}
               />
-              {showSaleDropdown && saleSearch.length > 0 && (() => {
-                const q = saleSearch.toLowerCase()
-                const hits = inventory.filter(i => i.name.toLowerCase().includes(q)).slice(0, 8)
-                return hits.length > 0 ? (
-                  <ul className="absolute z-20 left-0 right-0 mt-1 bg-background border rounded-md shadow-lg max-h-52 overflow-y-auto">
-                    {hits.map(item => (
-                      <li
-                        key={`${item.item_type}-${item.id}`}
-                        className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-muted text-sm"
-                        onMouseDown={() => {
-                          setSaleSelected(item)
-                          setSaleSearch(item.name)
-                          setSaleForm(f => ({ ...f, unit_price: item.price ?? '' }))
-                          setShowSaleDropdown(false)
-                        }}
-                      >
-                        <span className="font-medium truncate">{item.name}</span>
-                        <span className="ml-2 shrink-0 text-xs text-muted-foreground capitalize px-1.5 py-0.5 bg-muted rounded">{item.item_type}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="absolute z-20 left-0 right-0 mt-1 bg-background border rounded-md shadow px-3 py-2 text-sm text-muted-foreground">No items found</div>
-                )
-              })()}
               {saleSelected && (
                 <p className="mt-1 text-xs text-muted-foreground">
                   {saleSelected.item_type} · {saleSelected.stock_quantity} in stock · selling at {formatKES(saleSelected.price)}
