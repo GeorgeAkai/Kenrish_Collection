@@ -93,7 +93,7 @@ export default function AdminExpensesPage({ shop }: { shop?: ExpenseShop }) {
     }
   }
 
-  const title = shop ? `${SHOP_LABEL[shop]} Expenses` : 'All Expenses'
+  const title = shop ? `${SHOP_LABEL[shop]} Expenses` : 'Expense Management'
   const pending = data?.pending_count ?? 0
 
   return (

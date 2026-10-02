@@ -10,11 +10,11 @@ describe('getAdminPageTitle', () => {
   it('titles the expenses pages for each shop and for all shops', () => {
     expect(getAdminPageTitle('/admin/beauty/expenses')).toBe('Beauty Expenses')
     expect(getAdminPageTitle('/admin/fashion/expenses')).toBe('Fashion Expenses')
-    expect(getAdminPageTitle('/admin/expenses')).toBe('All Expenses')
+    expect(getAdminPageTitle('/admin/expenses')).toBe('Expense Management')
   })
 
   it('titles the employees page', () => {
-    expect(getAdminPageTitle('/admin/employees')).toBe('Employees')
+    expect(getAdminPageTitle('/admin/employees')).toBe('Employees Management')
   })
 
   it('titles the customers page', () => {

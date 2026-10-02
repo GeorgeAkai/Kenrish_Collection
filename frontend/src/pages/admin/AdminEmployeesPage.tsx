@@ -72,7 +72,7 @@ export default function AdminEmployeesPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-xl font-semibold">Employees</h2>
+          <h2 className="text-xl font-semibold">Employees Management</h2>
           <p className="text-sm text-muted-foreground">Each month's salary is added to Expenses automatically, prorated for part months.</p>
         </div>
         <button onClick={() => setForm({})} className="btn-modern btn-modern--primary flex items-center gap-1.5">

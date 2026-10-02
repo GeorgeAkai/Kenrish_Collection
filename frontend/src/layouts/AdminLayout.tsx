@@ -15,14 +15,22 @@ interface NavLeaf { to: string; label: string; icon: LucideIcon; end?: boolean }
 interface NavGroup { label: string; icon: LucideIcon; children: NavLeaf[] }
 type NavEntry = ({ kind: 'leaf' } & NavLeaf) | ({ kind: 'group' } & NavGroup)
 
-const NAV: NavEntry[] = [
+export const NAV: NavEntry[] = [
   { kind: 'leaf', to: '/admin/executive', label: 'Executive Dashboard', icon: TrendingUp, end: true },
-  { kind: 'leaf', to: '/admin/expenses', label: 'All Expenses', icon: Wallet },
-  { kind: 'leaf', to: '/admin/employees', label: 'Employees', icon: UserRoundCog },
-  // Orders can hold items from any shop, so it lives at the top level rather than under one store.
-  { kind: 'leaf', to: '/admin/orders', label: 'Customer Orders', icon: ClipboardList },
   {
-    kind: 'group', label: 'Kenrish Beauty Dashboard', icon: Scissors,
+    // Everything about the people who buy from us, in one place. Orders can hold items from either shop,
+    // which is why they live here rather than under one store.
+    kind: 'group', label: 'Customer & Order Management', icon: Users,
+    children: [
+      { to: '/admin/customers', label: 'Customers', icon: Contact },
+      { to: '/admin/orders', label: 'Customer Orders', icon: ClipboardList },
+      { to: '/admin/reviews', label: 'Customer Reviews', icon: MessageSquareQuote },
+      { to: '/admin/users', label: 'Users', icon: Users, end: true },
+      { to: '/admin/users/activity', label: 'Activity Logs', icon: Activity },
+    ],
+  },
+  {
+    kind: 'group', label: 'Kenrish Beauty', icon: Scissors,
     children: [
       { to: '/admin/beauty/analytics', label: 'Analytics', icon: BarChart3 },
       { to: '/admin/products', label: 'Products', icon: Package },
@@ -30,6 +38,7 @@ const NAV: NavEntry[] = [
       { to: '/admin/beauty/service-sales', label: 'Service Sales', icon: Receipt },
       { to: '/admin/beauty/staging', label: 'Draft Products', icon: PackagePlus },
       { to: '/admin/reservations', label: 'Reservations', icon: CalendarCheck },
+      { to: '/admin/slot-config', label: 'Service Time Settings', icon: Settings2 },
       { to: '/admin/beauty/gallery', label: 'Gallery', icon: Image },
       { to: '/admin/beauty/inventory', label: 'Inventory', icon: Warehouse },
       { to: '/admin/beauty/expenses', label: 'Expenses', icon: Wallet },
@@ -47,25 +56,17 @@ const NAV: NavEntry[] = [
       { to: '/admin/fashion/expenses', label: 'Expenses', icon: Wallet },
     ],
   },
-  { kind: 'leaf', to: '/admin/offers', label: 'Offers', icon: Tag },
-  { kind: 'leaf', to: '/admin/reviews', label: 'Customer Reviews', icon: MessageSquareQuote },
+  { kind: 'leaf', to: '/admin/expenses', label: 'Expense Management', icon: Wallet },
+  { kind: 'leaf', to: '/admin/employees', label: 'Employees Management', icon: UserRoundCog },
   { kind: 'leaf', to: '/admin/invoices', label: 'Invoices', icon: FileText },
-  { kind: 'leaf', to: '/admin/slot-config', label: 'Service Time Settings', icon: Settings2 },
-  {
-    kind: 'group', label: 'Users', icon: Users,
-    children: [
-      { to: '/admin/customers', label: 'Customers', icon: Contact },
-      { to: '/admin/users', label: 'All Users', icon: Users, end: true },
-      { to: '/admin/users/activity', label: 'Activity Logs', icon: Activity },
-    ],
-  },
+  { kind: 'leaf', to: '/admin/offers', label: 'Offers', icon: Tag },
 ]
 
 const PAGE_TITLES: Record<string, string> = {
   '/admin': 'Dashboard',
   '/admin/executive': 'Executive Dashboard',
-  '/admin/expenses': 'All Expenses',
-  '/admin/employees': 'Employees',
+  '/admin/expenses': 'Expense Management',
+  '/admin/employees': 'Employees Management',
   '/admin/customers': 'Customers',
   '/admin/beauty/expenses': 'Beauty Expenses',
   '/admin/fashion/expenses': 'Fashion Expenses',
