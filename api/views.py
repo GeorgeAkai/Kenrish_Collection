@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.signals import user_logged_in
 from django.core.mail import send_mail
+from django.db import transaction
 from django.db.models import Sum, Count, Q
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from django.http import StreamingHttpResponse
@@ -42,10 +43,12 @@ from app1.models import (
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
-    PasswordChangeCode, ClothesCategory, ServiceSale, ActivityLog, CustomerReview,
+    PasswordChangeCode, ClothesCategory, ServiceSale, ActivityLog, CustomerReview, AuditEntry, RecurringExpense,
 )
 
 from api.activity import log_event, activity_stats, client_ip
+from app1.audit import record_audit
+from app1.recurring import post_due_recurring
 from app1.inventory import add_stock, edit_sale as _edit_sale, record_sale as _record_sale, InsufficientStockError
 from chatbot.ai_service import build_system_prompt
 from api.analytics import (
@@ -73,7 +76,7 @@ from .serializers import (
     OrderSerializer, OrderCreateSerializer,
     SlotConfigurationSerializer,
     UserProfileSerializer, UserProfileUpdateSerializer,
-    ClothesCategorySerializer, ServiceSaleSerializer, ActivityLogSerializer, SaleEditSerializer,
+    ClothesCategorySerializer, ServiceSaleSerializer, ActivityLogSerializer, SaleEditSerializer, AuditEntrySerializer, RecurringExpenseSerializer,
     CustomerReviewSerializer,
 )
 
@@ -1121,35 +1124,111 @@ def admin_sales_list(request):
     return paginator.get_paginated_response(SaleSerializer(page, many=True).data)
 
 
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAdminUser])
-def admin_add_expense(request):
-    description = request.data.get('description')
-    amount = request.data.get('amount')
-    category = request.data.get('category', 'General')
-    shop = _clean_shop(request.data.get('shop'))
-    if not description or amount is None:
-        return Response({'detail': 'description and amount are required.'}, status=status.HTTP_400_BAD_REQUEST)
-    try:
-        amount = float(amount)
-    except (ValueError, TypeError):
-        return Response({'detail': 'Invalid amount.'}, status=status.HTTP_400_BAD_REQUEST)
-    expense = Expense.objects.create(
-        description=description,
-        amount=amount,
-        category=category,
-        shop=shop,
-        created_by=request.user,
-    )
-    # Also create a CashFlow entry for the expense
-    CashFlow.objects.create(
-        transaction_type='EXPENSE',
-        shop=shop,
-        amount=expense.amount,
-        description=expense.description,
-        created_by=request.user,
-    )
-    return Response(ExpenseSerializer(expense).data, status=status.HTTP_201_CREATED)
+def admin_expenses(request):
+    if request.method == 'POST':
+        serializer = ExpenseSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        expense = serializer.save(created_by=request.user)
+        return Response(ExpenseSerializer(expense).data, status=status.HTTP_201_CREATED)
+    post_due_recurring()  # no scheduler: bring this month's recurring entries up to date when the page is opened
+    qs = Expense.objects.all()
+    params = request.query_params
+    shop = params.get('shop')
+    if shop == 'shared':
+        qs = qs.filter(shop__isnull=True)
+    elif shop in ('beauty', 'fashion'):
+        qs = qs.filter(shop=shop)
+    if params.get('category'):
+        qs = qs.filter(category=params['category'])
+    if params.get('date_from'):
+        qs = qs.filter(date_purchased__gte=params['date_from'])
+    if params.get('date_to'):
+        qs = qs.filter(date_purchased__lte=params['date_to'])
+    qs = qs.order_by('-date_purchased', '-id')
+    return Response({
+        'results': ExpenseSerializer(qs, many=True).data,
+        'count': qs.count(),
+        'pending_count': qs.filter(amount__isnull=True).count(),
+        'total': f"{(qs.aggregate(total=Sum('amount'))['total'] or Decimal('0')):.2f}",
+    })
+
+
+@api_view(['PATCH', 'DELETE'])
+@permission_classes([IsAdminUser])
+def admin_expense_detail(request, pk):
+    expense = get_object_or_404(Expense, pk=pk)
+    before = dict(ExpenseSerializer(expense).data)
+    for key in ('id', 'created_at', 'is_pending', 'recurring'):
+        before.pop(key)
+    if request.method == 'DELETE':
+        with transaction.atomic():
+            record_audit(request.user, 'expense', expense, 'delete', before)
+            expense.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    serializer = ExpenseSerializer(expense, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    with transaction.atomic():
+        expense = serializer.save()
+        after = dict(ExpenseSerializer(expense).data)
+        for key in ('id', 'created_at', 'is_pending', 'recurring'):
+            after.pop(key)
+        if after != before:
+            record_audit(request.user, 'expense', expense, 'edit', before, after)
+    return Response(ExpenseSerializer(expense).data)
+
+
+def _template_snapshot(template):
+    data = dict(RecurringExpenseSerializer(template).data)
+    data.pop('id')
+    data.pop('created_at')
+    return data
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAdminUser])
+def admin_recurring_expenses(request):
+    if request.method == 'POST':
+        serializer = RecurringExpenseSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        template = serializer.save(created_by=request.user)
+        post_due_recurring()
+        return Response(RecurringExpenseSerializer(template).data, status=status.HTTP_201_CREATED)
+    return Response(RecurringExpenseSerializer(RecurringExpense.objects.all(), many=True).data)
+
+
+@api_view(['PATCH', 'DELETE'])
+@permission_classes([IsAdminUser])
+def admin_recurring_expense_detail(request, pk):
+    template = get_object_or_404(RecurringExpense, pk=pk)
+    before = _template_snapshot(template)
+    if request.method == 'DELETE':
+        with transaction.atomic():
+            record_audit(request.user, 'recurring_expense', template, 'delete', before)
+            template.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    serializer = RecurringExpenseSerializer(template, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    with transaction.atomic():
+        template = serializer.save()
+        after = _template_snapshot(template)
+        if after != before:
+            record_audit(request.user, 'recurring_expense', template, 'edit', before, after)
+    post_due_recurring()
+    return Response(RecurringExpenseSerializer(template).data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_audit_list(request):
+    """?kind=expense&ref=5 -> every correction made to that record, newest first."""
+    qs = AuditEntry.objects.all()
+    if request.query_params.get('kind'):
+        qs = qs.filter(kind=request.query_params['kind'])
+    if request.query_params.get('ref'):
+        qs = qs.filter(object_ref=request.query_params['ref'])
+    return Response(AuditEntrySerializer(qs[:200], many=True).data)
 
 
 @api_view(['GET', 'POST'])
@@ -1429,6 +1508,8 @@ def admin_invoice_detail(request, pk):
 # ---------------------------------------------------------------------------
 
 def _analytics_args(request):
+    # Every analytics endpoint starts here, so recurring costs (rent...) are posted before any total is read.
+    post_due_recurring()
     return request.query_params.get('period', 'month'), _clean_shop(request.query_params.get('shop'))
 
 

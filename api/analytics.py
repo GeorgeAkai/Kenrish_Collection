@@ -48,8 +48,15 @@ def _revenue_qs(period, shop=None):
 
 
 def _expense_qs(period, shop=None):
-    """Expenses with no shop are shared costs: they only appear in the all-shops view."""
-    qs = _period_qs(Expense.objects.all(), period)
+    """Expenses with no shop are shared costs: they only appear in the all-shops view.
+    Counted by the day the money was spent (date_purchased), not the day it was entered."""
+    today = timezone.localdate()
+    qs = Expense.objects.all()
+    if period == 'today':
+        qs = qs.filter(date_purchased=today)
+    else:
+        qs = qs.filter(date_purchased__gte=today - timedelta(days=PERIOD_DAYS.get(period, PERIOD_DAYS['month'])))
+    qs = qs.filter(amount__isnull=False)  # variable bills awaiting their amount don't count yet
     return qs.filter(shop=shop) if shop else qs
 
 
@@ -132,9 +139,9 @@ def transactions(kind, period='month', shop=None):
             'shop': r.shop or 'fashion', 'amount': r.amount,
         }
     else:
-        qs = _expense_qs(period, shop).order_by('-created_at', '-id')
+        qs = _expense_qs(period, shop).order_by('-date_purchased', '-id')
         row = lambda r: {
-            'id': r.id, 'date': r.created_at, 'description': r.description,
+            'id': r.id, 'date': r.date_purchased, 'description': r.description,
             'category': r.category, 'shop': r.shop or '', 'amount': r.amount,
         }
     return {
@@ -182,12 +189,14 @@ def cash_flow_trend(period='month', shop=None):
     trunc = TruncMonth if monthly else TruncDate
     fmt = (lambda d: d.strftime('%Y-%m')) if monthly else (lambda d: str(d))
 
-    def bucketed(qs, field):
-        rows = qs.annotate(b=trunc('created_at')).values('b').annotate(t=Sum(field))
+    def bucketed(qs, field, date_field='created_at', is_date=False):
+        # date_purchased is a plain DateField: it needs no day-truncation (and TruncDate rejects it on SQLite).
+        bucket = F(date_field) if (is_date and not monthly) else trunc(date_field)
+        rows = qs.annotate(b=bucket).values('b').annotate(t=Sum(field))
         return {fmt(r['b']): r['t'] for r in rows}
 
     income = bucketed(_revenue_qs(period, shop), 'amount')
-    expenses = bucketed(_expense_qs(period, shop), 'amount')
+    expenses = bucketed(_expense_qs(period, shop), 'amount', 'date_purchased', is_date=True)
     return [
         {'date': d, 'revenue': income.get(d, 0), 'expenses': expenses.get(d, 0)}
         for d in sorted(set(income) | set(expenses))

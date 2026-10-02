@@ -2,6 +2,7 @@ import re
 from django.contrib.auth.models import User
 from django.core.validators import validate_email as django_validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.utils import timezone
 from rest_framework import serializers
 
 from app1.models import (
@@ -10,7 +11,7 @@ from app1.models import (
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
-    ClothesCategory, ServiceSale, ActivityLog, CustomerReview, SaleEdit,
+    ClothesCategory, ServiceSale, ActivityLog, CustomerReview, SaleEdit, AuditEntry, RecurringExpense, EXPENSE_CATEGORIES,
 )
 
 
@@ -373,6 +374,12 @@ class SaleSerializer(serializers.ModelSerializer):
         return None
 
 
+class AuditEntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AuditEntry
+        fields = ['id', 'kind', 'object_ref', 'object_label', 'action', 'actor_username', 'before', 'after', 'created_at']
+
+
 class SaleEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = SaleEdit
@@ -401,10 +408,68 @@ class InventoryItemSerializer(serializers.Serializer):
 # ---------------------------------------------------------------------------
 
 class ExpenseSerializer(serializers.ModelSerializer):
+    # '' or null both mean a shared cost (no single shop).
+    shop = serializers.ChoiceField(choices=['beauty', 'fashion'], allow_null=True, allow_blank=True, required=False)
+
+    is_pending = serializers.SerializerMethodField()
+
     class Meta:
         model = Expense
-        fields = ['id', 'description', 'amount', 'category', 'shop', 'created_at']
+        fields = ['id', 'description', 'amount', 'category', 'shop', 'date_purchased', 'note',
+                  'is_pending', 'recurring', 'created_at']
+        read_only_fields = ['created_at', 'recurring']
+        # null in the database means "awaiting the bill"; a person can only ever set a real amount.
+        extra_kwargs = {'amount': {'required': True, 'allow_null': False}}
+
+    def get_is_pending(self, obj):
+        return obj.amount is None
+
+    def validate_shop(self, value):
+        return value or None
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('Amount must be greater than zero.')
+        return value
+
+    def validate_category(self, value):
+        # An old row (e.g. "Stock Purchase") may keep its category when other fields are edited.
+        if value not in EXPENSE_CATEGORIES and not (self.instance and self.instance.category == value):
+            raise serializers.ValidationError(f"Category must be one of: {', '.join(EXPENSE_CATEGORIES)}.")
+        return value
+
+    def validate_date_purchased(self, value):
+        if value > timezone.localdate():
+            raise serializers.ValidationError('The purchase date cannot be in the future.')
+        return value
+
+
+class RecurringExpenseSerializer(serializers.ModelSerializer):
+    shop = serializers.ChoiceField(choices=['beauty', 'fashion'], allow_null=True, allow_blank=True, required=False)
+
+    class Meta:
+        model = RecurringExpense
+        fields = ['id', 'name', 'category', 'shop', 'kind', 'amount', 'start_date', 'active', 'created_at']
         read_only_fields = ['created_at']
+
+    def validate_shop(self, value):
+        return value or None
+
+    def validate_category(self, value):
+        if value not in EXPENSE_CATEGORIES:
+            raise serializers.ValidationError(f"Category must be one of: {', '.join(EXPENSE_CATEGORIES)}.")
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        kind = attrs.get('kind', getattr(self.instance, 'kind', 'fixed'))
+        if kind == 'variable':
+            attrs['amount'] = None  # the bill sets it each month
+        else:
+            amount = attrs.get('amount', getattr(self.instance, 'amount', None))
+            if amount is None or amount <= 0:
+                raise serializers.ValidationError({'amount': 'A fixed expense needs an amount greater than zero.'})
+        return attrs
 
 
 # ---------------------------------------------------------------------------

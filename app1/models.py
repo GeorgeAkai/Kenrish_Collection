@@ -432,6 +432,30 @@ class Sale(models.Model):
         return f"Sale - {(item.name if item else 'Item')} x{self.quantity}"
 
 
+class AuditEntry(models.Model):
+    """Permanent record of a correction or deletion made by an admin (non-repudiation): who, when, and
+    the values before and after. Snapshots only, so entries outlive the object and the actor's account.
+    Never purged (unlike ActivityLog)."""
+    ACTIONS = [('edit', 'Edit'), ('delete', 'Delete')]
+
+    kind = models.CharField(max_length=30, db_index=True)   # 'expense', 'employee', 'customer', ...
+    object_ref = models.PositiveIntegerField()
+    object_label = models.CharField(max_length=255, blank=True)
+    action = models.CharField(max_length=10, choices=ACTIONS)
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='audit_entries')
+    actor_username = models.CharField(max_length=150)
+    before = models.JSONField(null=True)
+    after = models.JSONField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at', '-id']
+        indexes = [models.Index(fields=['kind', 'object_ref'])]
+
+    def __str__(self):
+        return f"{self.actor_username} {self.action} {self.kind} #{self.object_ref}"
+
+
 class SaleEdit(models.Model):
     """Permanent audit row for a correction to a recorded sale (non-repudiation).
     Unlike ActivityLog this is never purged, and it keeps its own snapshots so it survives
@@ -508,12 +532,49 @@ class GalleryLike(models.Model):
         return f"{self.user.username} likes {self.gallery_image.description[:20]}"
 
 
+# What an expense can be filed under. 'Stock Purchase' is written by add_stock and stays valid for old rows.
+EXPENSE_CATEGORIES = [
+    'Beauty Products', 'Fashion (Clothes)', 'Fashion (Handbags)',
+    'Rent', 'Electricity', 'Water', 'Equipment', 'Salaries', 'Other',
+]
+
+
+class RecurringExpense(models.Model):
+    """A cost that repeats monthly (rent, electricity...). Fixed ones post themselves with their amount;
+    variable ones post an entry with no amount that the admin fills in when the bill arrives."""
+    KINDS = [('fixed', 'Fixed amount'), ('variable', 'Variable amount')]
+
+    name = models.CharField(max_length=255)
+    category = models.CharField(max_length=100, default='Other')
+    shop = models.CharField(max_length=20, choices=[('beauty', 'Beauty'), ('fashion', 'Fashion')], null=True, blank=True)
+    kind = models.CharField(max_length=10, choices=KINDS, default='fixed')
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # fixed kind only
+    start_date = models.DateField(default=timezone.localdate)  # first month it posts
+    active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class Expense(models.Model):
     description = models.CharField(max_length=255)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    # Null = awaiting the bill (a variable recurring cost). Sum() skips nulls, so it stays out of totals.
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     category = models.CharField(max_length=100, default='General')
     # Null = shared/unattributed: counted in the Executive totals only.
     shop = models.CharField(max_length=20, choices=[('beauty', 'Beauty'), ('fashion', 'Fashion')], null=True, blank=True)
+    # When the money was actually spent (a bale bought last week is entered today). Analytics use this,
+    # not created_at, which is only when the row was typed in.
+    date_purchased = models.DateField(default=timezone.localdate)
+    note = models.TextField(blank=True)
+    # Set when a RecurringExpense posted this row; (recurring, period) is unique so posting is idempotent.
+    recurring = models.ForeignKey(RecurringExpense, null=True, blank=True, on_delete=models.SET_NULL, related_name='expenses')
+    period = models.DateField(null=True, blank=True)  # first day of the month this row covers
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -521,7 +582,11 @@ class Expense(models.Model):
         return f"{self.description} - Ksh {self.amount}"
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-date_purchased', '-created_at']
+        constraints = [
+            models.UniqueConstraint(fields=['recurring', 'period'], name='unique_recurring_period',
+                                    condition=models.Q(recurring__isnull=False)),
+        ]
 
 
 class Invoice(models.Model):
