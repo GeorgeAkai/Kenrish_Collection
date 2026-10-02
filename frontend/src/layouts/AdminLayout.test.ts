@@ -21,6 +21,11 @@ describe('getAdminPageTitle', () => {
     expect(getAdminPageTitle('/admin/customers')).toBe('Customers')
   })
 
+  it('titles a customer profile whatever its address', () => {
+    expect(getAdminPageTitle('/admin/customers/customer/12')).toBe('Customer Profile')
+    expect(getAdminPageTitle('/admin/customers/user/5')).toBe('Customer Profile')
+  })
+
   it('returns "Products" for /admin/products', () => {
     expect(getAdminPageTitle('/admin/products')).toBe('Products')
   })

@@ -49,7 +49,8 @@ from app1.models import (
 from api.activity import log_event, activity_stats, client_ip
 from app1.audit import record_audit
 from app1.customers import confirm_customer_link
-from api.customers import customer_rows
+from api.customers import customer_profile, customer_rows, resolve_customer_ref
+from app1.customers import normalize_phone
 from app1.recurring import post_all_due
 from app1.inventory import add_stock, edit_sale as _edit_sale, record_sale as _record_sale, InsufficientStockError
 from chatbot.ai_service import build_system_prompt
@@ -1290,6 +1291,36 @@ def admin_employee_dashboard(request):
 def admin_customers(request):
     """Every customer ranked by spend. ?shop=beauty|fashion and ?period=30d|90d|year|all (default all time)."""
     return Response(customer_rows(_clean_shop(request.query_params.get('shop')), request.query_params.get('period', 'all')))
+
+
+@api_view(['GET', 'PATCH'])
+@permission_classes([IsAdminUser])
+def admin_customer_profile(request, kind, pk):
+    """One customer's profile (GET), or a correction to their name or phone (PATCH, customers with a record only)."""
+    found = resolve_customer_ref(kind, pk)
+    if found is None:
+        return Response({'detail': 'Customer not found.'}, status=status.HTTP_404_NOT_FOUND)
+    customer, user = found
+    if request.method == 'PATCH':
+        if customer is None:
+            return Response({'detail': 'This person has no purchase record to edit yet.'}, status=status.HTTP_400_BAD_REQUEST)
+        before = {'name': customer.name, 'phone': customer.phone}
+        name = str(request.data['name']).strip() if 'name' in request.data else customer.name
+        phone = customer.phone
+        if 'phone' in request.data:
+            phone = normalize_phone(request.data['phone'])
+            if not phone:
+                return Response({'phone': ['Enter a valid Kenyan mobile number, e.g. 0712 345 678.']}, status=status.HTTP_400_BAD_REQUEST)
+            if Customer.objects.filter(phone=phone).exclude(pk=customer.pk).exists():
+                return Response({'phone': ['A customer with this number already exists.']}, status=status.HTTP_400_BAD_REQUEST)
+        after = {'name': name, 'phone': phone}
+        if after != before:
+            with transaction.atomic():
+                customer.name, customer.phone = name, phone
+                customer.save(update_fields=['name', 'phone'])
+                record_audit(request.user, 'customer', customer, 'edit', before, after)
+        customer, user = resolve_customer_ref('customer', customer.pk)
+    return Response(customer_profile(customer, user))
 
 
 @api_view(['POST'])

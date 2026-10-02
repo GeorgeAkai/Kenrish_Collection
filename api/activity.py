@@ -43,6 +43,7 @@ ACTION_LABELS = [
     ('PATCH', r'^/api/admin/employees/\d+/$', 'Edited an employee'),
     ('DELETE', r'^/api/admin/employees/\d+/$', 'Deleted an employee'),
     ('POST', r'^/api/admin/customers/\d+/link/$', 'Linked a customer to a registered user'),
+    ('PATCH', r'^/api/admin/customers/\w+/\d+/$', 'Edited a customer'),
     ('POST', r'^/api/admin/inventory/add-stock/$', 'Added stock'),
     ('POST', r'^/api/admin/inventory/clear-sales/$', 'Cleared sales data'),
     ('POST', r'^/api/admin/service-sales/$', 'Recorded a service sale'),

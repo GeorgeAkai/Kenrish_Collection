@@ -44,6 +44,7 @@ import AdminInventoryPage from '@/pages/admin/AdminInventoryPage'
 import AdminExpensesPage from '@/pages/admin/AdminExpensesPage'
 import AdminEmployeesPage from '@/pages/admin/AdminEmployeesPage'
 import AdminCustomersPage from '@/pages/admin/AdminCustomersPage'
+import AdminCustomerProfilePage from '@/pages/admin/AdminCustomerProfilePage'
 import AdminServicesPage from '@/pages/admin/AdminServicesPage'
 import AdminGalleryPage from '@/pages/admin/AdminGalleryPage'
 import AdminOffersPage from '@/pages/admin/AdminOffersPage'
@@ -133,6 +134,7 @@ export default function App() {
             <Route path="/admin/expenses" element={<AdminExpensesPage />} />
             <Route path="/admin/employees" element={<AdminEmployeesPage />} />
             <Route path="/admin/customers" element={<AdminCustomersPage />} />
+            <Route path="/admin/customers/:kind/:id" element={<AdminCustomerProfilePage />} />
 
             {/* Shop-scoped admin views */}
             <Route path="/admin/beauty/orders" element={<Navigate to="/admin/orders" replace />} />

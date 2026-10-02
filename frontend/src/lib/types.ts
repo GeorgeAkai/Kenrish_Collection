@@ -197,6 +197,42 @@ export interface CustomerRow {
   possible_user: { id: number; username: string } | null
 }
 
+export interface TimelineEvent {
+  type: 'sale' | 'service' | 'order' | 'reservation' | 'rating'
+  /** ISO datetime */
+  date: string
+  title: string
+  detail: string
+  amount: string | null
+}
+
+export interface CustomerProfile {
+  ref: string
+  kind: 'registered' | 'walkin'
+  name: string
+  username: string | null
+  email: string
+  joined: string | null
+  phone: string
+  user_id: number | null
+  /** null when a registered user has never bought anything (no record to edit or audit) */
+  customer_id: number | null
+  possible_user: { id: number; username: string } | null
+  metrics: {
+    total_spend: string
+    purchases: number
+    average_purchase: string
+    last_purchase: string | null
+    /** null for walk-ins (no account) */
+    logins: number | null
+    last_seen: string | null
+  }
+  spend_by_month: { month: string; spend: string }[]
+  timeline: TimelineEvent[]
+  /** null for walk-ins (no account) */
+  wishlist: { type: 'product' | 'handbag' | 'clothes'; id: number; name: string; price: string }[] | null
+}
+
 export interface ExpenseList {
   results: Expense[]
   count: number

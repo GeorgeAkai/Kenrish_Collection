@@ -97,6 +97,7 @@ const PAGE_TITLES: Record<string, string> = {
 }
 
 export function getAdminPageTitle(pathname: string): string {
+  if (pathname.startsWith('/admin/customers/')) return 'Customer Profile'
   return PAGE_TITLES[pathname] ?? 'Admin'
 }
 

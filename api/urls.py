@@ -83,6 +83,7 @@ urlpatterns = [
     path('admin/employees/<int:pk>/', views.admin_employee_detail, name='api-admin-employee-detail'),
     path('admin/customers/', views.admin_customers, name='api-admin-customers'),
     path('admin/customers/<int:pk>/link/', views.admin_customer_link, name='api-admin-customer-link'),
+    path('admin/customers/<str:kind>/<int:pk>/', views.admin_customer_profile, name='api-admin-customer-profile'),
     path('admin/audit/', views.admin_audit_list, name='api-admin-audit'),
     path('admin/service-sales/', views.admin_service_sale_list, name='api-admin-service-sale-list'),
     path('admin/service-sales/<int:pk>/', views.admin_service_sale_detail, name='api-admin-service-sale-detail'),
