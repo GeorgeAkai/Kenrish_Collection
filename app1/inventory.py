@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.db import transaction as db_transaction
 
+from .customers import resolve_customer
 from .models import InventoryTransaction, Sale, CashFlow, Expense, Product, Handbag, Clothes
 
 
@@ -65,6 +66,7 @@ def record_sale(item, quantity, unit_price, actor, customer_name='', customer_ph
             total_amount=Decimal(str(quantity)) * Decimal(str(unit_price)),
             customer_name=customer_name,
             customer_phone=customer_phone,
+            customer=resolve_customer(customer_name, customer_phone),
             created_by=actor,
         )
         _attach_item(sale, item)

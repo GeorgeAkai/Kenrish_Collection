@@ -147,6 +147,23 @@ class UserProfile(models.Model):
         return self.user.username
 
 
+class Customer(models.Model):
+    """One record per person we can identify by phone. user is null for walk-ins ("Customer not in App")."""
+    phone = models.CharField(max_length=20, unique=True)  # normalized, +2547XXXXXXXX
+    name = models.CharField(max_length=255, blank=True)
+    user = models.OneToOneField(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='customer')
+    # A registered user whose self-entered profile phone matches. Never trusted until an admin confirms.
+    possible_user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='possible_customers')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_in_app(self):
+        return self.user_id is not None
+
+    def __str__(self):
+        return f"{self.name or 'Customer'} ({self.phone})"
+
+
 class Wishlist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wishlist')
     products = models.ManyToManyField(Product, blank=True, related_name='wishlisted_by')
@@ -237,6 +254,7 @@ class ServiceSale(models.Model):
     payment_method = models.CharField(max_length=10, choices=PAYMENT_CHOICES, default='cash')
     customer_name = models.CharField(max_length=255, blank=True)
     customer_phone = models.CharField(max_length=20, blank=True)
+    customer = models.ForeignKey(Customer, null=True, blank=True, on_delete=models.SET_NULL, related_name='service_sales')
     notes = models.TextField(blank=True)
     served_at = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -248,6 +266,9 @@ class ServiceSale(models.Model):
     def save(self, *args, **kwargs):
         if not self.service_name and self.service_id:
             self.service_name = self.service.name
+        if self.customer_id is None:
+            from .customers import resolve_customer  # customers.py imports models
+            self.customer = resolve_customer(self.customer_name, self.customer_phone)
         super().save(*args, **kwargs)
         CashFlow.objects.update_or_create(
             reference_service_sale=self,
@@ -372,6 +393,7 @@ class Sale(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     customer_name = models.CharField(max_length=255, blank=True)
     customer_phone = models.CharField(max_length=20, blank=True)
+    customer = models.ForeignKey(Customer, null=True, blank=True, on_delete=models.SET_NULL, related_name='sales')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 

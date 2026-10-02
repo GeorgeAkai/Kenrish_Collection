@@ -18,3 +18,8 @@ def increment_login_count(sender, user, request, **kwargs):
     profile, created = UserProfile.objects.get_or_create(user=user)
     profile.login_count += 1
     profile.save()
+
+@receiver(post_save, sender=UserProfile)
+def suggest_customer_match(sender, instance, **kwargs):
+    from .customers import suggest_walkin_for_profile
+    suggest_walkin_for_profile(instance)
