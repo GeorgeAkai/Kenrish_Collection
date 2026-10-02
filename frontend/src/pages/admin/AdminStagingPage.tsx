@@ -203,6 +203,7 @@ export default function AdminStagingPage({ shop }: { shop?: Shop } = {}) {
     return shop === 'beauty' ? d.item_type === 'product' : d.item_type === 'handbag' || d.item_type === 'clothes'
   })
   const [loading, setLoading] = useState(true)
+  const inventoryPath = shop ? `/admin/${shop}/inventory` : '/admin/inventory'
 
   useEffect(() => {
     api.get('/admin/staging/')
@@ -228,7 +229,7 @@ export default function AdminStagingPage({ shop }: { shop?: Shop } = {}) {
             Add details and publish when ready, unpublished products are hidden from customers.
           </p>
         </div>
-        <Link to="/admin/inventory" className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2">
+        <Link to={inventoryPath} className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-2">
           ← Inventory
         </Link>
       </div>
@@ -239,7 +240,7 @@ export default function AdminStagingPage({ shop }: { shop?: Shop } = {}) {
           <p className="text-sm text-muted-foreground">
             Scan a receipt and leave items unlinked to create drafts here.
           </p>
-          <Link to="/admin/inventory" className="inline-block mt-3 text-sm text-primary hover:underline underline-offset-2">
+          <Link to={inventoryPath} className="inline-block mt-3 text-sm text-primary hover:underline underline-offset-2">
             Go to Inventory →
           </Link>
         </div>

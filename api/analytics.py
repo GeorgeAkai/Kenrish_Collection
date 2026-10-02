@@ -216,6 +216,36 @@ def shop_breakdown(period='month'):
     return {'totals': revenue, 'expenses': expenses, 'top_shop': top_shop}
 
 
+def inventory_summary(shop=None):
+    """The live numbers on the Inventory cards: stock value at cost, how many items are low or out, and product
+    sales today and this month (Nairobi calendar days). Services are sold on their own page, not counted here."""
+    stock_value = Decimal('0')
+    item_count = low = out = 0
+    for model, _label in [m for s in (SHOPS if shop is None else (shop,)) for m in SHOP_MODELS[s]]:
+        for stock, cost, reorder in model.objects.values_list('stock_quantity', 'cost_price', 'reorder_level'):
+            item_count += 1
+            stock_value += stock * Decimal(str(cost))
+            low += stock <= reorder
+            out += stock == 0
+
+    sales = Sale.objects.all()
+    if shop == 'beauty':
+        sales = sales.filter(product__isnull=False)
+    elif shop == 'fashion':
+        sales = sales.filter(Q(handbag__isnull=False) | Q(clothes__isnull=False))
+    today = timezone.localdate()
+    todays = sales.filter(created_at__date=today)
+    return {
+        'item_count': item_count,
+        'stock_value': f'{stock_value:.2f}',
+        'low_stock_count': low,
+        'out_of_stock_count': out,
+        'today_sales_total': f"{(todays.aggregate(t=Sum('total_amount'))['t'] or Decimal('0')):.2f}",
+        'today_sales_count': todays.count(),
+        'month_sales_count': sales.filter(created_at__date__gte=today.replace(day=1)).count(),
+    }
+
+
 def active_bookings_count():
     """Approved, upcoming salon reservations."""
     today = timezone.localdate()

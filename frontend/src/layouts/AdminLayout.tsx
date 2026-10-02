@@ -98,6 +98,9 @@ const PAGE_TITLES: Record<string, string> = {
 
 export function getAdminPageTitle(pathname: string): string {
   if (pathname.startsWith('/admin/customers/')) return 'Customer Profile'
+  // Each inventory card opens its own page under the shop's inventory address.
+  const inventory = pathname.match(/^\/admin\/(?:(beauty|fashion)\/)?inventory\//)
+  if (inventory) return PAGE_TITLES[inventory[1] ? `/admin/${inventory[1]}/inventory` : '/admin/inventory']
   return PAGE_TITLES[pathname] ?? 'Admin'
 }
 

@@ -119,6 +119,7 @@ export default function App() {
             <Route path="/admin/handbags" element={<AdminHandbagsPage />} />
             <Route path="/admin/clothes" element={<AdminClothesPage />} />
             <Route path="/admin/inventory" element={<AdminInventoryPage />} />
+            <Route path="/admin/inventory/:section" element={<AdminInventoryPage />} />
             <Route path="/admin/services" element={<AdminServicesPage />} />
             <Route path="/admin/gallery" element={<AdminGalleryPage />} />
             <Route path="/admin/offers" element={<AdminOffersPage />} />
@@ -145,7 +146,9 @@ export default function App() {
             <Route path="/admin/beauty/staging" element={<AdminStagingPage shop="beauty" />} />
             <Route path="/admin/beauty/gallery" element={<AdminGalleryPage shop="beauty" />} />
             <Route path="/admin/beauty/inventory" element={<AdminInventoryPage shop="beauty" />} />
+            <Route path="/admin/beauty/inventory/:section" element={<AdminInventoryPage shop="beauty" />} />
             <Route path="/admin/fashion/inventory" element={<AdminInventoryPage shop="fashion" />} />
+            <Route path="/admin/fashion/inventory/:section" element={<AdminInventoryPage shop="fashion" />} />
             <Route path="/admin/beauty/expenses" element={<AdminExpensesPage shop="beauty" />} />
             <Route path="/admin/fashion/expenses" element={<AdminExpensesPage shop="fashion" />} />
             <Route path="/admin/fashion/gallery" element={<AdminGalleryPage shop="fashion" />} />

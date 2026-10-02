@@ -59,6 +59,7 @@ from api.analytics import (
     inventory_alerts as _inventory_alerts, stock_value as _stock_value,
     sales_trend as _sales_trend, cash_flow_trend as _cash_flow_trend,
     expenses_breakdown as _expenses_breakdown,
+    inventory_summary as _inventory_summary,
     shop_breakdown as _shop_breakdown, active_bookings_count as _active_bookings_count,
     clean_shop as _clean_shop, stock_breakdown as _stock_breakdown,
     transactions as _transactions,
@@ -972,6 +973,13 @@ def admin_inventory_list(request):
             'is_low_stock': c.is_low_stock, 'inventory_value': c.inventory_value,
         })
     return Response(items)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_inventory_summary(request):
+    """Live numbers for the Inventory dashboard cards. ?shop=beauty|fashion (anything else = both shops)."""
+    return Response(_inventory_summary(_clean_shop(request.query_params.get('shop'))))
 
 
 @api_view(['POST'])

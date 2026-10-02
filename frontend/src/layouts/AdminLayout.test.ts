@@ -26,6 +26,12 @@ describe('getAdminPageTitle', () => {
     expect(getAdminPageTitle('/admin/customers/user/5')).toBe('Customer Profile')
   })
 
+  it('keeps the shop inventory title on each inventory sub-page', () => {
+    expect(getAdminPageTitle('/admin/beauty/inventory/record-sale')).toBe('Beauty Inventory')
+    expect(getAdminPageTitle('/admin/fashion/inventory/low-stock')).toBe('Fashion Inventory')
+    expect(getAdminPageTitle('/admin/inventory/sales')).toBe('Inventory')
+  })
+
   it('returns "Products" for /admin/products', () => {
     expect(getAdminPageTitle('/admin/products')).toBe('Products')
   })

@@ -235,6 +235,18 @@ export interface CustomerProfile {
   wishlist: { type: 'product' | 'handbag' | 'clothes'; id: number; name: string; price: string }[] | null
 }
 
+export interface InventorySummary {
+  item_count: number
+  /** stock at cost */
+  stock_value: string
+  /** at or below reorder level, including out of stock */
+  low_stock_count: number
+  out_of_stock_count: number
+  today_sales_total: string
+  today_sales_count: number
+  month_sales_count: number
+}
+
 export interface ExpenseList {
   results: Expense[]
   count: number

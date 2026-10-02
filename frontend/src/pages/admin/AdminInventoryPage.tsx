@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Pencil, ScanLine } from 'lucide-react'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, Pencil, ScanLine } from 'lucide-react'
 import api from '@/lib/axios'
 import { formatKES, formatPriceRange, formatDateTime } from '@/lib/utils'
 import ItemPicker from '@/components/admin/ItemPicker'
 import EditSaleModal from '@/components/admin/EditSaleModal'
+import InventoryDashboard from '@/components/admin/InventoryDashboard'
 import PriceRangeHint from '@/components/admin/PriceRangeHint'
 import type { InventoryItem, Sale } from '@/lib/types'
 
-type Tab = 'inventory' | 'add-stock' | 'record-sale' | 'sales' | 'scan-receipt'
+type Tab = 'stock' | 'add-stock' | 'record-sale' | 'sales' | 'scan-receipt' | 'low-stock'
+const SECTION_TITLES: Record<Tab, string> = {
+  stock: 'Stock Overview', 'add-stock': 'Add Stock', 'record-sale': 'Record Sale',
+  sales: 'Sales History', 'scan-receipt': 'Scan Receipt', 'low-stock': 'Low Stock Alerts',
+}
 type ScanStage = 'upload' | 'review' | 'done'
 
 interface ScannedItem {
@@ -339,7 +344,10 @@ function matchesShop(itemType: string, shop?: Shop) {
 }
 
 export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
-  const [tab, setTab] = useState<Tab>('inventory')
+  // The address decides what is shown: no section = the card dashboard, otherwise that card's own page.
+  const { section } = useParams()
+  const tab = (section && section in SECTION_TITLES ? section : null) as Tab | null
+  const basePath = shop ? `/admin/${shop}/inventory` : '/admin/inventory'
   const [inventoryRaw, setInventory] = useState<InventoryItem[]>([])
   const [salesRaw, setSales] = useState<Sale[]>([])
   const [loading, setLoading] = useState(true)
@@ -363,7 +371,7 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
   const [saleSelected, setSaleSelected] = useState<InventoryItem | null>(null)
 
   useEffect(() => {
-    if (tab === 'inventory') {
+    if (tab === 'stock' || tab === 'low-stock') {
       setLoading(true)
       api.get('/admin/inventory/').then(r => setInventory(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
     } else if (tab === 'sales') {
@@ -424,30 +432,22 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
     }
   }
 
-  const tabs: { key: Tab; label: string }[] = [
-    { key: 'inventory', label: 'Inventory' },
-    { key: 'add-stock', label: 'Add Stock' },
-    { key: 'record-sale', label: 'Record Sale' },
-    { key: 'sales', label: 'Sales History' },
-    { key: 'scan-receipt', label: 'Scan Receipt' },
-  ]
-
-
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-6">Inventory Management</h2>
+      {section && !tab && <Navigate to={basePath} replace />}
 
-      <div className="flex gap-1 border-b mb-6 overflow-x-auto scrollbar-none">
-        {tabs.map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)}
-            className={`px-4 py-2 text-sm font-medium rounded-t-md -mb-px transition-colors whitespace-nowrap ${tab === t.key ? 'bg-background border border-b-background text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
-            {t.key === 'scan-receipt' && <ScanLine size={12} className="inline mr-1.5 -mt-0.5" />}
-            {t.label}
-          </button>
-        ))}
-      </div>
+      {tab ? (
+        <div className="mb-6">
+          <Link to={basePath} className="text-sm text-primary inline-flex items-center gap-1"><ArrowLeft size={14} /> Inventory</Link>
+          <h2 className="text-xl font-semibold mt-1">{SECTION_TITLES[tab]}</h2>
+        </div>
+      ) : (
+        <h2 className="text-xl font-semibold mb-6">Inventory Management</h2>
+      )}
 
-      {tab === 'inventory' && (
+      {tab === null && !section && <InventoryDashboard shop={shop} basePath={basePath} />}
+
+      {tab === 'stock' && (
         loading ? <div className="text-center py-10 text-muted-foreground">Loading…</div> : (
           <>
             {/* Mobile cards */}
@@ -698,6 +698,29 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
       )}
 
       {tab === 'scan-receipt' && <ScanReceiptPanel inventory={inventory} />}
+
+      {tab === 'low-stock' && (() => {
+        // Emptiest first: what you can't sell at all comes before what is merely running low.
+        const low = inventory.filter(i => i.is_low_stock).sort((a, b) => a.stock_quantity - b.stock_quantity || a.name.localeCompare(b.name))
+        return loading ? <div className="text-center py-10 text-muted-foreground">Loading…</div> : (
+          <ul aria-label="Low stock items" className="space-y-2">
+            {low.length === 0 && <li className="py-10 text-center text-sm text-muted-foreground">Nothing needs reordering. Every item is above its reorder level.</li>}
+            {low.map(i => (
+              <li key={`${i.item_type}-${i.id}`} className="border rounded-xl p-3 bg-card flex flex-wrap items-center gap-x-4 gap-y-2">
+                <div className="flex-1 min-w-[12rem]">
+                  <p className="font-medium text-sm">{i.name}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{i.item_type}</p>
+                </div>
+                <p className={`text-sm font-semibold ${i.stock_quantity === 0 ? 'text-red-600' : 'text-amber-700'}`}>
+                  {i.stock_quantity === 0 ? 'Out of stock' : `${i.stock_quantity} left`}
+                </p>
+                <p className="text-xs text-muted-foreground">reorder at {i.reorder_level}</p>
+                <Link to={`${basePath}/add-stock`} aria-label={`Add stock for ${i.name}`} className="text-xs text-primary hover:underline">Add stock</Link>
+              </li>
+            ))}
+          </ul>
+        )
+      })()}
 
       {editingSale && (
         <EditSaleModal

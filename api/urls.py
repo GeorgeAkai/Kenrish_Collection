@@ -69,6 +69,7 @@ urlpatterns = [
     # --- 10. Admin Inventory ---
     path('admin/inventory/', views.admin_inventory_list, name='api-admin-inventory'),
     path('admin/inventory/add-stock/', views.admin_add_stock, name='api-admin-add-stock'),
+    path('admin/inventory/summary/', views.admin_inventory_summary, name='api-admin-inventory-summary'),
     path('admin/inventory/record-sale/', views.admin_record_sale, name='api-admin-record-sale'),
     path('admin/inventory/sales/', views.admin_sales_list, name='api-admin-sales'),
     path('admin/inventory/sales/<int:pk>/', views.admin_sale_detail, name='api-admin-sale-detail'),
