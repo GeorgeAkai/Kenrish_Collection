@@ -532,6 +532,43 @@ class GalleryLike(models.Model):
         return f"{self.user.username} likes {self.gallery_image.description[:20]}"
 
 
+WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
+
+def default_schedule():
+    """Mon-Sat 08:00-17:00, Sunday off. A day is None when the employee is off."""
+    return {d: ({'from': '08:00', 'to': '17:00'} if d != 'sun' else None) for d in WEEKDAYS}
+
+
+class Employee(models.Model):
+    """Staff member. Salary posts monthly as a Salaries expense (see payroll.py). Admin-only data."""
+    SHOP_CHOICES = [('beauty', 'Beauty'), ('fashion', 'Fashion'), ('both', 'Both shops')]
+
+    name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)  # last working day; null = still employed
+    monthly_salary = models.DecimalField(max_digits=10, decimal_places=2)
+    shop = models.CharField(max_length=10, choices=SHOP_CHOICES, default='both')
+    schedule = models.JSONField(default=default_schedule)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+    def is_active_on(self, day):
+        return self.start_date <= day and (self.end_date is None or day <= self.end_date)
+
+    @property
+    def off_days(self):
+        return [d for d in WEEKDAYS if not self.schedule.get(d)]
+
+
 # What an expense can be filed under. 'Stock Purchase' is written by add_stock and stays valid for old rows.
 EXPENSE_CATEGORIES = [
     'Beauty Products', 'Fashion (Clothes)', 'Fashion (Handbags)',
@@ -575,6 +612,8 @@ class Expense(models.Model):
     # Set when a RecurringExpense posted this row; (recurring, period) is unique so posting is idempotent.
     recurring = models.ForeignKey(RecurringExpense, null=True, blank=True, on_delete=models.SET_NULL, related_name='expenses')
     period = models.DateField(null=True, blank=True)  # first day of the month this row covers
+    # Set when payroll posted this row (a month's salary for that employee).
+    employee = models.ForeignKey(Employee, null=True, blank=True, on_delete=models.SET_NULL, related_name='salary_expenses')
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -586,6 +625,8 @@ class Expense(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['recurring', 'period'], name='unique_recurring_period',
                                     condition=models.Q(recurring__isnull=False)),
+            models.UniqueConstraint(fields=['employee', 'period'], name='unique_employee_period',
+                                    condition=models.Q(employee__isnull=False)),
         ]
 
 

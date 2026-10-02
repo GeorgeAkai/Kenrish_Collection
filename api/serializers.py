@@ -11,7 +11,7 @@ from app1.models import (
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
-    ClothesCategory, ServiceSale, ActivityLog, CustomerReview, SaleEdit, AuditEntry, RecurringExpense, EXPENSE_CATEGORIES,
+    ClothesCategory, ServiceSale, ActivityLog, CustomerReview, SaleEdit, AuditEntry, RecurringExpense, Employee, WEEKDAYS, default_schedule, EXPENSE_CATEGORIES,
 )
 
 
@@ -469,6 +469,71 @@ class RecurringExpenseSerializer(serializers.ModelSerializer):
             amount = attrs.get('amount', getattr(self.instance, 'amount', None))
             if amount is None or amount <= 0:
                 raise serializers.ValidationError({'amount': 'A fixed expense needs an amount greater than zero.'})
+        return attrs
+
+
+_HHMM = re.compile(r'^([01]\d|2[0-3]):[0-5]\d$')
+
+
+class EmployeeSerializer(serializers.ModelSerializer):
+    off_days = serializers.ListField(read_only=True)
+    is_active = serializers.SerializerMethodField()
+    works_today = serializers.SerializerMethodField()
+    schedule = serializers.JSONField(required=False, allow_null=True)
+
+    class Meta:
+        model = Employee
+        fields = ['id', 'name', 'phone', 'email', 'start_date', 'end_date', 'monthly_salary', 'shop',
+                  'schedule', 'off_days', 'is_active', 'works_today', 'created_at']
+        read_only_fields = ['created_at']
+
+    def get_is_active(self, obj):
+        return obj.is_active_on(timezone.localdate())
+
+    def get_works_today(self, obj):
+        today = timezone.localdate()
+        return obj.is_active_on(today) and bool(obj.schedule.get(WEEKDAYS[today.weekday()]))
+
+    def validate_phone(self, value):
+        if not value:
+            return ''
+        from app1.customers import normalize_phone
+        normalized = normalize_phone(value)
+        if not normalized:
+            raise serializers.ValidationError('Enter a valid Kenyan mobile number, e.g. 0712 345 678.')
+        return normalized
+
+    def validate_monthly_salary(self, value):
+        if value <= 0:
+            raise serializers.ValidationError('Salary must be greater than zero.')
+        return value
+
+    def validate_schedule(self, value):
+        if value is None:
+            return default_schedule()
+        if not isinstance(value, dict) or set(value) - set(WEEKDAYS):
+            raise serializers.ValidationError(f"Schedule must be a mapping of weekdays ({', '.join(WEEKDAYS)}) to a shift or null.")
+        clean = {}
+        for day in WEEKDAYS:
+            shift = value.get(day)
+            if not shift:
+                clean[day] = None
+                continue
+            start = shift.get('from') if isinstance(shift, dict) else None
+            end = shift.get('to') if isinstance(shift, dict) else None
+            if not (isinstance(start, str) and isinstance(end, str) and _HHMM.match(start) and _HHMM.match(end)):
+                raise serializers.ValidationError(f'{day}: use times like 08:00.')
+            if start >= end:
+                raise serializers.ValidationError(f'{day}: the shift must end after it starts.')
+            clean[day] = {'from': start, 'to': end}
+        return clean
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        start = attrs.get('start_date', getattr(self.instance, 'start_date', None))
+        end = attrs.get('end_date', getattr(self.instance, 'end_date', None))
+        if start and end and end < start:
+            raise serializers.ValidationError({'end_date': 'The last day cannot be before the start date.'})
         return attrs
 
 

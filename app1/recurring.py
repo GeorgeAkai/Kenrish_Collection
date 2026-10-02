@@ -28,3 +28,9 @@ def post_due_recurring(today=None):
             )
             created += was_created
     return created
+
+
+def post_all_due(today=None):
+    """Everything that posts itself: recurring costs and employee salaries. Returns how many rows were created."""
+    from .payroll import post_due_salaries  # payroll imports models only; imported here to keep this module light
+    return post_due_recurring(today) + post_due_salaries(today)

@@ -43,12 +43,12 @@ from app1.models import (
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
-    PasswordChangeCode, ClothesCategory, ServiceSale, ActivityLog, CustomerReview, AuditEntry, RecurringExpense,
+    PasswordChangeCode, ClothesCategory, ServiceSale, ActivityLog, CustomerReview, AuditEntry, RecurringExpense, Employee, WEEKDAYS,
 )
 
 from api.activity import log_event, activity_stats, client_ip
 from app1.audit import record_audit
-from app1.recurring import post_due_recurring
+from app1.recurring import post_all_due
 from app1.inventory import add_stock, edit_sale as _edit_sale, record_sale as _record_sale, InsufficientStockError
 from chatbot.ai_service import build_system_prompt
 from api.analytics import (
@@ -76,7 +76,7 @@ from .serializers import (
     OrderSerializer, OrderCreateSerializer,
     SlotConfigurationSerializer,
     UserProfileSerializer, UserProfileUpdateSerializer,
-    ClothesCategorySerializer, ServiceSaleSerializer, ActivityLogSerializer, SaleEditSerializer, AuditEntrySerializer, RecurringExpenseSerializer,
+    ClothesCategorySerializer, ServiceSaleSerializer, ActivityLogSerializer, SaleEditSerializer, AuditEntrySerializer, RecurringExpenseSerializer, EmployeeSerializer,
     CustomerReviewSerializer,
 )
 
@@ -1132,7 +1132,7 @@ def admin_expenses(request):
         serializer.is_valid(raise_exception=True)
         expense = serializer.save(created_by=request.user)
         return Response(ExpenseSerializer(expense).data, status=status.HTTP_201_CREATED)
-    post_due_recurring()  # no scheduler: bring this month's recurring entries up to date when the page is opened
+    post_all_due()  # no scheduler: bring this month's recurring entries up to date when the page is opened
     qs = Expense.objects.all()
     params = request.query_params
     shop = params.get('shop')
@@ -1193,7 +1193,7 @@ def admin_recurring_expenses(request):
         serializer = RecurringExpenseSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         template = serializer.save(created_by=request.user)
-        post_due_recurring()
+        post_all_due()
         return Response(RecurringExpenseSerializer(template).data, status=status.HTTP_201_CREATED)
     return Response(RecurringExpenseSerializer(RecurringExpense.objects.all(), many=True).data)
 
@@ -1215,8 +1215,72 @@ def admin_recurring_expense_detail(request, pk):
         after = _template_snapshot(template)
         if after != before:
             record_audit(request.user, 'recurring_expense', template, 'edit', before, after)
-    post_due_recurring()
+    post_all_due()
     return Response(RecurringExpenseSerializer(template).data)
+
+
+def _employee_snapshot(employee):
+    data = dict(EmployeeSerializer(employee).data)
+    for key in ('id', 'created_at', 'off_days', 'is_active', 'works_today'):
+        data.pop(key)
+    return data
+
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAdminUser])
+def admin_employees(request):
+    if request.method == 'POST':
+        serializer = EmployeeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        employee = serializer.save(created_by=request.user)
+        post_all_due()
+        return Response(EmployeeSerializer(employee).data, status=status.HTTP_201_CREATED)
+    post_all_due()
+    return Response(EmployeeSerializer(Employee.objects.all(), many=True).data)
+
+
+@api_view(['PATCH', 'DELETE'])
+@permission_classes([IsAdminUser])
+def admin_employee_detail(request, pk):
+    employee = get_object_or_404(Employee, pk=pk)
+    before = _employee_snapshot(employee)
+    if request.method == 'DELETE':
+        with transaction.atomic():
+            record_audit(request.user, 'employee', employee, 'delete', before)
+            employee.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    serializer = EmployeeSerializer(employee, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    with transaction.atomic():
+        employee = serializer.save()
+        after = _employee_snapshot(employee)
+        if after != before:
+            record_audit(request.user, 'employee', employee, 'edit', before, after)
+    post_all_due()
+    return Response(EmployeeSerializer(employee).data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_employee_dashboard(request):
+    """Who is working today, who is off, what payroll costs and how many people each shop has."""
+    post_all_due()
+    today = timezone.localdate()
+    day = WEEKDAYS[today.weekday()]
+    active = [e for e in Employee.objects.all() if e.is_active_on(today)]
+    card = lambda e: {'id': e.id, 'name': e.name, 'shop': e.shop, 'shift': e.schedule.get(day)}
+    payroll = sum((e.monthly_salary for e in active), Decimal('0'))
+    return Response({
+        'on_shift_today': [card(e) for e in active if e.schedule.get(day)],
+        'off_today': [card(e) for e in active if not e.schedule.get(day)],
+        'total_monthly_payroll': f'{payroll:.2f}',
+        'headcount': {
+            'beauty': sum(e.shop == 'beauty' for e in active),
+            'fashion': sum(e.shop == 'fashion' for e in active),
+            'both': sum(e.shop == 'both' for e in active),
+            'total': len(active),
+        },
+    })
 
 
 @api_view(['GET'])
@@ -1509,7 +1573,7 @@ def admin_invoice_detail(request, pk):
 
 def _analytics_args(request):
     # Every analytics endpoint starts here, so recurring costs (rent...) are posted before any total is read.
-    post_due_recurring()
+    post_all_due()
     return request.query_params.get('period', 'month'), _clean_shop(request.query_params.get('shop'))
 
 
