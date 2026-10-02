@@ -227,6 +227,8 @@ export interface CustomerProfile {
     logins: number | null
     last_seen: string | null
   }
+  /** Dated login detail; null for walk-ins. `logins` above is the older lifetime total. */
+  login_stats: { last_30_days: number; web: number; app: number; tracked_since: string | null } | null
   spend_by_month: { month: string; spend: string }[]
   timeline: TimelineEvent[]
   /** null for walk-ins (no account) */

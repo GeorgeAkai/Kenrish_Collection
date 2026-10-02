@@ -7,12 +7,12 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 from django.contrib.auth.models import User
-from django.db.models import Count, Max, Q, Sum
+from django.db.models import Count, Max, Min, Q, Sum
 from django.utils import timezone
 
 from app1.customers import normalize_phone
 from app1.models import (
-    Customer, HandbagRating, ClothesRating, Order, Rating, Reservation, Sale, ServiceSale,
+    ClothesRating, Customer, HandbagRating, LoginEvent, Order, Rating, Reservation, Sale, ServiceSale,
 )
 
 PERIOD_DAYS = {'30d': 30, '90d': 90, 'year': 365}   # anything else (incl. 'all') means all time
@@ -173,6 +173,19 @@ def _wishlist(user):
     return items
 
 
+def _login_stats(user):
+    """Detail from LoginEvent, which only exists from when it was introduced; `tracked_since` says from when.
+    (metrics.logins is the older lifetime total kept on the profile.)"""
+    events = LoginEvent.objects.filter(user=user)
+    first = LoginEvent.objects.aggregate(first=Min('created_at'))['first']
+    return {
+        'last_30_days': events.filter(created_at__gte=timezone.now() - timedelta(days=30)).count(),
+        'web': events.filter(source='web').count(),
+        'app': events.filter(source='app').count(),
+        'tracked_since': str(timezone.localtime(first).date()) if first else None,
+    }
+
+
 def customer_profile(customer, user):
     sales = _sale_totals(None, 'all').get(customer.id) if customer else None
     services = _service_totals(None, 'all').get(customer.id) if customer else None
@@ -200,6 +213,7 @@ def customer_profile(customer, user):
             'logins': user.userprofile.login_count if registered else None,
             'last_seen': user.last_login.isoformat() if registered and user.last_login else None,
         },
+        'login_stats': _login_stats(user) if registered else None,
         'spend_by_month': _spend_by_month(customer),
         'timeline': _timeline(customer, user),
         'wishlist': _wishlist(user) if registered else None,

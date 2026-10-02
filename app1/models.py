@@ -166,6 +166,22 @@ class Customer(models.Model):
         return f"{self.name or 'Customer'} ({self.phone})"
 
 
+class LoginEvent(models.Model):
+    """One successful login. Counting detail starts when this table was introduced (UserProfile.login_count
+    still holds the older lifetime total). Token refreshes, failed logins and sign-ups are not logins."""
+    SOURCES = [('web', 'Website'), ('app', 'App')]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='login_events')
+    source = models.CharField(max_length=10, choices=SOURCES)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} via {self.source} at {self.created_at:%Y-%m-%d %H:%M}"
+
+
 class Wishlist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wishlist')
     products = models.ManyToManyField(Product, blank=True, related_name='wishlisted_by')

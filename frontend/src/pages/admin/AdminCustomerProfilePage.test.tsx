@@ -17,6 +17,7 @@ const walkin: CustomerProfile = {
   ref: 'customer:1', kind: 'walkin', name: 'Mary', username: null, email: '', joined: null, phone: '+254712111111',
   user_id: null, customer_id: 1, possible_user: null,
   metrics: { total_spend: '2500.00', purchases: 2, average_purchase: '1250.00', last_purchase: '2026-10-01', logins: null, last_seen: null },
+  login_stats: null,
   spend_by_month: months,
   timeline: [
     { type: 'service', date: '2026-10-01T09:00:00+03:00', title: 'Braids', detail: 'Cash', amount: '1500.00' },
@@ -28,6 +29,7 @@ const registered: CustomerProfile = {
   ...walkin, ref: 'customer:2', kind: 'registered', name: 'Jane Wairimu', username: 'jane', email: 'jane@example.com',
   joined: '2026-02-03', user_id: 5, customer_id: 2,
   metrics: { ...walkin.metrics, logins: 7, last_seen: '2026-09-30T10:00:00+03:00' },
+  login_stats: { last_30_days: 3, web: 4, app: 2, tracked_since: '2026-10-01' },
   timeline: [
     { type: 'order', date: '2026-10-02T08:00:00+03:00', title: 'Online order #4', detail: 'Pending', amount: '800.00' },
     { type: 'reservation', date: '2026-10-01T10:00:00+03:00', title: 'Appointment: Braids', detail: 'Approved', amount: null },
@@ -85,9 +87,19 @@ describe('AdminCustomerProfilePage', () => {
     renderAt('/admin/customers/customer/2')
     const tiles = await screen.findByRole('region', { name: /customer metrics/i })
     expect(within(tiles).getByLabelText('Logins')).toHaveTextContent('7')
+    expect(within(tiles).getByLabelText('Logins')).toHaveTextContent('3 in the last 30 days')
+    expect(within(tiles).getByLabelText('Logins')).toHaveTextContent('4 website · 2 app')
+    expect(within(tiles).getByLabelText('Logins')).toHaveTextContent('Detailed history since 01/10/2026')
     expect(within(tiles).getByLabelText('Last seen')).not.toHaveTextContent('Never')
     expect(screen.getByText('@jane')).toBeInTheDocument()
     expect(screen.getByText('jane@example.com')).toBeInTheDocument()
+  })
+
+  it('says detailed login history has not started when no login has been recorded yet', async () => {
+    profile = { ...registered, login_stats: { last_30_days: 0, web: 0, app: 0, tracked_since: null } }
+    renderAt('/admin/customers/customer/2')
+    const tiles = await screen.findByRole('region', { name: /customer metrics/i })
+    expect(within(tiles).getByLabelText('Logins')).toHaveTextContent('Detailed history starts with the next login')
   })
 
   it('draws spend for each of the last twelve months', async () => {

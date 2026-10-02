@@ -146,3 +146,25 @@ class CustomerProfileAPITest(TestCase):
         other = APIClient()
         other.force_authenticate(User.objects.create_user(username='member', password='pass'))
         self.assertEqual(other.patch(f'/api/admin/customers/customer/{self.mary.id}/', {'name': 'x'}, format='json').status_code, 403)
+
+    def test_registered_profiles_show_login_detail_and_when_detailed_tracking_began(self):
+        from app1.models import LoginEvent
+        jane = User.objects.create_user(username='jane', password='pass')
+        jane.userprofile.login_count = 9           # lifetime total, including logins from before events were kept
+        jane.userprofile.save()
+        old = LoginEvent.objects.create(user=jane, source='web')
+        LoginEvent.objects.create(user=jane, source='web')
+        LoginEvent.objects.create(user=jane, source='app')
+        LoginEvent.objects.filter(pk=old.pk).update(created_at=timezone.now() - timedelta(days=40))
+
+        p = self._profile(f'user/{jane.id}')
+        self.assertEqual(p['metrics']['logins'], 9)
+        stats = p['login_stats']
+        self.assertEqual((stats['last_30_days'], stats['web'], stats['app']), (2, 2, 1))
+        self.assertEqual(stats['tracked_since'], str((timezone.now() - timedelta(days=40)).astimezone(timezone.get_current_timezone()).date()))
+
+    def test_login_detail_is_absent_for_walk_ins_and_for_a_system_with_no_events_yet(self):
+        self.assertIsNone(self._profile(f'customer/{self.mary.id}')['login_stats'])
+        bob = User.objects.create_user(username='bob', password='pass')
+        stats = self._profile(f'user/{bob.id}')['login_stats']
+        self.assertEqual((stats['last_30_days'], stats['web'], stats['app'], stats['tracked_since']), (0, 0, 0, None))

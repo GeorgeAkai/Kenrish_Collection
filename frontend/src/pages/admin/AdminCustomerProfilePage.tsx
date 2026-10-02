@@ -19,12 +19,12 @@ const EVENT_ICON: Record<TimelineEvent['type'], LucideIcon> = {
   sale: ShoppingBag, service: Scissors, order: ClipboardList, reservation: CalendarCheck, rating: Star,
 }
 
-function Tile({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function Tile({ label, value, sub }: { label: string; value: string; sub?: string[] }) {
   return (
     <div aria-label={label} className="border rounded-xl p-4 bg-card">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="text-xl font-semibold mt-0.5">{value}</p>
-      {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+      {sub?.map(line => <p key={line} className="text-xs text-muted-foreground">{line}</p>)}
     </div>
   )
 }
@@ -135,7 +135,14 @@ export default function AdminCustomerProfilePage() {
         <Tile label="Purchases" value={String(m.purchases)} />
         <Tile label="Average purchase" value={formatKES(m.average_purchase)} />
         <Tile label="Last purchase" value={m.last_purchase ? formatDate(m.last_purchase) : 'Never'} />
-        <Tile label="Logins" value={m.logins === null ? 'Not an app user' : String(m.logins)} />
+        <Tile label="Logins" value={m.logins === null ? 'Not an app user' : String(m.logins)}
+          sub={profile.login_stats ? [
+            `${profile.login_stats.last_30_days} in the last 30 days`,
+            `${profile.login_stats.web} website · ${profile.login_stats.app} app`,
+            profile.login_stats.tracked_since
+              ? `Detailed history since ${formatDate(profile.login_stats.tracked_since)}`
+              : 'Detailed history starts with the next login',
+          ] : undefined} />
         <Tile label="Last seen" value={m.last_seen ? formatDateTime(m.last_seen) : 'Never'} />
       </section>
 
