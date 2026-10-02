@@ -51,17 +51,28 @@ describe('InventoryDashboard', () => {
     expect(card(/low stock alerts/i)).toHaveTextContent('3')
   })
 
-  it('flags low stock in red only when something needs attention', async () => {
-    const { unmount } = renderDash('beauty')
+  it('flags low stock in red when something needs attention', async () => {
+    renderDash('beauty')
     await within(card(/low stock alerts/i)).findByText('3')
     expect(card(/low stock alerts/i)).toHaveAttribute('data-tone', 'alert')
-    unmount()
+  })
 
+  it('stays calm when nothing needs attention', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { ...summary, low_stock_count: 0, out_of_stock_count: 0 } })
     renderDash('beauty')
     await within(card(/low stock alerts/i)).findByText(/all stocked up/i)
     expect(card(/low stock alerts/i)).toHaveAttribute('data-tone', 'calm')
     expect(card(/add stock/i)).toHaveTextContent('Everything is in stock')
+  })
+
+  it('shows the last numbers straight away when you come back, without asking the server again', async () => {
+    const first = renderDash('beauty')
+    await screen.findByText('KES 125,000.00')
+    first.unmount()                                   // step away to another page
+
+    renderDash('beauty')                              // come back
+    expect(screen.getByText('KES 125,000.00')).toBeInTheDocument()   // there at once, no placeholder
+    expect(api.get).toHaveBeenCalledTimes(1)
   })
 
   it('uses the right grammar for a single sale', async () => {

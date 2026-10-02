@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import api from '@/lib/axios'
+import { useAdminQuery } from '@/lib/adminQuery'
 import { formatDateTime } from '@/lib/utils'
 import type { Sale } from '@/lib/types'
 import ModalShell from './ModalShell'
@@ -31,12 +32,9 @@ export default function EditSaleModal({ sale, onClose, onSaved }: {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [history, setHistory] = useState<EditRecord[]>([])
-
-  useEffect(() => {
-    if (!sale.edited) return
-    api.get(`/admin/inventory/sales/${sale.id}/edits/`).then(r => setHistory(r.data)).catch(console.error)
-  }, [sale.id, sale.edited])
+  // Only sales that were corrected have a history; always re-read it when the dialog opens.
+  const historyQuery = useAdminQuery<EditRecord[]>(`/admin/inventory/sales/${sale.id}/edits/`, { enabled: sale.edited, staleTime: 0 })
+  const history = historyQuery.data ?? []
 
   // Send only what changed, so the audit trail records real corrections.
   const changes: Record<string, string | number> = {}

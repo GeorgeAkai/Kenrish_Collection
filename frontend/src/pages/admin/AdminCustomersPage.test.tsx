@@ -28,12 +28,15 @@ beforeEach(() => {
 })
 
 const renderPage = () => render(<MemoryRouter><ToastProvider><AdminCustomersPage /></ToastProvider></MemoryRouter>)
+// The page's frame is there at once; the people arrive a moment later.
+const loaded = () => screen.findAllByText('Mary')
 const listRows = () => within(screen.getByRole('list', { name: /customers/i })).getAllByRole('listitem')
 
 describe('AdminCustomersPage', () => {
   it('ranks the top customers by total spend, leaving out people who have not bought anything', async () => {
     renderPage()
-    const top = await screen.findByRole('region', { name: /top customers/i })
+    await loaded()
+    const top = screen.getByRole('region', { name: /top customers/i })
     const items = within(top).getAllByRole('listitem')
     expect(items.map(i => i.textContent)).toEqual([
       expect.stringContaining('Jane Wairimu'), expect.stringContaining('Mary'), expect.stringContaining('Peter'),
@@ -45,7 +48,7 @@ describe('AdminCustomersPage', () => {
 
   it('asks for all shops and all time by default and refetches when the filters change', async () => {
     renderPage()
-    await screen.findByRole('region', { name: /top customers/i })
+    await loaded()
     expect(vi.mocked(api.get).mock.calls[0]).toEqual(['/admin/customers/', { params: { period: 'all' } }])
 
     await userEvent.selectOptions(screen.getByLabelText(/^shop/i), 'fashion')
@@ -56,7 +59,7 @@ describe('AdminCustomersPage', () => {
 
   it('splits registered customers from walk-ins who are not in the app', async () => {
     renderPage()
-    await screen.findByRole('list', { name: /customers/i })
+    await loaded()
     expect(listRows()).toHaveLength(4)
 
     await userEvent.click(screen.getByRole('tab', { name: /registered/i }))
@@ -70,7 +73,7 @@ describe('AdminCustomersPage', () => {
 
   it('searches names and phone numbers without caring about case or spacing', async () => {
     renderPage()
-    await screen.findByRole('list', { name: /customers/i })
+    await loaded()
     await userEvent.type(screen.getByRole('searchbox', { name: /search customers/i }), 'jANe')
     expect(listRows()).toHaveLength(1)
     await userEvent.clear(screen.getByRole('searchbox', { name: /search customers/i }))
@@ -81,7 +84,8 @@ describe('AdminCustomersPage', () => {
 
   it('shows spend, purchases, phone and last purchase, and links each customer to their profile', async () => {
     renderPage()
-    const list = await screen.findByRole('list', { name: /customers/i })
+    await loaded()
+    const list = screen.getByRole('list', { name: /customers/i })
     const mary = within(list).getByText('Mary').closest('li')!
     expect(mary).toHaveTextContent('KES 2,500.00')
     expect(mary).toHaveTextContent('2 purchases')
@@ -94,7 +98,8 @@ describe('AdminCustomersPage', () => {
 
   it('offers to link a walk-in to the registered user their phone suggests, after confirmation', async () => {
     renderPage()
-    const list = await screen.findByRole('list', { name: /customers/i })
+    await loaded()
+    const list = screen.getByRole('list', { name: /customers/i })
     const peter = within(list).getByText('Peter').closest('li')!
     expect(peter).toHaveTextContent(/possible match: @peterk/i)
 

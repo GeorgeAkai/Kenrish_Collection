@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { CalendarOff, History, Mail, Pencil, Phone, Plus, Trash2, Users } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { offDayNames, summarizeSchedule } from '@/lib/schedule'
 import { formatDate, formatKES } from '@/lib/utils'
 import type { Employee, EmployeeDashboard, EmployeeShiftCard } from '@/lib/types'
@@ -43,19 +44,15 @@ function ShiftList({ title, people, empty }: { title: string; people: EmployeeSh
 /** Staff list and dashboard. Salaries post themselves as expenses each month (see the Expenses pages). */
 export default function AdminEmployeesPage() {
   const toast = useToast()
-  const [employees, setEmployees] = useState<Employee[] | null>(null)
-  const [dashboard, setDashboard] = useState<EmployeeDashboard | null>(null)
   const [form, setForm] = useState<{ employee?: Employee } | null>(null)
   const [history, setHistory] = useState<Employee | null>(null)
   const del = useConfirm<number>()
 
-  const load = useCallback(() => {
-    // The list goes first: opening it also posts this month's salaries, which the dashboard totals then include.
-    api.get<Employee[]>('/admin/employees/').then(r => setEmployees(r.data)).catch(console.error)
-    api.get<EmployeeDashboard>('/admin/employees/dashboard/').then(r => setDashboard(r.data)).catch(console.error)
-  }, [])
-
-  useEffect(load, [load])
+  // Both are remembered, so coming back to this page shows the staff straight away. Opening the list also posts
+  // this month's salaries, which the dashboard totals include.
+  const employees = useAdminQuery<Employee[]>('/admin/employees/').data ?? null
+  const dashboard = useAdminQuery<EmployeeDashboard>('/admin/employees/dashboard/').data ?? null
+  const load = useInvalidateAdmin()
 
   async function remove(id: number) {
     del.cancel()

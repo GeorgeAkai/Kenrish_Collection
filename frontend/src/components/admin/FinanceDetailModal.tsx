@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import api from '@/lib/axios'
+import { useAdminQuery } from '@/lib/adminQuery'
 import { formatKES, formatChartDate, formatPeriodRange, NAIROBI_TZ } from '@/lib/utils'
 import ModalShell from '@/components/admin/ModalShell'
 
@@ -29,15 +28,13 @@ export default function FinanceDetailModal({ kind, scope, period, summary, cashF
   shopData: ShopData | null
   onClose: () => void
 }) {
-  const [tx, setTx] = useState<TxData | null>(null)
-  const [failed, setFailed] = useState(false)
-
-  useEffect(() => {
-    if (kind === 'net') return
-    const shop = scope === 'all' ? '' : `&shop=${scope}`
-    api.get<TxData>(`/admin/analytics/transactions/?type=${kind}&period=${period}${shop}`)
-      .then(r => setTx(r.data)).catch(() => setFailed(true))
-  }, [kind, scope, period])
+  // The income and expense rows behind a card; remembered, so reopening the same card is instant.
+  const txQuery = useAdminQuery<TxData>('/admin/analytics/transactions/', {
+    params: scope === 'all' ? { type: kind, period } : { type: kind, period, shop: scope },
+    enabled: kind !== 'net',
+  })
+  const tx = txQuery.data ?? null
+  const failed = txQuery.isError
 
   const title = kind === 'income' ? 'Income' : kind === 'expense' ? 'Expenses' : 'Net profit'
   const range = `${SCOPE_NAME[scope]} · ${formatPeriodRange(period)}`

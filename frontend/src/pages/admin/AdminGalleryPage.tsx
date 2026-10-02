@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type DragEvent, type FormEvent } from 'react'
+import { useRef, useState, type DragEvent, type FormEvent } from 'react'
 import { UploadCloud, X, FileVideo, Image } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { isVideoUrl } from '@/lib/utils'
 import type { GalleryImage } from '@/lib/types'
 import InlineConfirm from '@/components/InlineConfirm'
@@ -19,8 +20,6 @@ function isVideoFile(file: File) {
 type Shop = 'beauty' | 'fashion'
 
 export default function AdminGalleryPage({ shop }: { shop?: Shop } = {}) {
-  const [items, setItems] = useState<GalleryImage[]>([])
-  const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -32,12 +31,13 @@ export default function AdminGalleryPage({ shop }: { shop?: Shop } = {}) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const del = useConfirm<number>()
 
-  const fetchItems = () => {
-    const params = shop ? `?shop=${shop}` : ''
-    api.get(`/admin/gallery/${params}`).then(r => setItems(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
-  }
-
-  useEffect(() => { fetchItems() }, [shop])
+  // Each shop's gallery is remembered separately.
+  const list = useAdminQuery<{ results?: GalleryImage[] } & GalleryImage[], GalleryImage[]>('/admin/gallery/', {
+    params: shop ? { shop } : undefined, select: r => r.results ?? r,
+  })
+  const items = list.data ?? []
+  const loading = list.isPending
+  const fetchItems = useInvalidateAdmin()
 
   function selectFile(f: File) {
     setFile(f)

@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Link2, Phone, Trophy } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatDate, formatKES } from '@/lib/utils'
 import type { CustomerRow } from '@/lib/types'
 import InlineConfirm from '@/components/InlineConfirm'
@@ -39,26 +40,24 @@ const profilePath = (c: CustomerRow) => `/admin/customers/${c.ref.replace(':', '
 /** Mini CRM: customers ranked by what they spend, registered users and walk-ins together. */
 export default function AdminCustomersPage() {
   const toast = useToast()
-  const [rows, setRows] = useState<CustomerRow[] | null>(null)
   const [shop, setShop] = useState('')
   const [period, setPeriod] = useState('all')
   const [tab, setTab] = useState<Tab>('all')
   const [query, setQuery] = useState('')
   const confirmLink = useConfirm<string>()
 
-  function load() {
-    const params: Record<string, string> = { period }
-    if (shop) params.shop = shop
-    api.get<CustomerRow[]>('/admin/customers/', { params }).then(r => setRows(r.data)).catch(console.error)
-  }
-  useEffect(load, [shop, period])  // eslint-disable-line react-hooks/exhaustive-deps
+  const params: Record<string, string> = { period }
+  if (shop) params.shop = shop
+  // Each shop/period combination is remembered, so switching filters back and forth (or leaving and returning) is instant.
+  const rows = useAdminQuery<CustomerRow[]>('/admin/customers/', { params }).data ?? null
+  const refresh = useInvalidateAdmin()
 
   async function link(c: CustomerRow) {
     confirmLink.cancel()
     try {
       await api.post(`/admin/customers/${c.ref.split(':')[1]}/link/`, { user_id: c.possible_user!.id })
       toast.success(`${c.name} is now linked to @${c.possible_user!.username}.`)
-      load()
+      refresh()
     } catch {
       toast.error('Could not link this customer.')
     }

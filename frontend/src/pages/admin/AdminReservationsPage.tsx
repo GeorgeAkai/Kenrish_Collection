@@ -1,8 +1,9 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { CheckCircle, XCircle, Clock, CalendarDays, Plus, X, Trash2 } from 'lucide-react'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useConfirm } from '@/hooks/useConfirm'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import type { Reservation, ReservationStatus, Service } from '@/lib/types'
 
 type TabStatus = '' | ReservationStatus
@@ -25,10 +26,7 @@ const STATUS_BADGE: Record<string, string> = {
 interface AdminUser { id: number; username: string }
 
 export default function AdminReservationsPage() {
-  const [reservations, setReservations] = useState<Reservation[]>([])
-  const [pendingCount, setPendingCount] = useState(0)
   const [tab, setTab] = useState<TabStatus>('')
-  const [loading, setLoading] = useState(true)
   const del = useConfirm<number>()
 
   // Action modal state
@@ -39,8 +37,6 @@ export default function AdminReservationsPage() {
 
   // Add form modal
   const [showAdd, setShowAdd] = useState(false)
-  const [services, setServices] = useState<Service[]>([])
-  const [users, setUsers] = useState<AdminUser[]>([])
   const [addForm, setAddForm] = useState({
     customer: '',
     service: '',
@@ -52,32 +48,18 @@ export default function AdminReservationsPage() {
   })
   const [addError, setAddError] = useState('')
 
-  function fetchReservations(status: TabStatus = tab) {
-    setLoading(true)
-    const params = status ? `?status=${status}` : ''
-    api.get<{ results: Reservation[]; pending_count: number }>(`/admin/reservations/${params}`)
-      .then(r => {
-        setReservations(r.data.results)
-        setPendingCount(r.data.pending_count)
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }
+  // Each status tab is remembered, so flipping between them (or leaving and returning) is instant.
+  const list = useAdminQuery<{ results: Reservation[]; pending_count: number }>('/admin/reservations/', { params: tab ? { status: tab } : undefined })
+  const reservations = list.data?.results ?? []
+  const pendingCount = list.data?.pending_count ?? 0
+  const loading = list.isPending
+  const fetchReservations = useInvalidateAdmin()
 
-  useEffect(() => { fetchReservations() }, [])
+  // The people and services offered in the "add booking" form (the same lists other admin pages already hold).
+  const services = useAdminQuery<{ results?: Service[] } & Service[], Service[]>('/admin/services/', { select: r => r.results ?? r }).data ?? []
+  const users = useAdminQuery<{ results?: AdminUser[] } & AdminUser[], AdminUser[]>('/admin/users/', { select: r => r.results ?? r }).data ?? []
 
-  useEffect(() => {
-    api.get<{ results: Service[] }>('/admin/services/').then(r => setServices(r.data.results ?? r.data))
-    api.get<AdminUser[]>('/admin/users/').then(r => {
-      const data = Array.isArray(r.data) ? r.data : (r.data as { results?: AdminUser[] }).results ?? []
-      setUsers(data)
-    })
-  }, [])
-
-  function switchTab(t: TabStatus) {
-    setTab(t)
-    fetchReservations(t)
-  }
+  function switchTab(t: TabStatus) { setTab(t) }
 
   function openAction(r: Reservation, type: 'approve' | 'reject') {
     setActionTarget(r)

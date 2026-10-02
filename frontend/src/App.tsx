@@ -4,6 +4,8 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AccentThemeProvider } from '@/contexts/AccentThemeContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import { ToastProvider } from '@/contexts/ToastContext'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { appQueryClient } from '@/lib/queryClient'
 import { ProtectedRoute, AdminRoute } from '@/components/RouteGuards'
 import PublicLayout from '@/layouts/PublicLayout'
 import BeautyLayout from '@/layouts/BeautyLayout'
@@ -72,6 +74,7 @@ const NotFound = () => (
 
 export default function App() {
   return (
+    <QueryClientProvider client={appQueryClient}>
     <LanguageProvider>
     <ThemeProvider>
     <AccentThemeProvider>
@@ -164,5 +167,6 @@ export default function App() {
     </AccentThemeProvider>
     </ThemeProvider>
     </LanguageProvider>
+    </QueryClientProvider>
   )
 }

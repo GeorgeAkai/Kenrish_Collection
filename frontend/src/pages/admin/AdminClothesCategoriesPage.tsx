@@ -1,6 +1,7 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useToast } from '@/contexts/ToastContext'
@@ -14,8 +15,6 @@ function errorText(err: unknown, fallback: string) {
 
 /** Manage the Fashion clothes categories (Men, Women, Kids, ...). */
 export default function AdminClothesCategoriesPage() {
-  const [cats, setCats] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
   const [newName, setNewName] = useState('')
   const [adding, setAdding] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -24,9 +23,10 @@ export default function AdminClothesCategoriesPage() {
   const del = useConfirm<number>()
   const toast = useToast()
 
-  const load = () => api.get<Category[]>('/admin/clothes-categories/')
-    .then(r => setCats(r.data)).catch(console.error).finally(() => setLoading(false))
-  useEffect(() => { load() }, [])
+  const list = useAdminQuery<Category[]>('/admin/clothes-categories/')
+  const cats = list.data ?? []
+  const loading = list.isPending
+  const load = useInvalidateAdmin()
 
   async function handleAdd(e: FormEvent) {
     e.preventDefault()

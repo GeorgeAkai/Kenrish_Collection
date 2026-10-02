@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatKES, formatDateTime, formatDate } from '@/lib/utils'
 import type { Invoice } from '@/lib/types'
 
@@ -79,12 +80,13 @@ function PrintableInvoice({ invoice }: { invoice: Invoice }) {
   )
 }
 
+function useCatalog(path: string, enabled: boolean): CatalogItem[] {
+  return useAdminQuery<{ results?: CatalogItem[] } & CatalogItem[], CatalogItem[]>(path, { enabled, select: r => r.results ?? r }).data ?? []
+}
+
 export default function AdminInvoicesPage() {
-  const [invoices, setInvoices] = useState<Invoice[]>([])
-  const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
-  const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null)
-  const [loadingDetail, setLoadingDetail] = useState(false)
+  const [viewId, setViewId] = useState<number | null>(null)
   const printRef = useRef<HTMLDivElement>(null)
 
   // Create form state
@@ -92,34 +94,24 @@ export default function AdminInvoicesPage() {
   const [lines, setLines] = useState<LineItem[]>([{ item_type: 'product', item_id: '', quantity: '1', unit_price: '' }])
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState('')
-  const [catalog, setCatalog] = useState<Record<string, CatalogItem[]>>({ product: [], handbag: [], clothes: [] })
 
-  const fetchInvoices = () => {
-    api.get('/admin/invoices/').then(r => setInvoices(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
+  const list = useAdminQuery<{ results?: Invoice[] } & Invoice[], Invoice[]>('/admin/invoices/', { select: r => r.results ?? r })
+  const invoices = list.data ?? []
+  const loading = list.isPending
+  const fetchInvoices = useInvalidateAdmin()
+
+  // The product, handbag and clothes lists for the create dialog: fetched when it first opens, then remembered.
+  const catalog: Record<string, CatalogItem[]> = {
+    product: useCatalog('/products/', showCreate),
+    handbag: useCatalog('/handbags/', showCreate),
+    clothes: useCatalog('/clothes/', showCreate),
   }
 
-  useEffect(() => { fetchInvoices() }, [])
-
-  // Load product/handbag/clothes lists when the create modal opens
-  useEffect(() => {
-    if (!showCreate) return
-    const endpoints: Record<string, string> = { product: '/products/', handbag: '/handbags/', clothes: '/clothes/' }
-    Promise.all(
-      Object.entries(endpoints).map(([key, path]) =>
-        api.get(path).then(r => [key, r.data.results ?? r.data] as [string, CatalogItem[]])
-      )
-    ).then(entries => setCatalog(Object.fromEntries(entries))).catch(console.error)
-  }, [showCreate])
-
-  async function viewDetail(id: number) {
-    setLoadingDetail(true)
-    try {
-      const { data } = await api.get(`/admin/invoices/${id}/`)
-      setViewInvoice(data)
-    } finally {
-      setLoadingDetail(false)
-    }
-  }
+  // An invoice you have opened once opens instantly the next time.
+  const detailQuery = useAdminQuery<Invoice>(`/admin/invoices/${viewId ?? 0}/`, { enabled: viewId !== null })
+  const viewInvoice = viewId !== null ? (detailQuery.data ?? null) : null
+  const loadingDetail = viewId !== null && detailQuery.isPending
+  function viewDetail(id: number) { setViewId(id) }
 
   function addLine() {
     setLines(prev => [...prev, { item_type: 'product', item_id: '', quantity: '1', unit_price: '' }])
@@ -371,7 +363,7 @@ export default function AdminInvoicesPage() {
                 <button onClick={handlePrint} className="bg-primary text-primary-foreground px-4 py-1.5 rounded-md text-sm font-medium hover:bg-primary/90">
                   🖨 Print
                 </button>
-                <button onClick={() => setViewInvoice(null)} className="text-muted-foreground text-xl px-2">✕</button>
+                <button onClick={() => setViewId(null)} className="text-muted-foreground text-xl px-2">✕</button>
               </div>
             </div>
             {loadingDetail ? (

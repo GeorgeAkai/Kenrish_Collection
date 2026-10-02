@@ -1,6 +1,7 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Plus, Pencil, Trash2, X, Star } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useToast } from '@/contexts/ToastContext'
@@ -29,8 +30,6 @@ function Stars({ value }: { value: number }) {
 
 /** Add, edit, hide and delete the customer reviews shown on the home page. */
 export default function AdminReviewsPage() {
-  const [reviews, setReviews] = useState<Review[]>([])
-  const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<Review | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(empty)
@@ -40,8 +39,10 @@ export default function AdminReviewsPage() {
   const del = useConfirm<number>()
   const toast = useToast()
 
-  const load = () => api.get<Review[]>('/admin/reviews/').then(r => setReviews(r.data)).catch(console.error).finally(() => setLoading(false))
-  useEffect(() => { load() }, [])
+  const list = useAdminQuery<Review[]>('/admin/reviews/')
+  const reviews = list.data ?? []
+  const loading = list.isPending
+  const load = useInvalidateAdmin()
 
   function openCreate() { setEditing(null); setForm(empty); setError(''); setShowForm(true) }
   function openEdit(r: Review) {
@@ -70,7 +71,7 @@ export default function AdminReviewsPage() {
     setBusyId(r.id)
     try {
       await api.patch(`/admin/reviews/${r.id}/`, { is_published: !r.is_published })
-      setReviews(prev => prev.map(x => x.id === r.id ? { ...x, is_published: !r.is_published } : x))
+      load()
     } catch { toast.error('Could not update this review.') } finally { setBusyId(null) }
   }
 

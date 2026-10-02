@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { History, Pause, Pencil, Play, Plus, Repeat, Trash2 } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { categoriesForShop, type ExpenseShop } from '@/lib/expenseCategories'
 import { formatDate, formatKES } from '@/lib/utils'
 import type { Expense, ExpenseList, RecurringExpense } from '@/lib/types'
@@ -29,8 +30,6 @@ function ShopBadge({ shop }: { shop: string | null }) {
  */
 export default function AdminExpensesPage({ shop }: { shop?: ExpenseShop }) {
   const toast = useToast()
-  const [data, setData] = useState<ExpenseList | null>(null)
-  const [templates, setTemplates] = useState<RecurringExpense[]>([])
   const [category, setCategory] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -40,29 +39,16 @@ export default function AdminExpensesPage({ shop }: { shop?: ExpenseShop }) {
   const delExpense = useConfirm<number>()
   const delTemplate = useConfirm<number>()
 
-  const load = useCallback(() => {
-    const params: Record<string, string> = {}
-    if (shop) params.shop = shop
-    if (category) params.category = category
-    if (dateFrom) params.date_from = dateFrom
-    if (dateTo) params.date_to = dateTo
-    // Expenses first: opening it also posts this month's recurring entries, which the templates list then reflects.
-    api.get<ExpenseList>('/admin/expenses/', { params }).then(r => setData(r.data)).catch(console.error)
-  }, [shop, category, dateFrom, dateTo])
-
-  const loadTemplates = useCallback(() => {
-    api.get<RecurringExpense[]>('/admin/recurring-expenses/')
-      .then(r => setTemplates(shop ? r.data.filter(t => t.shop === shop) : r.data))
-      .catch(console.error)
-  }, [shop])
-
-  useEffect(load, [load])
-  useEffect(loadTemplates, [loadTemplates])
-
-  function refresh() {
-    load()
-    loadTemplates()
-  }
+  const params: Record<string, string> = {}
+  if (shop) params.shop = shop
+  if (category) params.category = category
+  if (dateFrom) params.date_from = dateFrom
+  if (dateTo) params.date_to = dateTo
+  // Each filter combination is remembered. Opening the list also posts this month's recurring entries.
+  const data = useAdminQuery<ExpenseList>('/admin/expenses/', { params }).data ?? null
+  const templates = useAdminQuery<RecurringExpense[]>('/admin/recurring-expenses/').data
+  const shopTemplates = (templates ?? []).filter(t => !shop || t.shop === shop)
+  const refresh = useInvalidateAdmin()
 
   async function removeExpense(id: number) {
     delExpense.cancel()
@@ -176,8 +162,8 @@ export default function AdminExpensesPage({ shop }: { shop?: ExpenseShop }) {
           <button onClick={() => setRecurringForm({})} className="btn-modern flex items-center gap-1.5"><Plus size={16} /> Add recurring</button>
         </div>
         <ul className="space-y-2">
-          {templates.length === 0 && <li className="py-6 text-center text-sm text-muted-foreground">No recurring expenses yet.</li>}
-          {templates.map(t => (
+          {shopTemplates.length === 0 && <li className="py-6 text-center text-sm text-muted-foreground">No recurring expenses yet.</li>}
+          {shopTemplates.map(t => (
             <li key={t.id} className={`border rounded-xl p-3 bg-card flex flex-wrap items-center gap-x-4 gap-y-2 ${t.active ? '' : 'opacity-60'}`}>
               <div className="flex-1 min-w-[12rem]">
                 <p className="font-medium text-sm">{t.name} {!t.active && <span className="ml-1 text-xs text-muted-foreground">(paused)</span>}</p>

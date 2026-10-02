@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatKES } from '@/lib/utils'
 import type { Service } from '@/lib/types'
 import InlineConfirm from '@/components/InlineConfirm'
@@ -13,8 +14,6 @@ function formatPriceRange(s: Service) {
 }
 
 export default function AdminServicesPage() {
-  const [services, setServices] = useState<Service[]>([])
-  const [loading, setLoading] = useState(true)
   const del = useConfirm<number>()
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Service | null>(null)
@@ -23,11 +22,10 @@ export default function AdminServicesPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const fetchServices = () => {
-    api.get('/admin/services/').then(r => setServices(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
-  }
-
-  useEffect(() => { fetchServices() }, [])
+  const list = useAdminQuery<{ results?: Service[] } & Service[], Service[]>('/admin/services/', { select: r => r.results ?? r })
+  const services = list.data ?? []
+  const loading = list.isPending
+  const fetchServices = useInvalidateAdmin()
 
   function openCreate() {
     setEditing(null)

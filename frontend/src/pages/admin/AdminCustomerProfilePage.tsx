@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   ArrowLeft, CalendarCheck, ClipboardList, History, Link2, Mail, Pencil, Phone, Scissors, ShoppingBag, Star,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatDate, formatDateTime, formatKES } from '@/lib/utils'
 import type { CustomerProfile, TimelineEvent } from '@/lib/types'
 import AuditHistoryModal from '@/components/admin/AuditHistoryModal'
@@ -55,20 +56,15 @@ function SpendChart({ months }: { months: CustomerProfile['spend_by_month'] }) {
 export default function AdminCustomerProfilePage() {
   const { kind, id } = useParams()
   const toast = useToast()
-  const [profile, setProfile] = useState<CustomerProfile | null>(null)
-  const [notFound, setNotFound] = useState(false)
   const [tab, setTab] = useState<Tab>('activity')
   const [editing, setEditing] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const confirmLink = useConfirm<string>()
 
-  const load = useCallback(() => {
-    api.get<CustomerProfile>(`/admin/customers/${kind}/${id}/`)
-      .then(r => { setProfile(r.data); setNotFound(false) })
-      .catch(() => setNotFound(true))
-  }, [kind, id])
-
-  useEffect(load, [load])
+  const query = useAdminQuery<CustomerProfile>(`/admin/customers/${kind}/${id}/`)
+  const profile = query.data ?? null
+  const notFound = query.isError && !profile
+  const load = useInvalidateAdmin()
 
   async function link() {
     confirmLink.cancel()

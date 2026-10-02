@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from 'react'
 import type { ReactNode } from 'react'
+import { appQueryClient } from '@/lib/queryClient'
 
 export interface User {
   id: number
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(restoreUser)
 
   const login = (user: User, access: string, refresh: string) => {
+    appQueryClient.clear()  // never show the previous person's cached admin data
     setUser(user)
     localStorage.setItem('user', JSON.stringify(user))
     localStorage.setItem('access', access)
@@ -37,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = () => {
+    appQueryClient.clear()
     setUser(null)
     localStorage.removeItem('user')
     localStorage.removeItem('access')

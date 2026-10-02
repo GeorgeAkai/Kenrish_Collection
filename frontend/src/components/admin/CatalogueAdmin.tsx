@@ -1,6 +1,7 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Plus, Pencil, Trash2, X, Star, FolderInput } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatPriceRange } from '@/lib/utils'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -75,8 +76,6 @@ function StatusBadge({ published }: { published: boolean }) {
 interface CategoryOption { id: number; name: string }
 
 export default function CatalogueAdmin({ title, endpoint, itemType, extraFields = [], withCategories }: Props) {
-  const [items, setItems] = useState<Item[]>([])
-  const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<Item | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState<Record<string, string>>({})
@@ -89,7 +88,6 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
   const [moving, setMoving] = useState<Item | null>(null)
   const [moveTarget, setMoveTarget] = useState<CategoryType | null>(null)
   const [moveLoading, setMoveLoading] = useState(false)
-  const [categories, setCategories] = useState<CategoryOption[]>([])
   const del = useConfirm<number>()
   const toast = useToast()
 
@@ -101,17 +99,14 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
     ? (['product', 'handbag', 'clothes'] as CategoryType[]).filter(t => t !== itemType)
     : []
 
-  const fetch = () => {
-    api.get(`${endpoint}/`).then(r => {
-      setItems(Array.isArray(r.data) ? r.data : (r.data.results ?? []))
-    }).catch(console.error).finally(() => setLoading(false))
-  }
-
-  useEffect(() => { fetch() }, [endpoint])
-  useEffect(() => {
-    if (!withCategories) return
-    api.get<CategoryOption[]>('/admin/clothes-categories/').then(r => setCategories(r.data)).catch(console.error)
-  }, [withCategories])
+  // Products, handbags and clothes are each remembered, so leaving and returning shows the list at once.
+  const list = useAdminQuery<Item[] | { results?: Item[] }, Item[]>(`${endpoint}/`, {
+    select: r => (Array.isArray(r) ? r : (r.results ?? [])),
+  })
+  const items = list.data ?? []
+  const loading = list.isPending
+  const categories = useAdminQuery<CategoryOption[]>('/admin/clothes-categories/', { enabled: !!withCategories }).data ?? []
+  const fetch = useInvalidateAdmin()
 
   function openCreate() {
     setEditing(null)
@@ -139,7 +134,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
     del.cancel()
     try {
       await api.delete(`${endpoint}/${id}/`)
-      setItems(prev => prev.filter(i => i.id !== id))
+      fetch()
     } catch {
       // silently ignore; item stays in list
     } finally {
@@ -152,7 +147,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
     setTogglingId(item.id)
     try {
       await api.patch(`${endpoint}/${item.id}/`, { is_published: newVal })
-      setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_published: newVal } : i))
+      fetch()
     } catch {
       // silently ignore
     } finally {
@@ -170,7 +165,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
     setMoveLoading(true)
     try {
       await api.post(`/admin/catalogue/${itemType}/${moving.id}/move/`, { target_type: moveTarget })
-      setItems(prev => prev.filter(i => i.id !== moving.id))
+      fetch()
       toast.success(`"${moving.name}" moved to ${CATEGORY_LABELS[moveTarget]}.`)
       setMoving(null)
     } catch (err: unknown) {

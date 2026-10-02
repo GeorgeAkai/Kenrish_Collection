@@ -1,6 +1,6 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Scissors, Shirt, TrendingUp, TrendingDown, CalendarCheck, Wallet, Receipt, Boxes } from 'lucide-react'
-import api from '@/lib/axios'
+import { useAdminQuery } from '@/lib/adminQuery'
 import { formatKESWhole, formatPeriodRange } from '@/lib/utils'
 import KpiCard from '@/components/admin/KpiCard'
 import SalesTrendChart from '@/components/admin/charts/SalesTrendChart'
@@ -57,46 +57,36 @@ function StockPill({ item }: { item: Alert }) {
  */
 export default function AnalyticsView({ scope, title, actions }: { scope: Scope; title: string; actions?: ReactNode }) {
   const [period, setPeriod] = useState<Period>('month')
-  const [summary, setSummary] = useState<Summary | null>(null)
-  const [trend, setTrend] = useState<TrendPoint[]>([])
-  const [cashFlow, setCashFlow] = useState<IncomeExpensePoint[]>([])
-  const [expenses, setExpenses] = useState<ExpenseRow[]>([])
-  const [sellers, setSellers] = useState<Seller[]>([])
-  const [alerts, setAlerts] = useState<Alert[]>([])
-  const [stockValue, setStockValue] = useState(0)
-  const [shopData, setShopData] = useState<ShopBreakdown | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
   const [showStock, setShowStock] = useState(false)
   const [finance, setFinance] = useState<FinanceKind | null>(null)
 
-  useEffect(() => {
-    setLoading(true)
-    setError(false)
-    const shop = scope === 'all' ? '' : `&shop=${scope}`
-    const p = `?period=${period}${shop}`
-    const s = scope === 'all' ? '' : `?shop=${scope}`
-    Promise.all([
-      api.get<Summary>(`/admin/analytics/summary/${p}`),
-      api.get<TrendPoint[]>(`/admin/analytics/sales-trend/${p}`),
-      api.get<IncomeExpensePoint[]>(`/admin/analytics/cash-flow/${p}`),
-      api.get<ExpenseRow[]>(`/admin/analytics/expenses-breakdown/${p}`),
-      api.get<Record<'products' | 'handbags' | 'clothes' | 'services', Seller[]>>(`/admin/analytics/top-sellers/${p}`),
-      api.get<Alert[]>(`/admin/analytics/inventory-alerts/${s}`),
-      api.get<{ total_value: number }>(`/admin/analytics/stock-value/${s}`),
-      api.get<ShopBreakdown>(`/admin/analytics/shop-breakdown/?period=${period}`),
-    ]).then(([sm, tr, cf, ex, ts, al, sv, sb]) => {
-      setSummary(sm.data)
-      setTrend(tr.data)
-      setCashFlow(cf.data)
-      setExpenses(ex.data)
-      setSellers([...ts.data.products, ...ts.data.handbags, ...ts.data.clothes, ...ts.data.services]
-        .sort((a, b) => b.units_sold - a.units_sold).slice(0, 8))
-      setAlerts(al.data)
-      setStockValue(Number(sv.data.total_value))
-      setShopData(sb.data)
-    }).catch(err => { console.error(err); setError(true) }).finally(() => setLoading(false))
-  }, [period, scope])
+  // Each period and shop is remembered: coming back to the dashboard, or flipping between periods you have already
+  // looked at, shows the figures at once and only refreshes quietly behind them.
+  const withPeriod = scope === 'all' ? { period } : { period, shop: scope }
+  const shopOnly = scope === 'all' ? undefined : { shop: scope }
+  const summaryQ = useAdminQuery<Summary>('/admin/analytics/summary/', { params: withPeriod })
+  const trendQ = useAdminQuery<TrendPoint[]>('/admin/analytics/sales-trend/', { params: withPeriod })
+  const cashFlowQ = useAdminQuery<IncomeExpensePoint[]>('/admin/analytics/cash-flow/', { params: withPeriod })
+  const expensesQ = useAdminQuery<ExpenseRow[]>('/admin/analytics/expenses-breakdown/', { params: withPeriod })
+  const sellersQ = useAdminQuery<Record<'products' | 'handbags' | 'clothes' | 'services', Seller[]>, Seller[]>('/admin/analytics/top-sellers/', {
+    params: withPeriod,
+    select: ts => [...ts.products, ...ts.handbags, ...ts.clothes, ...ts.services].sort((a, b) => b.units_sold - a.units_sold).slice(0, 8),
+  })
+  const alertsQ = useAdminQuery<Alert[]>('/admin/analytics/inventory-alerts/', { params: shopOnly })
+  const stockValueQ = useAdminQuery<{ total_value: number }>('/admin/analytics/stock-value/', { params: shopOnly })
+  const shopDataQ = useAdminQuery<ShopBreakdown>('/admin/analytics/shop-breakdown/', { params: { period } })
+
+  const queries = [summaryQ, trendQ, cashFlowQ, expensesQ, sellersQ, alertsQ, stockValueQ, shopDataQ]
+  const loading = queries.some(q => q.isPending)
+  const error = queries.some(q => q.isError)
+  const summary = summaryQ.data ?? null
+  const trend = trendQ.data ?? []
+  const cashFlow = cashFlowQ.data ?? []
+  const expenses = expensesQ.data ?? []
+  const sellers = sellersQ.data ?? []
+  const alerts = alertsQ.data ?? []
+  const stockValue = Number(stockValueQ.data?.total_value ?? 0)
+  const shopData = shopDataQ.data ?? null
 
   const net = summary?.net_profit ?? 0
   const margin = summary && summary.revenue > 0 ? `${Math.round((net / Number(summary.revenue)) * 100)}% margin` : undefined

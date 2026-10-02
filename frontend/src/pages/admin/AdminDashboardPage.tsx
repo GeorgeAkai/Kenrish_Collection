@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Heart } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from 'recharts'
 import type { PieLabelRenderProps } from 'recharts'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatKES } from '@/lib/utils'
 import type { GalleryImage } from '@/lib/types'
 import { AlertTriangle, RotateCcw, Download } from 'lucide-react'
@@ -26,13 +27,6 @@ type ResetModal = null | 'confirm' | 'busy' | 'done'
 
 export default function AdminDashboardPage() {
   const [period, setPeriod] = useState<Period>('month')
-  const [summary, setSummary] = useState<Summary | null>(null)
-  const [trend, setTrend] = useState<TrendPoint[]>([])
-  const [topSellers, setTopSellers] = useState<TopSeller[]>([])
-  const [alerts, setAlerts] = useState<Alert[]>([])
-  const [stockValue, setStockValue] = useState<number | null>(null)
-  const [expenses, setExpenses] = useState<ExpenseRow[]>([])
-  const [loading, setLoading] = useState(true)
   const [resetModal, setResetModal] = useState<ResetModal>(null)
   const [resetMsg, setResetMsg] = useState('')
 
@@ -52,59 +46,43 @@ export default function AdminDashboardPage() {
       const d = data.deleted
       setResetMsg(`Cleared ${d.sales} sale${d.sales !== 1 ? 's' : ''}, ${d.expenses} expense${d.expenses !== 1 ? 's' : ''}, and ${d.cash_flow} cash-flow record${d.cash_flow !== 1 ? 's' : ''}.`)
       setResetModal('done')
-      // Reload analytics
-      setPeriod(p => p)
+      refresh()  // the figures were just cleared: reload every dashboard
     } catch {
       setResetMsg('Reset failed. Please try again.')
       setResetModal('done')
     }
   }
 
-  const [wishlistStats, setWishlistStats] = useState<WishlistStat[]>([])
-  const [topLiked, setTopLiked] = useState<GalleryImage[]>([])
-  const [engagementLoading, setEngagementLoading] = useState(true)
+  const refresh = useInvalidateAdmin()
 
-  // Main analytics, period-dependent
-  useEffect(() => {
-    setLoading(true)
-    const p = `?period=${period}`
-    Promise.all([
-      api.get(`/admin/analytics/summary/${p}`),
-      api.get(`/admin/analytics/sales-trend/${p}`),
-      api.get(`/admin/analytics/top-sellers/${p}`),
-      api.get('/admin/analytics/inventory-alerts/'),
-      api.get('/admin/analytics/stock-value/'),
-      api.get(`/admin/analytics/expenses-breakdown/${p}`),
-    ]).then(([s, t, ts, a, sv, e]) => {
-      setSummary(s.data)
-      setTrend(t.data)
-      const flat: TopSeller[] = [
-        ...(ts.data.products ?? []),
-        ...(ts.data.handbags ?? []),
-        ...(ts.data.clothes ?? []),
-      ].sort((a: TopSeller, b: TopSeller) => b.units_sold - a.units_sold).slice(0, 10)
-      setTopSellers(flat)
-      setAlerts(a.data)
-      setStockValue(sv.data.total_value)
-      setExpenses(e.data)
-    }).catch(console.error).finally(() => setLoading(false))
-  }, [period])
+  // Main analytics, remembered per period: flipping between periods you have seen (or coming back) is instant.
+  const byPeriod = { period }
+  const summaryQ = useAdminQuery<Summary>('/admin/analytics/summary/', { params: byPeriod })
+  const trendQ = useAdminQuery<TrendPoint[]>('/admin/analytics/sales-trend/', { params: byPeriod })
+  const sellersQ = useAdminQuery<Record<'products' | 'handbags' | 'clothes', TopSeller[]>, TopSeller[]>('/admin/analytics/top-sellers/', {
+    params: byPeriod,
+    select: ts => [...(ts.products ?? []), ...(ts.handbags ?? []), ...(ts.clothes ?? [])].sort((a, b) => b.units_sold - a.units_sold).slice(0, 10),
+  })
+  const alertsQ = useAdminQuery<Alert[]>('/admin/analytics/inventory-alerts/')
+  const stockValueQ = useAdminQuery<{ total_value: number }>('/admin/analytics/stock-value/')
+  const expensesQ = useAdminQuery<ExpenseRow[]>('/admin/analytics/expenses-breakdown/', { params: byPeriod })
+  const loading = [summaryQ, trendQ, sellersQ, alertsQ, stockValueQ, expensesQ].some(q => q.isPending)
+  const summary = summaryQ.data ?? null
+  const trend = trendQ.data ?? []
+  const topSellers = sellersQ.data ?? []
+  const alerts = alertsQ.data ?? []
+  const stockValue = stockValueQ.data ? stockValueQ.data.total_value : null
+  const expenses = expensesQ.data ?? []
 
-  // Engagement data, period-independent, fetched once
-  useEffect(() => {
-    setEngagementLoading(true)
-    Promise.all([
-      api.get('/admin/wishlist-stats/').catch(() => ({ data: [] })),
-      api.get('/gallery/').catch(() => ({ data: [] })),
-    ]).then(([ws, gl]) => {
-      setWishlistStats(ws.data ?? [])
-      const sorted: GalleryImage[] = [...(gl.data ?? [])]
-        .sort((a, b) => (b.like_count ?? 0) - (a.like_count ?? 0))
-        .filter(img => (img.like_count ?? 0) > 0)
-        .slice(0, 10)
-      setTopLiked(sorted)
-    }).finally(() => setEngagementLoading(false))
-  }, [])
+  // Engagement data doesn't depend on the period. A failure just leaves its panel empty.
+  const wishlistQ = useAdminQuery<WishlistStat[]>('/admin/wishlist-stats/')
+  const galleryQ = useAdminQuery<GalleryImage[]>('/gallery/')
+  const engagementLoading = wishlistQ.isPending || galleryQ.isPending
+  const wishlistStats = wishlistQ.data ?? []
+  const topLiked = [...(galleryQ.data ?? [])]
+    .sort((a, b) => (b.like_count ?? 0) - (a.like_count ?? 0))
+    .filter(img => (img.like_count ?? 0) > 0)
+    .slice(0, 10)
 
   const periods: { key: Period; label: string }[] = [
     { key: 'today', label: 'Today' },

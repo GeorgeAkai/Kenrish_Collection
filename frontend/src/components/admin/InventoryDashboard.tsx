@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AlertTriangle, History, PackagePlus, ScanLine, ShoppingCart, Warehouse } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import api from '@/lib/axios'
+import { useAdminQuery } from '@/lib/adminQuery'
 import { formatKES } from '@/lib/utils'
 import type { InventorySummary } from '@/lib/types'
 
@@ -52,14 +51,10 @@ function cards(s: InventorySummary | null, failed: boolean): CardSpec[] {
 
 /** The Inventory landing page: one card per task, each with a live number, each opening its own page. */
 export default function InventoryDashboard({ shop, basePath }: { shop?: 'beauty' | 'fashion'; basePath: string }) {
-  const [summary, setSummary] = useState<InventorySummary | null>(null)
-  const [failed, setFailed] = useState(false)
-
-  useEffect(() => {
-    api.get<InventorySummary>('/admin/inventory/summary/', { params: shop ? { shop } : {} })
-      .then(r => setSummary(r.data))
-      .catch(() => setFailed(true))
-  }, [shop])
+  // Kept between visits: coming back to the dashboard shows the last numbers at once, then updates them quietly.
+  const q = useAdminQuery<InventorySummary>('/admin/inventory/summary/', { params: shop ? { shop } : {} })
+  const summary = q.data ?? null
+  const failed = q.isError && !summary
 
   return (
     <div className="space-y-4">

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ImagePlus, Trash2 } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatKES } from '@/lib/utils'
 
 interface DraftProduct {
@@ -197,24 +198,17 @@ function DraftCard({
 type Shop = 'beauty' | 'fashion'
 
 export default function AdminStagingPage({ shop }: { shop?: Shop } = {}) {
-  const [draftsRaw, setDrafts] = useState<DraftProduct[]>([])
-  const drafts = draftsRaw.filter(d => {
+  const list = useAdminQuery<DraftProduct[]>('/admin/staging/')
+  const drafts = (list.data ?? []).filter(d => {
     if (!shop) return true
     return shop === 'beauty' ? d.item_type === 'product' : d.item_type === 'handbag' || d.item_type === 'clothes'
   })
-  const [loading, setLoading] = useState(true)
+  const loading = list.isPending
+  const refresh = useInvalidateAdmin()
   const inventoryPath = shop ? `/admin/${shop}/inventory` : '/admin/inventory'
 
-  useEffect(() => {
-    api.get('/admin/staging/')
-      .then(r => setDrafts(r.data))
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
-
-  function removeItem(id: number, type: string) {
-    setDrafts(prev => prev.filter(d => !(d.id === id && d.item_type === type)))
-  }
+  // A published or discarded draft is gone from the server's list, so just refresh it everywhere.
+  const removeItem = () => { refresh() }
 
   if (loading) {
     return <div className="text-center py-16 text-muted-foreground">Loading drafts…</div>

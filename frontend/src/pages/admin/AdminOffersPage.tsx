@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatKES } from '@/lib/utils'
 import type { Offer } from '@/lib/types'
 import InlineConfirm from '@/components/InlineConfirm'
@@ -7,8 +8,6 @@ import { useConfirm } from '@/hooks/useConfirm'
 import FileDropZone from '@/components/admin/FileDropZone'
 
 export default function AdminOffersPage() {
-  const [offers, setOffers] = useState<Offer[]>([])
-  const [loading, setLoading] = useState(true)
   const del = useConfirm<number>()
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ name: '', description: '', offer_price: '' })
@@ -16,11 +15,11 @@ export default function AdminOffersPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const fetch = () => {
-    api.get('/admin/offers/').then(r => setOffers(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
-  }
-
-  useEffect(() => { fetch() }, [])
+  // Remembered between visits; `fetch()` after a save refreshes it everywhere.
+  const list = useAdminQuery<{ results?: Offer[] } & Offer[], Offer[]>('/admin/offers/', { select: r => r.results ?? r })
+  const offers = list.data ?? []
+  const loading = list.isPending
+  const fetch = useInvalidateAdmin()
 
   async function handleDelete(id: number) {
     del.cancel()

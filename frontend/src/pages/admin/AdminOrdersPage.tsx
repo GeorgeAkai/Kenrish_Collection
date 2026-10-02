@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { CheckCircle, XCircle, ChevronDown, ChevronUp, Clock, Package, X } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatKES, formatDateTime } from '@/lib/utils'
 import type { Order, OrderStatus } from '@/lib/types'
 
@@ -23,10 +24,7 @@ const STATUS_BADGE: Record<OrderStatus, string> = {
 
 // Orders can mix items from any shop, so this page is deliberately not shop-scoped.
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([])
-  const [pendingCount, setPendingCount] = useState(0)
   const [tab, setTab] = useState<Tab>('')
-  const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<number | null>(null)
 
   // Action modal
@@ -36,18 +34,14 @@ export default function AdminOrdersPage() {
   const [saving, setSaving] = useState(false)
   const [actionError, setActionError] = useState('')
 
-  function fetchOrders(status: Tab = tab) {
-    setLoading(true)
-    const params = status ? `?status=${status}` : ''
-    api.get<{ results: Order[]; pending_count: number }>(`/admin/orders/${params}`)
-      .then(r => { setOrders(r.data.results); setPendingCount(r.data.pending_count) })
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }
+  // Every status tab is remembered, so flipping between them (or leaving and returning) is instant.
+  const list = useAdminQuery<{ results: Order[]; pending_count: number }>('/admin/orders/', { params: tab ? { status: tab } : undefined })
+  const orders = list.data?.results ?? []
+  const pendingCount = list.data?.pending_count ?? 0
+  const loading = list.isPending
+  const fetchOrders = useInvalidateAdmin()
 
-  useEffect(() => { fetchOrders() }, [])
-
-  function switchTab(t: Tab) { setTab(t); fetchOrders(t) }
+  function switchTab(t: Tab) { setTab(t) }
 
   function openAction(order: Order, type: 'confirm' | 'complete' | 'cancel') {
     setActionTarget(order)

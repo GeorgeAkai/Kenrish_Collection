@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Pencil, ScanLine } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatKES, formatPriceRange, formatDateTime } from '@/lib/utils'
 import ItemPicker from '@/components/admin/ItemPicker'
 import EditSaleModal from '@/components/admin/EditSaleModal'
@@ -28,6 +29,7 @@ interface ScannedItem {
 
 function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
   const navigate = useNavigate()
+  const refresh = useInvalidateAdmin()
   const [stage, setStage] = useState<ScanStage>('upload')
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -100,6 +102,7 @@ function ScanReceiptPanel({ inventory }: { inventory: InventoryItem[] }) {
       setAddedCount(res.data.added ?? 0)
       setCreatedCount(res.data.created ?? 0)
       setStage('done')
+      refresh()  // stock and draft products changed
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { error?: string } } }).response?.data?.error
       setError(msg ?? 'Confirm failed. Please try again.')
@@ -348,12 +351,7 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
   const { section } = useParams()
   const tab = (section && section in SECTION_TITLES ? section : null) as Tab | null
   const basePath = shop ? `/admin/${shop}/inventory` : '/admin/inventory'
-  const [inventoryRaw, setInventory] = useState<InventoryItem[]>([])
-  const [salesRaw, setSales] = useState<Sale[]>([])
-  const [loading, setLoading] = useState(true)
   const [editingSale, setEditingSale] = useState<Sale | null>(null)
-  const inventory = inventoryRaw.filter(i => matchesShop(i.item_type, shop))
-  const sales = salesRaw.filter(s => matchesShop(s.item_type, shop))
 
   // Add stock form
   const [stockForm, setStockForm] = useState({ item_type: 'product', item_id: '', quantity: '', cost_price: '' })
@@ -370,18 +368,20 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
   const [saleMsg, setSaleMsg] = useState('')
   const [saleSelected, setSaleSelected] = useState<InventoryItem | null>(null)
 
-  useEffect(() => {
-    if (tab === 'stock' || tab === 'low-stock') {
-      setLoading(true)
-      api.get('/admin/inventory/').then(r => setInventory(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
-    } else if (tab === 'sales') {
-      setLoading(true)
-      api.get('/admin/inventory/sales/').then(r => setSales(r.data.results ?? r.data)).catch(console.error).finally(() => setLoading(false))
-    } else if (tab === 'scan-receipt' || tab === 'record-sale' || tab === 'add-stock') {
-      if (inventory.length === 0)
-        api.get('/admin/inventory/').then(r => setInventory(r.data.results ?? r.data)).catch(console.error)
-    }
-  }, [tab])
+  // The stock list serves every page except the sales history; each is remembered between visits and refreshed
+  // after anything that changes stock or sales (below).
+  const inventoryQuery = useAdminQuery<{ results?: InventoryItem[] } & InventoryItem[], InventoryItem[]>('/admin/inventory/', {
+    enabled: tab !== null && tab !== 'sales', select: r => r.results ?? r,
+  })
+  const salesQuery = useAdminQuery<{ results?: Sale[] } & Sale[], Sale[]>('/admin/inventory/sales/', {
+    enabled: tab === 'sales', select: r => r.results ?? r,
+  })
+  const inventoryRaw = inventoryQuery.data ?? []
+  const salesRaw = salesQuery.data ?? []
+  const loading = tab === 'sales' ? salesQuery.isPending : inventoryQuery.isPending
+  const refresh = useInvalidateAdmin()
+  const inventory = inventoryRaw.filter(i => matchesShop(i.item_type, shop))
+  const sales = salesRaw.filter(s => matchesShop(s.item_type, shop))
 
   async function handleAddStock(e: FormEvent) {
     e.preventDefault()
@@ -399,6 +399,7 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
       setStockForm({ item_type: 'product', item_id: '', quantity: '', cost_price: '' })
       setStockSearch('')
       setStockSelected(null)
+      refresh()
     } catch (err: unknown) {
       const response = (err as { response?: { data?: Record<string, string[]> } }).response
       setStockMsg(response?.data ? JSON.stringify(response.data) : 'Failed to add stock.')
@@ -424,6 +425,7 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
       setSaleMsg('Sale recorded successfully!')
       setSaleForm({ item_type: 'product', item_id: '', quantity: '1', unit_price: '', customer_name: '', customer_phone: '' })
       setSaleSelected(null)
+      refresh()
     } catch (err: unknown) {
       const response = (err as { response?: { data?: Record<string, string[]> } }).response
       setSaleMsg(response?.data ? JSON.stringify(response.data) : 'Failed to record sale.')
@@ -726,11 +728,9 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
         <EditSaleModal
           sale={editingSale}
           onClose={() => setEditingSale(null)}
-          onSaved={updated => {
-            setSales(list => list.map(x => x.id === updated.id ? updated : x))
+          onSaved={() => {
             setEditingSale(null)
-            // Stock changed with the edit; refresh so the inventory tab is not stale.
-            api.get('/admin/inventory/').then(r => setInventory(r.data.results ?? r.data)).catch(console.error)
+            refresh()  // the sale, the stock and the customer figures all changed
           }}
         />
       )}

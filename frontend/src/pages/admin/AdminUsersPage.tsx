@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatDate } from '@/lib/utils'
 import type { AdminUser, Wishlist } from '@/lib/types'
 import InlineConfirm from '@/components/InlineConfirm'
@@ -9,21 +10,21 @@ const MAX_ADMINS = 3
 
 export default function AdminUsersPage() {
   const toast = useToast()
-  const [users, setUsers] = useState<AdminUser[]>([])
-  const [loading, setLoading] = useState(true)
   const [actionId, setActionId] = useState<number | null>(null)
   const [confirming, setConfirming] = useState<{ id: number; type: 'promote' | 'revoke' | 'delete' } | null>(null)
   const [wishlistModal, setWishlistModal] = useState<{ userId: number; username: string } | null>(null)
-  const [wishlistData, setWishlistData] = useState<Wishlist | null>(null)
-  const [wishlistLoading, setWishlistLoading] = useState(false)
 
-  const fetchUsers = () => {
-    api.get('/admin/users/').then(r => setUsers(r.data.results ?? r.data)).catch(() => {
-      toast.error("Couldn't load users. Please refresh and try again.")
-    }).finally(() => setLoading(false))
-  }
+  const list = useAdminQuery<{ results?: AdminUser[] } & AdminUser[], AdminUser[]>('/admin/users/', { select: r => r.results ?? r })
+  const users = list.data ?? []
+  const loading = list.isPending
+  const fetchUsers = useInvalidateAdmin()
+  useEffect(() => { if (list.isError) toast.error("Couldn't load users. Please refresh and try again.") }, [list.isError])  // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { fetchUsers() }, [])
+  // A wishlist is read when its dialog opens (and remembered briefly, so reopening it is instant).
+  const wishlistQuery = useAdminQuery<Wishlist>(`/admin/users/${wishlistModal?.userId ?? 0}/wishlist/`, { enabled: !!wishlistModal })
+  const wishlistData = wishlistQuery.data ?? null
+  const wishlistLoading = !!wishlistModal && wishlistQuery.isPending
+  useEffect(() => { if (wishlistQuery.isError) toast.error("Couldn't load this user's wishlist.") }, [wishlistQuery.isError])  // eslint-disable-line react-hooks/exhaustive-deps
 
   async function promote(id: number) {
     setConfirming(null); setActionId(id)
@@ -55,16 +56,8 @@ export default function AdminUsersPage() {
     } finally { setActionId(null) }
   }
 
-  async function openWishlist(userId: number, username: string) {
+  function openWishlist(userId: number, username: string) {
     setWishlistModal({ userId, username })
-    setWishlistData(null)
-    setWishlistLoading(true)
-    try {
-      const { data } = await api.get(`/admin/users/${userId}/wishlist/`)
-      setWishlistData(data)
-    } catch {
-      toast.error("Couldn't load this user's wishlist.")
-    } finally { setWishlistLoading(false) }
   }
 
   const adminCount = users.filter(u => u.is_staff).length

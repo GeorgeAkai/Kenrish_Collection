@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import api from '@/lib/axios'
+import { useAdminQuery } from '@/lib/adminQuery'
 import { formatKES, formatKESWhole } from '@/lib/utils'
 import ModalShell from '@/components/admin/ModalShell'
 
@@ -10,13 +9,9 @@ const th = 'px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.12em] text-m
 
 /** Every stocked item with its units and prices, so the stock-value figure can be traced. */
 export default function StockBreakdownModal({ shop, title, onClose }: { shop?: 'beauty' | 'fashion'; title: string; onClose: () => void }) {
-  const [data, setData] = useState<Breakdown | null>(null)
-  const [failed, setFailed] = useState(false)
-
-  useEffect(() => {
-    api.get<Breakdown>(`/admin/analytics/stock-breakdown/${shop ? `?shop=${shop}` : ''}`)
-      .then(r => setData(r.data)).catch(() => setFailed(true))
-  }, [shop])
+  const query = useAdminQuery<Breakdown>('/admin/analytics/stock-breakdown/', { params: shop ? { shop } : undefined })
+  const data = query.data ?? null
+  const failed = query.isError
 
   return (
     <ModalShell

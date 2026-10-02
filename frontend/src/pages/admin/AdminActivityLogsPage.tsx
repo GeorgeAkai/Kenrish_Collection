@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { Eye, Users, ShoppingBag, LogIn, ShieldAlert, MousePointerClick, Trash2 } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatChartDate, formatPeriodRange, NAIROBI_TZ } from '@/lib/utils'
 import KpiCard from '@/components/admin/KpiCard'
 import InlineConfirm from '@/components/InlineConfirm'
@@ -78,14 +79,8 @@ function describe(r: LogRow) {
 export default function AdminActivityLogsPage() {
   const [tab, setTab] = useState<Tab>('overview')
   const [period, setPeriod] = useState<Period>('week')
-  const [stats, setStats] = useState<Stats | null>(null)
-  const [loading, setLoading] = useState(true)
 
-  const [rows, setRows] = useState<LogRow[]>([])
   const [page, setPage] = useState(1)
-  const [count, setCount] = useState(0)
-  const [hasNext, setHasNext] = useState(false)
-  const [logLoading, setLogLoading] = useState(false)
   const [event, setEvent] = useState('')
   const [user, setUser] = useState('')
   const [q, setQ] = useState('')
@@ -96,27 +91,25 @@ export default function AdminActivityLogsPage() {
   const [confirmPurge, setConfirmPurge] = useState(false)
   const toast = useToast()
 
-  useEffect(() => {
-    setLoading(true)
-    api.get<Stats>(`/admin/activity/stats/?period=${period}`)
-      .then(r => setStats(r.data)).catch(() => toast.error("Couldn't load activity analytics."))
-      .finally(() => setLoading(false))
-  }, [period])
+  // Activity is live data: coming back shows what was there at once, and it always refreshes behind it (staleTime 0).
+  const statsQuery = useAdminQuery<Stats>('/admin/activity/stats/', { params: { period }, staleTime: 0 })
+  const stats = statsQuery.data ?? null
+  const loading = statsQuery.isPending
+  useEffect(() => { if (statsQuery.isError) toast.error("Couldn't load activity analytics.") }, [statsQuery.isError])  // eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadLog = useCallback(() => {
-    setLogLoading(true)
-    const params = new URLSearchParams({ page: String(page) })
-    if (event) params.set('event', event)
-    if (user) params.set('user', user)
-    if (q) params.set('q', q)
-    if (dateFrom) params.set('date_from', dateFrom)
-    if (dateTo) params.set('date_to', dateTo)
-    api.get<PaginatedResponse<LogRow>>(`/admin/activity/?${params}`).then(r => {
-      setRows(r.data.results); setCount(r.data.count); setHasNext(!!r.data.next)
-    }).catch(() => toast.error("Couldn't load the activity log.")).finally(() => setLogLoading(false))
-  }, [page, event, user, q, dateFrom, dateTo])
-
-  useEffect(() => { if (tab === 'log') loadLog() }, [tab, loadLog])
+  const logParams: Record<string, string> = { page: String(page) }
+  if (event) logParams.event = event
+  if (user) logParams.user = user
+  if (q) logParams.q = q
+  if (dateFrom) logParams.date_from = dateFrom
+  if (dateTo) logParams.date_to = dateTo
+  const logQuery = useAdminQuery<PaginatedResponse<LogRow>>('/admin/activity/', { params: logParams, enabled: tab === 'log', staleTime: 0 })
+  const rows = logQuery.data?.results ?? []
+  const count = logQuery.data?.count ?? 0
+  const hasNext = !!logQuery.data?.next
+  const logLoading = tab === 'log' && logQuery.isPending
+  useEffect(() => { if (logQuery.isError) toast.error("Couldn't load the activity log.") }, [logQuery.isError])  // eslint-disable-line react-hooks/exhaustive-deps
+  const loadLog = useInvalidateAdmin()
 
   function filterBy(setter: (v: string) => void, value: string) { setter(value); setPage(1) }
 

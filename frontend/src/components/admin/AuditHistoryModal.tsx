@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import api from '@/lib/axios'
+import { useAdminQuery } from '@/lib/adminQuery'
 import { formatDateTime } from '@/lib/utils'
 import ModalShell from './ModalShell'
 
@@ -22,13 +21,9 @@ export default function AuditHistoryModal({ kind, objectRef, title, onClose }: {
   title: string
   onClose: () => void
 }) {
-  const [entries, setEntries] = useState<AuditEntry[] | null>(null)
-
-  useEffect(() => {
-    api.get('/admin/audit/', { params: { kind, ref: objectRef } })
-      .then(r => setEntries(r.data))
-      .catch(() => setEntries([]))
-  }, [kind, objectRef])
+  // A change history must be current whenever it is opened, so it is never served from the cache unrefreshed.
+  const q = useAdminQuery<AuditEntry[]>('/admin/audit/', { params: { kind, ref: objectRef }, staleTime: 0 })
+  const entries: AuditEntry[] | null = q.data ?? (q.isError ? [] : null)
 
   return (
     <ModalShell title="Change history" subtitle={title} onClose={onClose}>

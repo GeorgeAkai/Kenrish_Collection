@@ -46,7 +46,7 @@ describe('AdminEmployeesPage', () => {
   it('shows the payroll total and headcount for each shop', async () => {
     renderPage()
     const tiles = await screen.findByRole('region', { name: /staff overview/i })
-    expect(within(tiles).getByText('KES 33,000.00')).toBeInTheDocument()
+    expect(await within(tiles).findByText('KES 33,000.00')).toBeInTheDocument()
     expect(within(tiles).getByText('2 on payroll')).toBeInTheDocument()
     expect(within(tiles).getByLabelText('Beauty headcount')).toHaveTextContent('1')
     expect(within(tiles).getByLabelText('Fashion headcount')).toHaveTextContent('1')
@@ -56,10 +56,10 @@ describe('AdminEmployeesPage', () => {
   it('shows who is on shift today with their hours, and who is off', async () => {
     renderPage()
     const onShift = await screen.findByRole('region', { name: /on shift today/i })
-    expect(within(onShift).getByText('Wanjiru Kamau')).toBeInTheDocument()
+    expect(await within(onShift).findByText('Wanjiru Kamau')).toBeInTheDocument()
     expect(within(onShift).getByText('08:00–17:00')).toBeInTheDocument()
     const off = screen.getByRole('region', { name: /off today/i })
-    expect(within(off).getByText('Achieng Otieno')).toBeInTheDocument()
+    expect(await within(off).findByText('Achieng Otieno')).toBeInTheDocument()
   })
 
   it('lists employees with shop, salary, schedule and days off, marking those who have left', async () => {

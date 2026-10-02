@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Settings2, Plus, Pencil, Trash2, X, CheckCircle, Clock } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import type { SlotConfiguration } from '@/lib/types'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -44,9 +45,6 @@ function formatTime(t: string) {
 }
 
 export default function AdminSlotConfigPage() {
-  const [configs, setConfigs] = useState<SlotConfiguration[]>([])
-  const [unconfigured, setUnconfigured] = useState<UnconfiguredService[]>([])
-  const [loading, setLoading] = useState(true)
   const del = useConfirm<number>()
 
   const [showForm, setShowForm] = useState(false)
@@ -55,18 +53,11 @@ export default function AdminSlotConfigPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const fetchData = () => {
-    setLoading(true)
-    api.get('/admin/slot-configs/')
-      .then(r => {
-        setConfigs(r.data.configs)
-        setUnconfigured(r.data.unconfigured_services)
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { fetchData() }, [])
+  const list = useAdminQuery<{ configs: SlotConfiguration[]; unconfigured_services: UnconfiguredService[] }>('/admin/slot-configs/')
+  const configs = list.data?.configs ?? []
+  const unconfigured = list.data?.unconfigured_services ?? []
+  const loading = list.isPending
+  const fetchData = useInvalidateAdmin()
 
   function openCreate() {
     setEditTarget(null)

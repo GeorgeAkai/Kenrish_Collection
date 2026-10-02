@@ -1,6 +1,7 @@
-import { useEffect, useState, useCallback, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Plus, Pencil, Trash2, X } from 'lucide-react'
 import api from '@/lib/axios'
+import { useAdminQuery, useInvalidateAdmin } from '@/lib/adminQuery'
 import { formatKES, NAIROBI_TZ, toNairobiInput, fromNairobiInput } from '@/lib/utils'
 import type { Service, PaginatedResponse } from '@/lib/types'
 import InlineConfirm from '@/components/InlineConfirm'
@@ -38,11 +39,6 @@ const emptyForm = () => ({
 const suggestedPrice = (s: Service) => s.price ?? s.price_from ?? ''
 
 export default function AdminServiceSalesPage() {
-  const [sales, setSales] = useState<ServiceSale[]>([])
-  const [total, setTotal] = useState<number>(0)
-  const [count, setCount] = useState(0)
-  const [services, setServices] = useState<Service[]>([])
-  const [loading, setLoading] = useState(true)
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [editing, setEditing] = useState<ServiceSale | null>(null)
@@ -54,21 +50,17 @@ export default function AdminServiceSalesPage() {
   const del = useConfirm<number>()
   const toast = useToast()
 
-  const load = useCallback(() => {
-    const params = new URLSearchParams({ page_size: '100' })
-    if (dateFrom) params.set('date_from', dateFrom)
-    if (dateTo) params.set('date_to', dateTo)
-    return api.get<SalesPage>(`/admin/service-sales/?${params}`).then(r => {
-      setSales(r.data.results)
-      setCount(r.data.count)
-      setTotal(Number(r.data.total_amount))
-    }).catch(console.error).finally(() => setLoading(false))
-  }, [dateFrom, dateTo])
-
-  useEffect(() => { load() }, [load])
-  useEffect(() => {
-    api.get<Service[]>('/services/').then(r => setServices(r.data)).catch(console.error)
-  }, [])
+  const params: Record<string, string> = { page_size: '100' }
+  if (dateFrom) params.date_from = dateFrom
+  if (dateTo) params.date_to = dateTo
+  // Each date range is remembered, so changing it back (or leaving and returning) is instant.
+  const list = useAdminQuery<SalesPage>('/admin/service-sales/', { params })
+  const sales = list.data?.results ?? []
+  const count = list.data?.count ?? 0
+  const total = Number(list.data?.total_amount ?? 0)
+  const loading = list.isPending
+  const load = useInvalidateAdmin()
+  const services = useAdminQuery<Service[]>('/services/').data ?? []
 
   function openCreate() {
     setEditing(null)
