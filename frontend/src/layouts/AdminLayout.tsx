@@ -8,7 +8,7 @@ import {
   Package, ShoppingBag, Shirt, Warehouse,
   Scissors, Image, Tag, Users, FileText, LogOut, Menu, X,
   Sun, Moon, ChevronRight, ChevronDown, CalendarCheck, ClipboardList, Settings2, PackagePlus,
-  TrendingUp, ArrowRight, BarChart3, Receipt, Tags, Activity, MessageSquareQuote, Wallet,
+  TrendingUp, ArrowRight, BarChart3, Receipt, Tags, Activity, MessageSquareQuote, Wallet, UserRoundCog,
 } from 'lucide-react'
 
 interface NavLeaf { to: string; label: string; icon: LucideIcon; end?: boolean }
@@ -18,6 +18,7 @@ type NavEntry = ({ kind: 'leaf' } & NavLeaf) | ({ kind: 'group' } & NavGroup)
 const NAV: NavEntry[] = [
   { kind: 'leaf', to: '/admin/executive', label: 'Executive Dashboard', icon: TrendingUp, end: true },
   { kind: 'leaf', to: '/admin/expenses', label: 'All Expenses', icon: Wallet },
+  { kind: 'leaf', to: '/admin/employees', label: 'Employees', icon: UserRoundCog },
   // Orders can hold items from any shop, so it lives at the top level rather than under one store.
   { kind: 'leaf', to: '/admin/orders', label: 'Customer Orders', icon: ClipboardList },
   {
@@ -63,6 +64,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin': 'Dashboard',
   '/admin/executive': 'Executive Dashboard',
   '/admin/expenses': 'All Expenses',
+  '/admin/employees': 'Employees',
   '/admin/beauty/expenses': 'Beauty Expenses',
   '/admin/fashion/expenses': 'Fashion Expenses',
   '/admin/dashboard-legacy': 'Dashboard (Legacy)',

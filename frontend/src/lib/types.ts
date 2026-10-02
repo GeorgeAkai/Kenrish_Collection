@@ -150,6 +150,37 @@ export interface RecurringExpense {
   active: boolean
 }
 
+export interface Employee {
+  id: number
+  name: string
+  phone: string
+  email: string
+  start_date: string
+  /** last working day; null = still employed */
+  end_date: string | null
+  monthly_salary: string
+  shop: 'beauty' | 'fashion' | 'both'
+  schedule: import('./schedule').Schedule
+  off_days: import('./schedule').Day[]
+  is_active: boolean
+  works_today: boolean
+  created_at: string
+}
+
+export interface EmployeeShiftCard {
+  id: number
+  name: string
+  shop: Employee['shop']
+  shift: import('./schedule').Shift | null
+}
+
+export interface EmployeeDashboard {
+  on_shift_today: EmployeeShiftCard[]
+  off_today: EmployeeShiftCard[]
+  total_monthly_payroll: string
+  headcount: { beauty: number; fashion: number; both: number; total: number }
+}
+
 export interface ExpenseList {
   results: Expense[]
   count: number
