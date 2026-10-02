@@ -101,6 +101,8 @@ export interface Sale {
   customer_phone: string
   created_at: string
   created_by_username: string
+  edited: boolean
+  edit_count: number
 }
 
 export interface InventoryItem {

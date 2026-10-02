@@ -5,6 +5,7 @@ import string
 
 from api.notifications import send_reservation_email
 from datetime import timedelta, date
+from decimal import Decimal
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -13,6 +14,7 @@ from django.core.mail import send_mail
 from django.db.models import Sum, Count, Q
 from django.db.models.functions import TruncDate, TruncWeek, TruncMonth
 from django.http import StreamingHttpResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from rest_framework import status
@@ -44,7 +46,7 @@ from app1.models import (
 )
 
 from api.activity import log_event, activity_stats, client_ip
-from app1.inventory import add_stock, record_sale as _record_sale, InsufficientStockError
+from app1.inventory import add_stock, edit_sale as _edit_sale, record_sale as _record_sale, InsufficientStockError
 from chatbot.ai_service import build_system_prompt
 from api.analytics import (
     sales_summary as _sales_summary, top_sellers as _top_sellers,
@@ -71,7 +73,7 @@ from .serializers import (
     OrderSerializer, OrderCreateSerializer,
     SlotConfigurationSerializer,
     UserProfileSerializer, UserProfileUpdateSerializer,
-    ClothesCategorySerializer, ServiceSaleSerializer, ActivityLogSerializer,
+    ClothesCategorySerializer, ServiceSaleSerializer, ActivityLogSerializer, SaleEditSerializer,
     CustomerReviewSerializer,
 )
 
@@ -1058,6 +1060,43 @@ def admin_record_sale(request):
     except InsufficientStockError as e:
         return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     return Response(SaleSerializer(sale).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAdminUser])
+def admin_sale_detail(request, pk):
+    sale = get_object_or_404(Sale, pk=pk)
+    data = request.data
+    if {'item_id', 'item_type', 'product', 'handbag', 'clothes'} & set(data):
+        return Response({'detail': 'The item of a sale cannot be changed. Delete the sale and record a new one.'},
+                        status=status.HTTP_400_BAD_REQUEST)
+    try:
+        changes = {}
+        if 'quantity' in data:
+            changes['quantity'] = int(data['quantity'])
+            if changes['quantity'] < 1:
+                raise ValueError('quantity')
+        if 'unit_price' in data:
+            changes['unit_price'] = Decimal(str(data['unit_price']))
+            if not changes['unit_price'].is_finite() or changes['unit_price'] < 0:
+                raise ValueError('unit_price')
+    except (ValueError, TypeError, ArithmeticError):
+        return Response({'detail': 'Invalid quantity or unit_price.'}, status=status.HTTP_400_BAD_REQUEST)
+    for field in ('customer_name', 'customer_phone'):
+        if field in data:
+            changes[field] = str(data[field])
+    try:
+        sale = _edit_sale(sale, request.user, **changes)
+    except InsufficientStockError as e:
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    return Response(SaleSerializer(sale).data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_sale_edits(request, pk):
+    sale = get_object_or_404(Sale, pk=pk)
+    return Response(SaleEditSerializer(sale.edits.all(), many=True).data)
 
 
 @api_view(['GET'])

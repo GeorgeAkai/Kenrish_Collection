@@ -10,7 +10,7 @@ from app1.models import (
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
-    ClothesCategory, ServiceSale, ActivityLog, CustomerReview,
+    ClothesCategory, ServiceSale, ActivityLog, CustomerReview, SaleEdit,
 )
 
 
@@ -330,14 +330,22 @@ class SaleSerializer(serializers.ModelSerializer):
     item_name = serializers.SerializerMethodField()
     item_type = serializers.SerializerMethodField()
     created_by_username = serializers.CharField(source='created_by.username', read_only=True)
+    edit_count = serializers.SerializerMethodField()
+    edited = serializers.SerializerMethodField()
 
     class Meta:
         model = Sale
         fields = [
             'id', 'item_name', 'item_type', 'quantity', 'unit_price',
             'total_amount', 'customer_name', 'customer_phone',
-            'created_at', 'created_by_username',
+            'created_at', 'created_by_username', 'edited', 'edit_count',
         ]
+
+    def get_edit_count(self, obj):
+        return obj.edits.count()
+
+    def get_edited(self, obj):
+        return obj.edits.exists()
 
     def get_item_name(self, obj):
         item = obj._target_item()
@@ -351,6 +359,12 @@ class SaleSerializer(serializers.ModelSerializer):
         if obj.clothes_id:
             return 'clothes'
         return None
+
+
+class SaleEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SaleEdit
+        fields = ['id', 'editor_username', 'before', 'after', 'created_at']
 
 
 # ---------------------------------------------------------------------------

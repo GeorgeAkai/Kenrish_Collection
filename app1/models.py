@@ -428,6 +428,26 @@ class Sale(models.Model):
         return f"Sale - {(item.name if item else 'Item')} x{self.quantity}"
 
 
+class SaleEdit(models.Model):
+    """Permanent audit row for a correction to a recorded sale (non-repudiation).
+    Unlike ActivityLog this is never purged, and it keeps its own snapshots so it survives
+    the sale or the editor's account being deleted."""
+    sale = models.ForeignKey(Sale, on_delete=models.SET_NULL, null=True, blank=True, related_name='edits')
+    sale_ref = models.PositiveIntegerField()  # the sale's id at the time, kept after the sale is gone
+    item_name = models.CharField(max_length=255, blank=True)
+    editor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='sale_edits')
+    editor_username = models.CharField(max_length=150)
+    before = models.JSONField()
+    after = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at', '-id']
+
+    def __str__(self):
+        return f"Edit of sale #{self.sale_ref} by {self.editor_username}"
+
+
 # Add inventory properties to Product and Handbag models (Clothes defines its own)
 def is_low_stock_property(self):
     return hasattr(self, 'stock_quantity') and hasattr(self, 'reorder_level') and self.stock_quantity <= self.reorder_level

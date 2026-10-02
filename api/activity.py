@@ -32,6 +32,7 @@ ACTION_LABELS = [
     ('POST', r'^/api/auth/change-password/', 'Changed password'),
     ('POST', r'^/api/admin/analytics/reset/$', 'Reset the dashboard'),
     ('POST', r'^/api/admin/inventory/record-sale/$', 'Recorded a sale'),
+    ('PATCH', r'^/api/admin/inventory/sales/\d+/$', 'Edited a sale'),
     ('POST', r'^/api/admin/inventory/add-stock/$', 'Added stock'),
     ('POST', r'^/api/admin/inventory/clear-sales/$', 'Cleared sales data'),
     ('POST', r'^/api/admin/service-sales/$', 'Recorded a service sale'),

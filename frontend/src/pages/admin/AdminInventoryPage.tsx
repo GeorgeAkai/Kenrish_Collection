@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ScanLine } from 'lucide-react'
+import { Pencil, ScanLine } from 'lucide-react'
 import api from '@/lib/axios'
 import { formatKES, formatDateTime } from '@/lib/utils'
 import ItemPicker from '@/components/admin/ItemPicker'
+import EditSaleModal from '@/components/admin/EditSaleModal'
 import type { InventoryItem, Sale } from '@/lib/types'
 
 type Tab = 'inventory' | 'add-stock' | 'record-sale' | 'sales' | 'scan-receipt'
@@ -341,6 +342,7 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
   const [inventoryRaw, setInventory] = useState<InventoryItem[]>([])
   const [salesRaw, setSales] = useState<Sale[]>([])
   const [loading, setLoading] = useState(true)
+  const [editingSale, setEditingSale] = useState<Sale | null>(null)
   const inventory = inventoryRaw.filter(i => matchesShop(i.item_type, shop))
   const sales = salesRaw.filter(s => matchesShop(s.item_type, shop))
 
@@ -640,7 +642,15 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
                     <span>Qty: {s.quantity} @ {formatKES(s.unit_price)}</span>
                     {s.customer_name && <span>{s.customer_name}</span>}
                   </div>
-                  <p className="text-xs text-muted-foreground">{formatDateTime(s.created_at)}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">
+                      {formatDateTime(s.created_at)}
+                      {s.edited && <span className="ml-2 px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-medium">Edited</span>}
+                    </p>
+                    <button type="button" onClick={() => setEditingSale(s)} className="text-xs flex items-center gap-1 text-primary" aria-label={`Edit sale of ${s.item_name}`}>
+                      <Pencil size={12} /> Edit
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -655,6 +665,7 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
                     <th className="text-left px-4 py-3 font-medium">Total</th>
                     <th className="text-left px-4 py-3 font-medium">Customer</th>
                     <th className="text-left px-4 py-3 font-medium">Date</th>
+                    <th className="px-4 py-3"><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -665,10 +676,18 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
                       <td className="px-4 py-3">{formatKES(s.unit_price)}</td>
                       <td className="px-4 py-3 font-semibold">{formatKES(s.total_amount)}</td>
                       <td className="px-4 py-3">{s.customer_name || '-'}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{formatDateTime(s.created_at)}</td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {formatDateTime(s.created_at)}
+                        {s.edited && <span className="ml-2 px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-medium">Edited</span>}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <button type="button" onClick={() => setEditingSale(s)} className="inline-flex items-center gap-1 text-xs text-primary hover:underline" aria-label={`Edit sale of ${s.item_name}`}>
+                          <Pencil size={12} /> Edit
+                        </button>
+                      </td>
                     </tr>
                   ))}
-                  {sales.length === 0 && <tr><td colSpan={6} className="px-4 py-10 text-center text-muted-foreground">No sales recorded.</td></tr>}
+                  {sales.length === 0 && <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">No sales recorded.</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -677,6 +696,19 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
       )}
 
       {tab === 'scan-receipt' && <ScanReceiptPanel inventory={inventory} />}
+
+      {editingSale && (
+        <EditSaleModal
+          sale={editingSale}
+          onClose={() => setEditingSale(null)}
+          onSaved={updated => {
+            setSales(list => list.map(x => x.id === updated.id ? updated : x))
+            setEditingSale(null)
+            // Stock changed with the edit; refresh so the inventory tab is not stale.
+            api.get('/admin/inventory/').then(r => setInventory(r.data.results ?? r.data)).catch(console.error)
+          }}
+        />
+      )}
     </div>
   )
 }

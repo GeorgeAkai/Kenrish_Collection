@@ -2,7 +2,7 @@ from decimal import Decimal
 from django.db import transaction as db_transaction
 
 from .customers import resolve_customer
-from .models import InventoryTransaction, Sale, CashFlow, Expense, Product, Handbag, Clothes
+from .models import InventoryTransaction, Sale, SaleEdit, CashFlow, Expense, Product, Handbag, Clothes
 
 
 class InsufficientStockError(Exception):
@@ -82,4 +82,49 @@ def record_sale(item, quantity, unit_price, actor, customer_name='', customer_ph
             reference_sale=sale,
             created_by=actor,
         )
+        return sale
+
+
+def _sale_snapshot(sale):
+    return {
+        'quantity': sale.quantity,
+        'unit_price': str(Decimal(sale.unit_price).quantize(Decimal('0.01'))),
+        'customer_name': sale.customer_name,
+        'customer_phone': sale.customer_phone,
+    }
+
+
+def edit_sale(sale, actor, quantity=None, unit_price=None, customer_name=None, customer_phone=None):
+    with db_transaction.atomic():
+        item = sale._target_item()
+        item.refresh_from_db()
+        before = _sale_snapshot(sale)
+        if quantity is not None and quantity != sale.quantity:
+            delta = quantity - sale.quantity
+            if delta > item.stock_quantity:
+                raise InsufficientStockError(
+                    f'Insufficient stock for {item.name}. '
+                    f'Available: {item.stock_quantity}, additional needed: {delta}'
+                )
+            item.stock_quantity -= delta
+            item.save()
+            sale.quantity = quantity
+        if unit_price is not None:
+            sale.unit_price = Decimal(str(unit_price))
+        if customer_name is not None:
+            sale.customer_name = customer_name
+        if customer_phone is not None and customer_phone != sale.customer_phone:
+            sale.customer_phone = customer_phone
+            sale.customer = resolve_customer(sale.customer_name, customer_phone)
+        sale.save()  # recomputes total_amount; not a new sale, so no stock/cashflow side effects
+        CashFlow.objects.filter(reference_sale=sale).update(
+            amount=sale.total_amount,
+            description=f'Sale: {item.name} x{sale.quantity}',
+        )
+        after = _sale_snapshot(sale)
+        if after != before:
+            SaleEdit.objects.create(
+                sale=sale, sale_ref=sale.pk, item_name=item.name,
+                editor=actor, editor_username=actor.username, before=before, after=after,
+            )
         return sale
