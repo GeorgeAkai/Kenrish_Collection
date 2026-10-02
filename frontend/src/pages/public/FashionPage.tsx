@@ -86,7 +86,7 @@ export default function FashionPage() {
       ) : filtered.length === 0 ? (
         <p className="text-center text-muted-foreground py-20">Nothing here yet.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-5">
           {filtered.map(item => (
             <CatalogueCard
               key={`${item.type}-${item.id}`}
