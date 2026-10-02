@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import api from '@/lib/axios'
 import RatingWidget from '@/components/RatingWidget'
 import { useWishlist } from '@/hooks/useWishlist'
-import { formatKES, formatDate } from '@/lib/utils'
+import { formatPriceRange, formatDate } from '@/lib/utils'
 import { Heart, Star, Sparkles } from 'lucide-react'
 import type { Clothes } from '@/lib/types'
 
@@ -47,7 +47,7 @@ export default function ClothesDetailPage() {
         <div className="flex flex-col">
           <h1 className="text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Georgia, serif' }}>{item.name}</h1>
           <div className="mt-3 flex items-center gap-3">
-            <p className="text-2xl text-primary font-bold">{formatKES(item.price)}</p>
+            <p className="text-2xl text-primary font-bold">{formatPriceRange(item.price, item.max_price)}</p>
             {item.average_rating > 0 && (
               <div className="flex items-center gap-1 bg-muted px-2.5 py-1 rounded-full">
                 <Star size={12} className="text-gold" fill="currentColor" />

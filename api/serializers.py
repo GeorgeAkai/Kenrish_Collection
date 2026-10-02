@@ -120,7 +120,7 @@ class HandbagListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Handbag
-        fields = ['id', 'name', 'price', 'image', 'average_rating', 'stock_quantity', 'reorder_level']
+        fields = ['id', 'name', 'price', 'max_price', 'image', 'average_rating', 'stock_quantity', 'reorder_level']
 
     def get_image(self, obj):
         request = self.context.get('request')
@@ -143,7 +143,19 @@ class HandbagDetailSerializer(serializers.ModelSerializer):
         return None
 
 
-class HandbagAdminSerializer(serializers.ModelSerializer):
+class PriceRangeValidationMixin:
+    """The top of a price range must not be below the bottom (price). Checks the merged result on PATCH."""
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        price = attrs.get('price', getattr(self.instance, 'price', None))
+        max_price = attrs.get('max_price', getattr(self.instance, 'max_price', None))
+        if price is not None and max_price is not None and max_price < price:
+            raise serializers.ValidationError({'max_price': 'Maximum price cannot be below the price.'})
+        return attrs
+
+
+class HandbagAdminSerializer(PriceRangeValidationMixin, serializers.ModelSerializer):
     image = serializers.ImageField(required=False)
 
     class Meta:
@@ -183,7 +195,7 @@ class ClothesListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Clothes
-        fields = ['id', 'name', 'price', 'image', 'average_rating', 'stock_quantity', 'reorder_level',
+        fields = ['id', 'name', 'price', 'max_price', 'image', 'average_rating', 'stock_quantity', 'reorder_level',
                   'category', 'category_name', 'category_slug']
 
     def get_image(self, obj):
@@ -209,7 +221,7 @@ class ClothesDetailSerializer(serializers.ModelSerializer):
         return None
 
 
-class ClothesAdminSerializer(serializers.ModelSerializer):
+class ClothesAdminSerializer(PriceRangeValidationMixin, serializers.ModelSerializer):
     image = serializers.ImageField(required=False)
 
     class Meta:
@@ -379,6 +391,7 @@ class InventoryItemSerializer(serializers.Serializer):
     reorder_level = serializers.IntegerField()
     cost_price = serializers.DecimalField(max_digits=10, decimal_places=2)
     price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    max_price = serializers.DecimalField(max_digits=10, decimal_places=2, allow_null=True)
     is_low_stock = serializers.BooleanField()
     inventory_value = serializers.DecimalField(max_digits=14, decimal_places=2)
 
@@ -576,7 +589,8 @@ class OrderCreateItemSerializer(serializers.Serializer):
     item_type = serializers.ChoiceField(choices=['product', 'handbag', 'clothes'])
     item_id = serializers.IntegerField(min_value=1)
     quantity = serializers.IntegerField(min_value=1)
-    unit_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    # Accepted for older clients but ignored: the server prices every line from the item.
+    unit_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False, write_only=True)
 
 
 class OrderCreateSerializer(serializers.Serializer):

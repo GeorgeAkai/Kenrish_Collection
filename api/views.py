@@ -948,21 +948,21 @@ def admin_inventory_list(request):
         items.append({
             'id': p.id, 'name': p.name, 'item_type': 'product',
             'stock_quantity': p.stock_quantity, 'reorder_level': p.reorder_level,
-            'cost_price': p.cost_price, 'price': p.price,
+            'cost_price': p.cost_price, 'price': p.price, 'max_price': None,
             'is_low_stock': p.is_low_stock, 'inventory_value': p.inventory_value,
         })
     for h in Handbag.objects.all():
         items.append({
             'id': h.id, 'name': h.name, 'item_type': 'handbag',
             'stock_quantity': h.stock_quantity, 'reorder_level': h.reorder_level,
-            'cost_price': h.cost_price, 'price': h.price,
+            'cost_price': h.cost_price, 'price': h.price, 'max_price': h.max_price,
             'is_low_stock': h.is_low_stock, 'inventory_value': h.inventory_value,
         })
     for c in Clothes.objects.all():
         items.append({
             'id': c.id, 'name': c.name, 'item_type': 'clothes',
             'stock_quantity': c.stock_quantity, 'reorder_level': c.reorder_level,
-            'cost_price': c.cost_price, 'price': c.price,
+            'cost_price': c.cost_price, 'price': c.price, 'max_price': c.max_price,
             'is_low_stock': c.is_low_stock, 'inventory_value': c.inventory_value,
         })
     return Response(items)
@@ -2212,12 +2212,14 @@ def create_order(request):
             item = _resolve_item(d['item_type'], d['item_id'])
             if item is None:
                 return Response({'detail': f"{d['item_type'].capitalize()} {d['item_id']} not found."}, status=status.HTTP_404_NOT_FOUND)
-            subtotal = Decimal(str(d['quantity'])) * d['unit_price']
+            # Price comes from the item, never from the client (a ranged item bills at its minimum).
+            unit_price = item.price
+            subtotal = Decimal(str(d['quantity'])) * unit_price
             total += subtotal
-            order_items.append((d, item, subtotal))
+            order_items.append((d, item, unit_price, subtotal))
 
         order = Order.objects.create(customer=request.user, notes=notes, total_amount=total)
-        for d, item, subtotal in order_items:
+        for d, item, unit_price, subtotal in order_items:
             kwargs = {'product': None, 'handbag': None, 'clothes': None}
             kwargs[d['item_type']] = item
             OrderItem.objects.create(
@@ -2225,7 +2227,7 @@ def create_order(request):
                 item_type=d['item_type'],
                 item_name=item.name,
                 quantity=d['quantity'],
-                unit_price=d['unit_price'],
+                unit_price=unit_price,
                 subtotal=subtotal,
                 **kwargs,
             )

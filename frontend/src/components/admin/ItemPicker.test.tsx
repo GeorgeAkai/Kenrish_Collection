@@ -6,7 +6,7 @@ import ItemPicker from './ItemPicker'
 
 const item = (over: Partial<InventoryItem>): InventoryItem => ({
   id: 1, name: 'Item', item_type: 'product', stock_quantity: 5, reorder_level: 2,
-  cost_price: '100', price: '500', is_low_stock: false, inventory_value: '500', ...over,
+  cost_price: '100', price: '500', max_price: null, is_low_stock: false, inventory_value: '500', ...over,
 })
 
 const items: InventoryItem[] = [
@@ -74,4 +74,12 @@ describe('ItemPicker', () => {
     await userEvent.keyboard('{Escape}')
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
+
+  it('shows the price range for an item that sells across a range', async () => {
+    render(<ItemPicker items={[item({ id: 9, name: 'Mixed Bale Jacket', item_type: 'clothes', price: '800', max_price: '1500' })]}
+      selected={null} onSelect={() => {}} />)
+    await userEvent.click(screen.getByRole('combobox'))
+    expect(screen.getByRole('option', { name: /Mixed Bale Jacket/ })).toHaveTextContent('KES 800.00 – 1,500.00')
+  })
 })
+

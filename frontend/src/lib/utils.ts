@@ -10,6 +10,23 @@ export function formatKES(amount: string | number): string {
   return `KES ${num.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
+/**
+ * Price for an item that may sell across a range (e.g. a bale of jackets priced piece by piece).
+ * `price` is the bottom of the range. 'range' shows both ends, 'from' shows only the bottom (for lists).
+ */
+export function formatPriceRange(
+  price: string | number,
+  maxPrice?: string | number | null,
+  style: 'range' | 'from' = 'range',
+  fromLabel = 'From',
+): string {
+  const low = Number(price)
+  const high = maxPrice == null || maxPrice === '' ? null : Number(maxPrice)
+  if (high === null || high <= low) return formatKES(price)
+  if (style === 'from') return `${fromLabel} ${formatKES(price)}`
+  return `${formatKES(price)} – ${high.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
 /** The shop runs on Nairobi time (UTC+3, no DST) whatever the visitor's device clock says. */
 export const NAIROBI_TZ = 'Africa/Nairobi'
 

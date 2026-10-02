@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Plus, Pencil, Trash2, X, Star, FolderInput } from 'lucide-react'
 import api from '@/lib/axios'
-import { formatKES } from '@/lib/utils'
+import { formatPriceRange } from '@/lib/utils'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useConfirm } from '@/hooks/useConfirm'
 import FileDropZone from '@/components/admin/FileDropZone'
@@ -11,6 +11,7 @@ interface Item {
   id: number
   name: string
   price: string
+  max_price?: string | null
   cost_price?: string
   description: string
   stock_quantity: number
@@ -45,6 +46,9 @@ const CATEGORY_LABELS: Record<CategoryType, string> = {
   handbag: 'Handbags',
   clothes: 'Clothes',
 }
+
+// Fashion items (clothes, handbags) can sell across a range, e.g. a bale of jackets priced piece by piece.
+const maxPriceField: Field = { name: 'max_price', label: 'Maximum price (KES), if sold across a range', type: 'number' }
 
 const baseFields: Field[] = [
   { name: 'name', label: 'Name', required: true },
@@ -89,7 +93,9 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
   const del = useConfirm<number>()
   const toast = useToast()
 
-  const allFields = [...baseFields, ...extraFields]
+  const priceIdx = baseFields.findIndex(f => f.name === 'price')
+  const rangeFields = itemType === 'product' ? [] : [maxPriceField]
+  const allFields = [...baseFields.slice(0, priceIdx + 1), ...rangeFields, ...baseFields.slice(priceIdx + 1), ...extraFields]
 
   const moveTargets: CategoryType[] = itemType
     ? (['product', 'handbag', 'clothes'] as CategoryType[]).filter(t => t !== itemType)
@@ -181,7 +187,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
     setError('')
     try {
       const fd = new FormData()
-      allFields.forEach(f => { if (form[f.name]) fd.append(f.name, form[f.name]) })
+      allFields.forEach(f => { if (form[f.name] || f.name === 'max_price') fd.append(f.name, form[f.name] ?? '') })
       fd.append('is_published', String(isPublished))
       if (withCategories) fd.append('category', form.category ?? '')
       if (imageFile) fd.append('image', imageFile)
@@ -266,7 +272,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
                     {withCategories && (
                       <td className="px-4 py-3 text-muted-foreground">{(item.category_name as string | null) ?? 'Uncategorised'}</td>
                     )}
-                    <td className="px-4 py-3 font-medium">{formatKES(item.price)}</td>
+                    <td className="px-4 py-3 font-medium">{formatPriceRange(item.price, item.max_price)}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${stockClass(item)}`}>
                         {item.stock_quantity}
@@ -298,7 +304,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
                             <FolderInput size={13} />
                           </button>
                         )}
-                        <button onClick={() => openEdit(item)}
+                        <button onClick={() => openEdit(item)} aria-label={`Edit ${item.name}`}
                           className="w-8 h-8 flex items-center justify-center rounded-lg border hover:bg-muted transition-colors">
                           <Pencil size={13} />
                         </button>
@@ -329,7 +335,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
                   {item.image && <div className="w-16 h-16 rounded-xl overflow-hidden"><img src={item.image} alt="" className="w-full h-full object-cover" /></div>}
                   <div className="flex-1 min-w-0">
                     <p className="product-title font-semibold truncate">{item.name}</p>
-                    <p className="product-price font-medium text-sm mt-0.5">{formatKES(item.price)}</p>
+                    <p className="product-price font-medium text-sm mt-0.5">{formatPriceRange(item.price, item.max_price)}</p>
                     {withCategories && (
                       <p className="text-xs text-muted-foreground">{(item.category_name as string | null) ?? 'Uncategorised'}</p>
                     )}
@@ -353,7 +359,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
                         <FolderInput size={13} />
                       </button>
                     )}
-                    <button onClick={() => openEdit(item)}
+                    <button onClick={() => openEdit(item)} aria-label={`Edit ${item.name}`}
                       className="w-8 h-8 flex items-center justify-center rounded-lg border hover:bg-muted transition-colors">
                       <Pencil size={13} />
                     </button>
@@ -389,9 +395,10 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               {allFields.map(f => (
                 <div key={f.name}>
-                  <label className="block text-sm font-medium mb-1.5">{f.label}{f.required ? <> <span className="text-danger" aria-hidden="true">*</span></> : <> <span className="font-normal text-muted-foreground">(optional)</span></>}</label>
+                  <label htmlFor={`field-${f.name}`} className="block text-sm font-medium mb-1.5">{f.label}{f.required ? <> <span className="text-danger" aria-hidden="true">*</span></> : <> <span className="font-normal text-muted-foreground">(optional)</span></>}</label>
                   {f.type === 'textarea' ? (
                     <textarea
+                      id={`field-${f.name}`}
                       className="input-field min-h-[80px]"
                       value={form[f.name] ?? ''}
                       onChange={e => setForm(prev => ({ ...prev, [f.name]: e.target.value }))}
@@ -399,6 +406,7 @@ export default function CatalogueAdmin({ title, endpoint, itemType, extraFields 
                     />
                   ) : (
                     <input
+                      id={`field-${f.name}`}
                       type={f.type ?? 'text'}
                       className="input-field"
                       value={form[f.name] ?? ''}

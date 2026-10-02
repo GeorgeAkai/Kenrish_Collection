@@ -1,5 +1,5 @@
 import { useEffect, useState, type KeyboardEvent } from 'react'
-import { formatKES } from '@/lib/utils'
+import { formatPriceRange } from '@/lib/utils'
 import type { InventoryItem } from '@/lib/types'
 
 const GROUPS: { type: InventoryItem['item_type']; label: string }[] = [
@@ -86,7 +86,7 @@ export default function ItemPicker({ items, selected, onSelect }: Props) {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-medium truncate">{i.name}</span>
-                      <span className="shrink-0 text-xs text-muted-foreground">{formatKES(i.price)}</span>
+                      <span className="shrink-0 text-xs text-muted-foreground">{formatPriceRange(i.price, i.max_price)}</span>
                     </div>
                     <div className={`text-xs ${i.stock_quantity > 0 ? 'text-muted-foreground' : 'text-red-600'}`}>
                       {i.stock_quantity > 0 ? `${i.stock_quantity} in stock` : 'Out of stock'}

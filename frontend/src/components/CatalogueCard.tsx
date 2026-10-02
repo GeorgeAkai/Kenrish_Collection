@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom'
 import { Heart, Star, Sparkles } from 'lucide-react'
-import { formatKES } from '@/lib/utils'
+import { formatPriceRange } from '@/lib/utils'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 interface CatalogueItem {
   id: number
   name: string
   price: string
+  /** Top of a price range; null/absent means a single fixed price. */
+  max_price?: string | null
   image: string | null
   average_rating: number
   stock_quantity: number
@@ -95,7 +97,7 @@ export default function CatalogueCard({ item, href, onWishlist, inWishlist, cate
           )}
           <p className="product-title line-clamp-2 leading-snug">{item.name}</p>
           <div className="flex items-center justify-between mt-1.5">
-            <p className="product-price">{formatKES(item.price)}</p>
+            <p className="product-price">{formatPriceRange(item.price, item.max_price, 'from', t('common.from'))}</p>
             {item.average_rating > 0 && (
               <div className="flex items-center gap-0.5">
                 <Star size={12} className="text-gold" fill="currentColor" />

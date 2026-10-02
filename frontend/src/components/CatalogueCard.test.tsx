@@ -39,6 +39,26 @@ function renderCard(
 
 afterEach(() => localStorage.clear())
 
+describe('CatalogueCard price range', () => {
+  const ranged = { ...itemWithImage, price: '800.00', max_price: '1500.00' }
+
+  it('shows a "From" price when the item has a price range', () => {
+    renderCard(ranged, 'en')
+    expect(screen.getByText('From KES 800.00')).toBeInTheDocument()
+    expect(screen.queryByText(/1,500/)).not.toBeInTheDocument()
+  })
+
+  it('translates the "From" label to Swahili', () => {
+    renderCard(ranged, 'sw')
+    expect(screen.getByText('Kuanzia KES 800.00')).toBeInTheDocument()
+  })
+
+  it('shows the plain price for a single-price item', () => {
+    renderCard({ ...itemWithImage, max_price: null }, 'en')
+    expect(screen.getByText('KES 3,500.00')).toBeInTheDocument()
+  })
+})
+
 describe('CatalogueCard', () => {
   // ── Tracer bullet ───────────────────────────────────────────────────
   it('renders the item name', () => {

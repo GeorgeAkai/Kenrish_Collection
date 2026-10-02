@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '@/lib/axios'
-import { formatKES, nairobiDateKey, nairobiDayLabel } from '@/lib/utils'
+import { formatKES, formatPriceRange, nairobiDateKey, nairobiDayLabel } from '@/lib/utils'
 import { Sparkles, ChevronRight, Star, Scissors, Phone, CalendarDays, CheckCircle2, Truck, ShieldCheck, Headphones, Search, X, Shirt, ArrowRight } from 'lucide-react'
 import type { Product, Handbag, Clothes, Offer, Service } from '@/lib/types'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -47,7 +47,7 @@ function ItemCard({ item, href }: { item: Product | Handbag | Clothes; href: str
       <div className="product-info">
         <p className="product-title truncate">{item.name}</p>
         <div className="flex items-center justify-between mt-1.5">
-          <p className="product-price">{formatKES(item.price)}</p>
+          <p className="product-price">{formatPriceRange(item.price, item.max_price, 'from', t('common.from'))}</p>
           {item.average_rating > 0 && (
             <div className="flex items-center gap-0.5">
               {[1,2,3,4,5].map(i => (

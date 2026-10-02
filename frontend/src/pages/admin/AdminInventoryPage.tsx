@@ -2,9 +2,10 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Pencil, ScanLine } from 'lucide-react'
 import api from '@/lib/axios'
-import { formatKES, formatDateTime } from '@/lib/utils'
+import { formatKES, formatPriceRange, formatDateTime } from '@/lib/utils'
 import ItemPicker from '@/components/admin/ItemPicker'
 import EditSaleModal from '@/components/admin/EditSaleModal'
+import PriceRangeHint from '@/components/admin/PriceRangeHint'
 import type { InventoryItem, Sale } from '@/lib/types'
 
 type Tab = 'inventory' | 'add-stock' | 'record-sale' | 'sales' | 'scan-receipt'
@@ -591,7 +592,7 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
               />
               {saleSelected && (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {saleSelected.item_type} · {saleSelected.stock_quantity} in stock · selling at {formatKES(saleSelected.price)}
+                  {saleSelected.item_type} · {saleSelected.stock_quantity} in stock · selling at {formatPriceRange(saleSelected.price, saleSelected.max_price)}
                 </p>
               )}
             </div>
@@ -604,6 +605,7 @@ export default function AdminInventoryPage({ shop }: { shop?: Shop } = {}) {
               <label className="block text-sm font-medium mb-1">Unit Price (KES) <span className="text-danger" aria-hidden="true">*</span></label>
               <input type="number" required step="any" className="w-full border rounded-md px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                 value={saleForm.unit_price} onChange={e => setSaleForm(f => ({ ...f, unit_price: e.target.value }))} />
+              {saleSelected && <PriceRangeHint price={saleSelected.price} maxPrice={saleSelected.max_price} unitPrice={saleForm.unit_price} />}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Customer Name <span className="font-normal text-muted-foreground">(optional)</span></label>

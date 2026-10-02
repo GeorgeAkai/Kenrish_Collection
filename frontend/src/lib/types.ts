@@ -2,6 +2,7 @@ export interface Product {
   id: number
   name: string
   price: string
+  max_price?: null  // beauty products are single-price; present so shared item cards type-check
   description: string
   image: string | null
   average_rating: number
@@ -16,6 +17,8 @@ export interface Handbag {
   id: number
   name: string
   price: string
+  /** Top of a price range; price is the bottom. null/absent = a single fixed price. */
+  max_price?: string | null
   description: string
   image: string | null
   average_rating: number
@@ -38,6 +41,8 @@ export interface Clothes {
   id: number
   name: string
   price: string
+  /** Top of a price range; price is the bottom. null/absent = a single fixed price. */
+  max_price?: string | null
   description: string
   image: string | null
   average_rating: number
@@ -113,6 +118,7 @@ export interface InventoryItem {
   reorder_level: number
   cost_price: string
   price: string
+  max_price: string | null
   is_low_stock: boolean
   inventory_value: string
 }
