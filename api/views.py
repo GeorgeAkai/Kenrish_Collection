@@ -43,11 +43,13 @@ from app1.models import (
     Wishlist, Service, GalleryImage, GalleryLike, Offer,
     InventoryTransaction, Sale, CashFlow, Expense, UserProfile,
     Invoice, InvoiceItem, Reservation, Order, OrderItem, SlotConfiguration,
-    PasswordChangeCode, ClothesCategory, ServiceSale, ActivityLog, CustomerReview, AuditEntry, RecurringExpense, Employee, WEEKDAYS,
+    PasswordChangeCode, ClothesCategory, ServiceSale, ActivityLog, CustomerReview, AuditEntry, RecurringExpense, Employee, Customer, WEEKDAYS,
 )
 
 from api.activity import log_event, activity_stats, client_ip
 from app1.audit import record_audit
+from app1.customers import confirm_customer_link
+from api.customers import customer_rows
 from app1.recurring import post_all_due
 from app1.inventory import add_stock, edit_sale as _edit_sale, record_sale as _record_sale, InsufficientStockError
 from chatbot.ai_service import build_system_prompt
@@ -1281,6 +1283,32 @@ def admin_employee_dashboard(request):
             'total': len(active),
         },
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_customers(request):
+    """Every customer ranked by spend. ?shop=beauty|fashion and ?period=30d|90d|year|all (default all time)."""
+    return Response(customer_rows(_clean_shop(request.query_params.get('shop')), request.query_params.get('period', 'all')))
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def admin_customer_link(request, pk):
+    """Confirm that a walk-in is a registered user (an admin must confirm; matching phones only suggest it)."""
+    customer = get_object_or_404(Customer, pk=pk)
+    user_id = request.data.get('user_id')
+    if not user_id:
+        return Response({'detail': 'user_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    user = get_object_or_404(User, pk=user_id)
+    if user.is_staff:
+        return Response({'detail': 'Staff accounts cannot be linked to a customer.'}, status=status.HTTP_400_BAD_REQUEST)
+    before = {'user': customer.user.username if customer.user else None, 'phone': customer.phone, 'name': customer.name}
+    with transaction.atomic():
+        linked = confirm_customer_link(customer, user)
+        record_audit(request.user, 'customer', linked, 'edit', before,
+                     {'user': user.username, 'phone': linked.phone, 'name': linked.name})
+    return Response({'id': linked.id, 'ref': f'customer:{linked.id}', 'user': user.username})
 
 
 @api_view(['GET'])

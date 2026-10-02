@@ -17,6 +17,10 @@ describe('getAdminPageTitle', () => {
     expect(getAdminPageTitle('/admin/employees')).toBe('Employees')
   })
 
+  it('titles the customers page', () => {
+    expect(getAdminPageTitle('/admin/customers')).toBe('Customers')
+  })
+
   it('returns "Products" for /admin/products', () => {
     expect(getAdminPageTitle('/admin/products')).toBe('Products')
   })

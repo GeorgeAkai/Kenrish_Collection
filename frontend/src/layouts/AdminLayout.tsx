@@ -8,7 +8,7 @@ import {
   Package, ShoppingBag, Shirt, Warehouse,
   Scissors, Image, Tag, Users, FileText, LogOut, Menu, X,
   Sun, Moon, ChevronRight, ChevronDown, CalendarCheck, ClipboardList, Settings2, PackagePlus,
-  TrendingUp, ArrowRight, BarChart3, Receipt, Tags, Activity, MessageSquareQuote, Wallet, UserRoundCog,
+  TrendingUp, ArrowRight, BarChart3, Receipt, Tags, Activity, MessageSquareQuote, Wallet, UserRoundCog, Contact,
 } from 'lucide-react'
 
 interface NavLeaf { to: string; label: string; icon: LucideIcon; end?: boolean }
@@ -54,6 +54,7 @@ const NAV: NavEntry[] = [
   {
     kind: 'group', label: 'Users', icon: Users,
     children: [
+      { to: '/admin/customers', label: 'Customers', icon: Contact },
       { to: '/admin/users', label: 'All Users', icon: Users, end: true },
       { to: '/admin/users/activity', label: 'Activity Logs', icon: Activity },
     ],
@@ -65,6 +66,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/executive': 'Executive Dashboard',
   '/admin/expenses': 'All Expenses',
   '/admin/employees': 'Employees',
+  '/admin/customers': 'Customers',
   '/admin/beauty/expenses': 'Beauty Expenses',
   '/admin/fashion/expenses': 'Fashion Expenses',
   '/admin/dashboard-legacy': 'Dashboard (Legacy)',

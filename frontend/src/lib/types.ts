@@ -181,6 +181,22 @@ export interface EmployeeDashboard {
   headcount: { beauty: number; fashion: number; both: number; total: number }
 }
 
+export interface CustomerRow {
+  /** 'customer:12' (has a customer record) or 'user:5' (registered, never bought) */
+  ref: string
+  kind: 'registered' | 'walkin'
+  name: string
+  username: string | null
+  phone: string
+  user_id: number | null
+  spend: string
+  purchases: number
+  /** YYYY-MM-DD */
+  last_purchase: string | null
+  /** A registered user whose profile phone matches this walk-in; an admin must confirm the link */
+  possible_user: { id: number; username: string } | null
+}
+
 export interface ExpenseList {
   results: Expense[]
   count: number
