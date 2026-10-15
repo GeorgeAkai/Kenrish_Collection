@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAccentTheme, ACCENTS } from '@/contexts/AccentThemeContext'
 import api from '@/lib/axios'
+import UpcomingAppointmentAlert from '@/components/notifications/UpcomingAppointmentAlert'
 import {
   Camera, Heart, ShoppingBag, CalendarDays, Lock, Sun, Moon, Trash2, User, AlertTriangle, Check,
 } from 'lucide-react'
@@ -91,6 +92,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-5 py-12">
+      <UpcomingAppointmentAlert className="mb-8" />
 
       {/* ── Avatar + Basic Info ── */}
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-10">

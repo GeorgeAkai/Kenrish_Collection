@@ -106,6 +106,10 @@ UI components use **shadcn/ui** (Radix primitives + Tailwind CSS v4). Path alias
 - JWT: React SPA uses Bearer tokens (access 15 min, refresh 7 days) via `/api/auth/login/` and `/api/auth/token/refresh/`.
 - Custom backend (`app1/backends.py`) allows login with email OR username.
 
+### In-app notifications
+
+All notifications live in our own database (`Notification`, `Announcement` in `app1/models.py`); no SMS/email/push service is involved (the separate admin booking email in `api/notifications.py` still runs). `app1/notify.py` creates rows and swallows its own errors so a notification problem never breaks a booking, order or stock update. Triggers are signals in `app1/signals.py` (reservation/order status changes, wishlisted stock 0 -> >0 and down to 1, user made staff) plus calls in `api/views.py` (new order, password changed). Endpoints are in `api/notification_views.py` (`/api/notifications/`, `/api/notifications/read/`, `/api/announcements/current/`, `/api/admin/announcements/`). Scheduled checks (appointment-tomorrow reminders, morning low-stock digest, monthly "no expenses" check, 30-day cleanup) are idempotent via `dedupe_key`: run `python manage.py notification_checks` hourly from cron; the notifications endpoint also runs them at most every 10 minutes per worker. The frontend polls every 60s while the tab is visible (`frontend/src/lib/notifications.ts`).
+
 ## Key Environment Variables
 
 | Variable | Purpose |

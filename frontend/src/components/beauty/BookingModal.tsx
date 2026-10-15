@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, CalendarDays } from 'lucide-react'
 import api from '@/lib/axios'
+import Alert from '@/components/notifications/Alert'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Service } from '@/lib/types'
 
@@ -54,6 +55,9 @@ export default function BookingModal({
   const [slotsLoading, setSlotsLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  // A slot someone else booked between loading the times and pressing Confirm.
+  const [taken, setTaken] = useState<string | null>(null)
+  const [slotsVersion, setSlotsVersion] = useState(0)
   const [success, setSuccess] = useState(false)
 
   useEffect(() => {
@@ -70,18 +74,25 @@ export default function BookingModal({
       .then(r => setSlots(r.data))
       .catch(() => setSlots([]))
       .finally(() => setSlotsLoading(false))
-  }, [form.service, form.reservation_date])
+  }, [form.service, form.reservation_date, slotsVersion])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!form.reservation_time) { setError('Select a time slot.'); return }
-    setSaving(true); setError('')
+    setSaving(true); setError(''); setTaken(null)
     try {
       await api.post('/reservations/', form)
       setSuccess(true)
       onBooked?.()
-    } catch {
-      setError('Could not submit your booking. Please try again.')
+    } catch (err) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? ''
+      if (/fully booked|taken|no longer available/i.test(detail)) {
+        setTaken(form.reservation_time)
+        setForm(f => ({ ...f, reservation_time: '' }))
+        setSlotsVersion(v => v + 1)
+      } else {
+        setError(detail || 'Could not submit your booking. Please try again.')
+      }
     } finally {
       setSaving(false)
     }
@@ -176,7 +187,25 @@ export default function BookingModal({
               />
             </div>
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {taken && (() => {
+              const free = slots.filter(sl => sl.available)
+              const next = [...free.filter(sl => sl.time > taken), ...free.filter(sl => sl.time < taken)].slice(0, 3)
+              return (
+                <Alert tone="warning" title="That time was just taken"
+                  actions={next.map(sl => (
+                    <button key={sl.time} type="button"
+                      onClick={() => { setForm(f => ({ ...f, reservation_time: sl.time })); setTaken(null) }}
+                      className="h-9 px-4 rounded-full border border-border-control bg-card text-[13px] font-semibold hover:bg-secondary">
+                      {formatSlotTime(sl.time)}
+                    </button>
+                  ))}>
+                  {`Someone booked ${formatSlotTime(taken)} a moment ago. `}
+                  {next.length ? 'These are the next free times:' : 'There are no other free times that day; try another date.'}
+                </Alert>
+              )
+            })()}
+
+            {error && <p role="alert" className="text-sm text-danger">{error}</p>}
 
             <button type="submit" disabled={saving} className="btn-primary w-full disabled:opacity-60">
               {saving ? 'Booking…' : 'Confirm Booking'}

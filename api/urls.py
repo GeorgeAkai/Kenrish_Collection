@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-from . import views, receipt_views
+from . import views, receipt_views, notification_views
 
 urlpatterns = [
     # --- Auth ---
@@ -158,4 +158,11 @@ urlpatterns = [
     path('orders/<int:pk>/cancel/', views.cancel_order, name='api-cancel-order'),
     path('admin/orders/', views.admin_order_list, name='api-admin-orders'),
     path('admin/orders/<int:pk>/', views.admin_order_detail, name='api-admin-order-detail'),
+
+    # --- In-app notifications & announcement bar ---
+    path('notifications/', notification_views.notification_list, name='api-notifications'),
+    path('notifications/read/', notification_views.notification_mark_read, name='api-notifications-read'),
+    path('announcements/current/', notification_views.announcement_current, name='api-announcement-current'),
+    path('admin/announcements/', notification_views.admin_announcement_list, name='api-admin-announcements'),
+    path('admin/announcements/<int:pk>/', notification_views.admin_announcement_detail, name='api-admin-announcement-detail'),
 ]

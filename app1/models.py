@@ -878,3 +878,66 @@ class CustomerReview(models.Model):
     def __str__(self):
         return f'{self.customer_name} ({self.rating}/5)'
 
+
+class Notification(models.Model):
+    """An in-app notification shown in the bell inbox. Lives only in our own database:
+    no SMS, email or push service is involved. Kept for 30 days (see app1/notify.py)."""
+    KIND_CHOICES = [
+        ('booking', 'Booking'),          # customer: request received / confirmed / declined
+        ('reminder', 'Reminder'),        # customer: appointment tomorrow
+        ('stock', 'Stock'),              # customer: wishlist item back in stock / only 1 left
+        ('order', 'Order'),              # customer + staff: order placed / confirmed / cancelled
+        ('approval', 'Approval'),        # staff: new booking needs approval (inline approve/decline)
+        ('cancel', 'Cancellation'),      # staff: a customer cancelled; slot is free again
+        ('inventory', 'Inventory'),      # staff: morning low-stock digest
+        ('data', 'Data check'),          # staff: e.g. no expenses recorded this month
+        ('security', 'Security'),        # password changed, new admin added
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    kind = models.CharField(max_length=20, choices=KIND_CHOICES)
+    title = models.CharField(max_length=160)
+    body = models.CharField(max_length=300, blank=True)
+    # In-app path for the single next step, e.g. "/orders" or "/admin/reservations".
+    link = models.CharField(max_length=255, blank=True)
+    action_label = models.CharField(max_length=40, blank=True)
+    priority = models.BooleanField(default=False)
+    # What the notification is about, so the UI can act on it (approve a reservation)
+    # and so handled items can be marked read everywhere.
+    ref_type = models.CharField(max_length=20, blank=True)
+    ref_id = models.PositiveIntegerField(null=True, blank=True)
+    thumb = models.CharField(max_length=500, blank=True)
+    # Makes scheduled/repeated events idempotent: one row per (user, dedupe_key).
+    dedupe_key = models.CharField(max_length=120, blank=True, db_index=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at', '-id']
+        indexes = [models.Index(fields=['user', 'read_at'])]
+
+    def __str__(self):
+        return f'{self.user.username}: {self.title}'
+
+
+class Announcement(models.Model):
+    """One site-wide line shown above the header (an offer, a closure, holiday hours).
+    Only the newest active one inside its date window is shown."""
+    TONE_CHOICES = [('gold', 'Gold'), ('dark', 'Dark'), ('warning', 'Warning')]
+
+    message = models.CharField(max_length=200)
+    tone = models.CharField(max_length=10, choices=TONE_CHOICES, default='gold')
+    link_label = models.CharField(max_length=40, blank=True)
+    link_url = models.CharField(max_length=255, blank=True)
+    dismissible = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
+    starts_at = models.DateTimeField(null=True, blank=True)
+    ends_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at', '-id']
+
+    def __str__(self):
+        return self.message

@@ -7,6 +7,7 @@ import { formatSlotTime, type PublicSlot } from '@/lib/slots'
 import { useLanguage } from '@/contexts/LanguageContext'
 import TodaySchedule from '@/components/TodaySchedule'
 import BookingModal from '@/components/beauty/BookingModal'
+import UpcomingAppointmentAlert from '@/components/notifications/UpcomingAppointmentAlert'
 import type { Service } from '@/lib/types'
 
 function priceRange(s: Service) {
@@ -33,6 +34,8 @@ export default function BeautyPage() {
 
   return (
     <>
+      <UpcomingAppointmentAlert className="max-w-6xl mx-4 lg:mx-auto mt-4" />
+
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <section className="gradient-hero">
         <div className="max-w-6xl mx-auto px-4 lg:px-5 pt-10 pb-12 lg:py-20 grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-14 items-center">

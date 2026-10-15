@@ -13,6 +13,9 @@ import { LOGO_URL } from '@/lib/brand'
 import { STORES, SEARCH_CATEGORIES, SHOP_PHONE, SHOP_PHONE_TEL, storeForPath } from '@/lib/stores'
 import StoreSwitcher from '@/components/layout/StoreSwitcher'
 import type { Offer } from '@/lib/types'
+import NotificationBell from '@/components/notifications/NotificationBell'
+import AnnouncementBar from '@/components/notifications/AnnouncementBar'
+import OfflineAlert from '@/components/notifications/OfflineAlert'
 
 /** Wishlist size for the header counter; refreshed on every navigation. */
 function useWishlistCount(enabled: boolean, pathname: string) {
@@ -294,6 +297,9 @@ export default function PublicLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
+      {/* ── Site-wide announcement (offer, closure, holiday hours) ───── */}
+      <AnnouncementBar />
+
       {/* ── Desktop utility bar: store switcher + visit details ───────── */}
       <div className="hidden lg:block bg-secondary border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-6">
@@ -328,6 +334,7 @@ export default function PublicLayout() {
           </Link>
           <div className="flex-1 max-w-2xl"><SearchForm /></div>
           <div className="flex items-center gap-2 ml-auto">
+            {isAuthenticated && <NotificationBell />}
             <Link to="/wishlist" className={iconBtn} aria-label={`${t('nav.wishlist')}${wishCount ? `, ${wishCount}` : ''}`}>
               <Heart size={19} strokeWidth={1.75} />
               <CountBubble n={wishCount} />
@@ -380,6 +387,7 @@ export default function PublicLayout() {
           <button className={iconBtn} onClick={() => setSearchAt(searchOpen ? null : here)} aria-label={t('nav.search')} aria-expanded={searchOpen}>
             {searchOpen ? <X size={20} strokeWidth={1.75} /> : <Search size={20} strokeWidth={1.75} />}
           </button>
+          {isAuthenticated && <NotificationBell />}
           <Link to="/wishlist" className={iconBtn} aria-label={`${t('nav.wishlist')}${wishCount ? `, ${wishCount}` : ''}`}>
             <Heart size={20} strokeWidth={1.75} />
             <CountBubble n={wishCount} />
@@ -400,6 +408,7 @@ export default function PublicLayout() {
       {menuOpen && <MobileDrawer onClose={() => setMenuOpen(false)} wishCount={wishCount} hasOffers={hasActiveOffers} />}
 
       <main className="flex-1">
+        <OfflineAlert className="max-w-7xl mx-4 lg:mx-auto mt-4" />
         <Outlet />
       </main>
 
