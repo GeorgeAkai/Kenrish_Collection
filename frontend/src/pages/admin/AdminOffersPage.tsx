@@ -6,6 +6,7 @@ import type { Offer } from '@/lib/types'
 import InlineConfirm from '@/components/InlineConfirm'
 import { useConfirm } from '@/hooks/useConfirm'
 import FileDropZone from '@/components/admin/FileDropZone'
+import AnnouncementEditor from '@/components/admin/AnnouncementEditor'
 
 export default function AdminOffersPage() {
   const del = useConfirm<number>()
@@ -49,6 +50,8 @@ export default function AdminOffersPage() {
 
   return (
     <div>
+      <AnnouncementEditor />
+
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold">Offers</h2>
         <button onClick={() => { setShowForm(true); setError('') }}

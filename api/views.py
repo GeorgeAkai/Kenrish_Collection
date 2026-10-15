@@ -4,6 +4,7 @@ import random
 import string
 
 from api.notifications import send_reservation_email
+from app1 import notify
 from datetime import timedelta, date
 from decimal import Decimal
 
@@ -219,6 +220,7 @@ def change_password_confirm(request):
     request.user.set_password(record.new_password)
     request.user.save()
     record.delete()
+    notify.password_changed(request.user)
     return Response({'message': 'Password changed successfully. Please log in again.'})
 
 
@@ -2444,6 +2446,7 @@ def create_order(request):
                 **kwargs,
             )
 
+    notify.order_created(order)
     return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
 

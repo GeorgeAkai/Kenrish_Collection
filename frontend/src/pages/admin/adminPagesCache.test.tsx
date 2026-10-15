@@ -38,7 +38,10 @@ interface Case {
 const cases: Case[] = [
   {
     name: 'Offers', page: () => <AdminOffersPage />, sees: 'Eid Special',
-    data: { '/admin/offers/': [{ id: 1, name: 'Eid Special', description: 'd', offer_price: '999.00', image: null, created_at: when }] },
+    data: {
+      '/admin/offers/': [{ id: 1, name: 'Eid Special', description: 'd', offer_price: '999.00', image: null, created_at: when }],
+      '/admin/announcements/': [],
+    },
   },
   {
     name: 'Services', page: () => <AdminServicesPage />, sees: 'Knotless Braids',

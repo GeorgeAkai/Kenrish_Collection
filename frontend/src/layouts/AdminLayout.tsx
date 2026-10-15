@@ -4,6 +4,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { LOGO_URL } from '@/lib/brand'
+import NotificationBell from '@/components/notifications/NotificationBell'
 import {
   Package, ShoppingBag, Shirt, Warehouse,
   Scissors, Image, Tag, Users, FileText, LogOut, Menu, X,
@@ -314,8 +315,9 @@ export default function AdminLayout() {
             <h1 className="font-semibold text-foreground truncate">{pageTitle}</h1>
           </nav>
           <div className="flex-1" />
-          <Link to="/" className="flex items-center gap-1.5 text-sm font-semibold text-gold-ink hover:underline underline-offset-2">
-            View store <ArrowRight size={14} />
+          <NotificationBell audience="admin" />
+          <Link to="/" aria-label="View store" className="flex items-center gap-1.5 text-sm font-semibold text-gold-ink hover:underline underline-offset-2">
+            <span className="hidden sm:inline">View store</span> <ArrowRight size={14} />
           </Link>
         </header>
 
